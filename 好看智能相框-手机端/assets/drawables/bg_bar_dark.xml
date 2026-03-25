@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 底部选择栏容器背景。实际使用需叠加 blur 20dp，此处为纯色版本 -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="#E61C1C1E"/>
+    <corners android:radius="16dp"/>
+</shape>

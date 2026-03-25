@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>壁纸功能区原型 - 视觉平衡版</title>
+    <!-- 引入 Tailwind CSS 以进行布局控制 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 FontAwesome 图标库 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* 模拟手机屏幕容器 */
+        .phone-container {
+            width: 100%;
+            max-width: 412px;
+            height: 100vh;
+            max-height: 892px;
+            margin: 0 auto;
+            position: relative;
+            overflow: hidden;
+            background-image: url('https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?q=80&w=2144&auto=format&fit=crop'); 
+            background-size: cover;
+            background-position: center;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        /* 顶部状态栏及天气区域 */
+        .top-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 20;
+            padding: 12px 20px;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 100%);
+        }
+
+        /* 胶囊天气设计 - 右上角保持小巧 */
+        .weather-capsule {
+            position: absolute;
+            top: 50px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 6px 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        /* 底部功能区总容器 */
+        .bottom-panel {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            /* 底部阴影加深以衬托文字 */
+            background: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.2) 40%, rgba(0,0,0,0.5) 100%);
+        }
+
+        /* 新闻资讯区块：优化的横条样式 */
+        .news-section {
+            padding: 0 20px 16px 20px;
+        }
+
+        .news-bar {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(15px);
+            border-radius: 12px;
+            padding: 10px 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
+
+        .news-icon-container {
+            color: #FF9500; /* 使用醒目的橙色提醒 */
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+        }
+
+        .news-text {
+            flex: 1;
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.95);
+            line-height: 1.4;
+            /* white-space: nowrap; */
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-weight: 400;
+        }
+
+        /* 操作底栏 */
+        .action-footer {
+            padding: 12px 20px 24px 20px;
+            padding-bottom: calc(env(safe-area-inset-bottom, 32px) + 20px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .album-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .album-title {
+            color: white;
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .album-count {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 13px;
+            margin-top: 1px;
+        }
+
+        .subscribe-btn {
+            background: #FFFFFF;
+            color: #000000;
+            border-radius: 14px;
+            height: 44px;
+            padding: 0 22px;
+            font-size: 15px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            transition: transform 0.1s;
+        }
+        
+        .subscribe-btn:active {
+            transform: scale(0.96);
+        }
+    </style>
+</head>
+<body class="bg-gray-300 flex items-center justify-center min-h-screen">
+
+    <div class="phone-container shadow-2xl">
+        
+        <!-- 顶部信息 -->
+        <div class="top-overlay">
+            <div class="flex justify-between text-white text-xs font-semibold">
+                <span>09:41</span>
+                <div class="flex gap-2 items-center">
+                    <i class="fas fa-signal"></i>
+                    <i class="fas fa-wifi"></i>
+                    <i class="fas fa-battery-full text-sm"></i>
+                </div>
+            </div>
+
+            <!-- 右上角天气 -->
+            <div class="weather-capsule cursor-pointer">
+                <i class="fas fa-sun text-yellow-400"></i>
+                <div class="flex flex-col">
+                    <span class="text-xs font-bold leading-none">26°</span>
+                    <span class="text-[9px] opacity-70 mt-0.5">上海</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 底部聚合面板 -->
+        <div class="bottom-panel">
+            
+            <!-- 新闻资讯 - 视觉平衡版横条 -->
+            <div class="news-section">
+                <div class="news-bar cursor-pointer">
+                    <div class="news-icon-container">
+                        <i class="fas fa-newspaper"></i>
+                    </div>
+                    <p class="news-text">
+                        今日聚焦：WWDC 2024 发布多项视觉设计革新，带来全新的人机交互体验，重塑数字生活方式。
+                    </p>
+                    <i class="fas fa-angle-right text-white opacity-40 text-xs"></i>
+                </div>
+            </div>
+
+            <!-- 操作底栏 -->
+            <div class="action-footer">
+                <div class="album-info">
+                    <h2 class="album-title">赛博都市</h2>
+                    <p class="album-count">18 张高清壁纸</p>
+                </div>
+                
+                <button class="subscribe-btn">
+                    免费订阅
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+</html>

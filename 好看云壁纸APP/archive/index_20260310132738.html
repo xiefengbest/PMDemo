@@ -1,0 +1,3469 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>好看云壁纸</title>
+    <!-- 按平台使用对应 logo -->
+    <script>
+      (function(){ var u = navigator.userAgent; document.documentElement.classList.add(/iPad|iPhone|iPod/.test(u) ? 'platform-ios' : 'platform-android'); })();
+    </script>
+    <link rel="icon" href="https://hk-h5-cdn.levect.com/html/xiefeng/PhotoFrame/logo-android.png" type="image/png">
+    <link rel="apple-touch-icon" href="https://hk-h5-cdn.levect.com/html/xiefeng/PhotoFrame/logo-ios.png">
+    <!-- 引入外部资源 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap');
+        
+        :root {
+            --accent: #6366f1;
+            --bg: #fdfdfe;
+        }
+
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: var(--bg);
+            color: #1a1a1b;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* 隐藏滚动条但保留功能 */
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+
+        /* 全局卡片交互效果 */
+        .premium-card {
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            cursor: pointer;
+        }
+        .premium-card:active {
+            transform: scale(0.96);
+        }
+
+        /* 分类页面布局样式 */
+        .category-hero {
+            position: relative;
+            height: 180px;
+            border-radius: 2.5rem;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 20px 40px -15px rgba(0,0,0,0.1);
+        }
+        .category-small {
+            position: relative;
+            height: 240px;
+            border-radius: 2.5rem;
+            overflow: hidden;
+        }
+        .cat-overlay {
+            background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 60%);
+        }
+        .vertical-text {
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+        }
+
+        /* 相册瀑布流（Pinterest风格）布局 */
+        .masonry-grid {
+            column-count: 2;
+            column-gap: 1rem;
+        }
+        .masonry-item {
+            break-inside: avoid;
+            margin-bottom: 1rem;
+        }
+
+        /* 底部导航栏毛玻璃效果 */
+        .nav-blur {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(25px) saturate(200%);
+            -webkit-backdrop-filter: blur(25px) saturate(200%);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+        }
+
+        /* 页面切换动画 */
+        .view-content {
+            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 教程模态框 */
+        #tutorial-modal {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            z-index: 200;
+            background: var(--bg);
+            width: 100%;
+            max-width: 28rem;
+            transform: translate(-50%, 100%);
+            transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        #tutorial-modal.show { transform: translate(-50%, 0); }
+        #tutorial-modal .modal-drag-bar { display: none; }
+        .tut-tab {
+            flex: 1;
+            text-align: center;
+            padding: 12px;
+            border-radius: 100px;
+            background: #e2e8f0;
+            color: #64748b;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .tut-tab.active {
+            background: #1e293b;
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(30,41,59,0.2);
+        }
+        .step-line {
+            position: absolute;
+            left: 11px;
+            top: 32px;
+            bottom: -28px;
+            width: 2px;
+            background: #cbd5e1;
+        }
+
+        /* 分类标签 */
+        .cat-tabs-scroll {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding: 0 1.5rem 1rem;
+        }
+        .cat-tab-b {
+            flex-shrink: 0;
+            padding: 8px 20px;
+            border-radius: 100px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #64748b;
+            background: transparent;
+            border: 1.5px solid #cbd5e1;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            white-space: nowrap;
+            outline: none;
+        }
+        .cat-tab-b:active { transform: scale(0.95); }
+        .cat-tab-b.active {
+            background: #1e293b;
+            color: #fff;
+            border-color: #1e293b;
+            box-shadow: 0 4px 12px rgba(30,41,59,0.2);
+        }
+
+        /* 产品卡片 */
+        .product-card-b {
+            position: relative;
+            border-radius: 2.5rem;
+            overflow: hidden;
+            height: 420px;
+            box-shadow: 0 20px 40px -15px rgba(0,0,0,0.12);
+            cursor: pointer;
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .product-card-b:active { transform: scale(0.97); }
+        .product-card-b .card-bg {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.7s ease;
+        }
+        .product-card-b:hover .card-bg { transform: scale(1.05); }
+        .product-card-b .card-gradient {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, transparent 30%, rgba(0,0,0,0.55) 60%, rgba(0,0,0,0.92) 100%);
+        }
+        .product-card-b .card-inner {
+            position: relative;
+            z-index: 2;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 1.5rem;
+        }
+        .mini-preview {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .mini-preview-img {
+            width: 48px;
+            height: 86px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1.5px solid rgba(255,255,255,0.3);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            backdrop-filter: blur(4px);
+        }
+        .mini-preview-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* 照片网格 */
+        .photo-grid-b {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+        .photo-grid-b .photo-item {
+            aspect-ratio: 1;
+            border-radius: 1.25rem;
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .photo-grid-b .photo-item:active { transform: scale(0.95); }
+        .photo-grid-b .photo-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .photo-status-badge {
+            position: absolute;
+            bottom: 6px;
+            left: 6px;
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 8px;
+            color: #fff;
+            backdrop-filter: blur(6px);
+        }
+        .photo-status-badge.on { background: rgba(16, 185, 129, 0.8); }
+        .photo-status-badge.off { background: rgba(0,0,0,0.4); }
+        .photo-add-b {
+            aspect-ratio: 1;
+            border-radius: 1.25rem;
+            border: 2px dashed #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: white;
+            color: #94a3b8;
+        }
+        .photo-add-b:active { background: #f8fafc; transform: scale(0.95); }
+
+        /* 照片管理多选模式 */
+        .photo-item.manage-mode { position: relative; }
+        .photo-item.manage-mode .photo-manage-check {
+            position: absolute;
+            top: 6px;
+            left: 6px;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.9);
+            background: rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2;
+        }
+        .photo-item.manage-mode.selected .photo-manage-check {
+            background: #6366f1;
+            border-color: #6366f1;
+        }
+        .photo-item.manage-mode.selected .photo-manage-check i { opacity: 1; color: #fff; }
+        .photo-item.manage-mode .photo-manage-check i { font-size: 12px; opacity: 0; color: #fff; }
+        .photo-item.manage-mode.selected { box-shadow: 0 0 0 3px #6366f1; }
+        .photo-manage-bar {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 28rem;
+            padding: 12px 24px;
+            padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+            background: rgba(30, 41, 59, 0.96);
+            backdrop-filter: blur(20px);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+        .photo-manage-bar.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .profile-android-only { display: none !important; }
+        .profile-interval-opt.selected { border-color: #6366f1; background: #eef2ff; color: #4338ca; }
+        #profile-interval-row.profile-interval-row-disabled { opacity: 0.5; pointer-events: none; cursor: default; }
+        .photo-manage-bar .count { color: #94a3b8; font-size: 13px; font-weight: 700; }
+        .photo-manage-bar .btn-delete {
+            padding: 10px 24px;
+            border-radius: 1.25rem;
+            font-size: 14px;
+            font-weight: 800;
+            background: #ef4444;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .photo-manage-bar .btn-delete:active { transform: scale(0.97); }
+
+        /* 详情模态框 */
+        #detail-modal {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            z-index: 200;
+            background: var(--bg);
+            width: 100%;
+            max-width: 28rem;
+            transform: translate(-50%, 100%);
+            transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        #detail-modal.show { transform: translate(-50%, 0); }
+        .detail-cover-b {
+            width: 100%;
+            aspect-ratio: 1.5;
+            object-fit: cover;
+        }
+        .detail-body {
+            padding: 28px 24px;
+            margin-top: -28px;
+            background: var(--bg);
+            border-radius: 2rem 2rem 0 0;
+            position: relative;
+        }
+        .detail-previews-b {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+        }
+        .detail-previews-b img {
+            width: 100px;
+            height: 178px;
+            border-radius: 1rem;
+            object-fit: cover;
+            flex-shrink: 0;
+            border: 1px solid #f1f5f9;
+            cursor: pointer;
+        }
+        .detail-previews-b img:active { opacity: 0.9; }
+        .detail-history-b {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+        }
+        .detail-history-b .h-item {
+            flex: 0 0 90px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .detail-history-b .h-item img {
+            width: 90px;
+            height: 160px;
+            border-radius: 12px;
+            object-fit: cover;
+            background: #f8fafc;
+        }
+        .benefit-grid-b {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        .detail-sub-bar-b {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            max-width: 28rem;
+            width: 100%;
+            padding: 14px 24px;
+            padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+            background: rgba(253,253,254,0.92);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(0,0,0,0.08);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            z-index: 201;
+        }
+
+        /* 锁屏全屏预览（与主内容同宽居中） */
+        .ls-fullscreen {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            width: 100%;
+            max-width: 28rem;
+            transform: translateX(-50%);
+            z-index: 9999;
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #fff;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            cursor: pointer;
+            background-color: #000;
+            overflow: hidden;
+        }
+        .ls-fullscreen.ls-original-mode { background-image: none !important; }
+        .ls-track {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            flex-shrink: 0;
+            transition: transform 0.25s ease-out;
+        }
+        .ls-slide {
+            flex: 0 0 100%;
+            width: 100%;
+            height: 100%;
+            position: relative;
+            background-size: cover;
+            background-position: center;
+        }
+        .ls-slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: none;
+            pointer-events: none;
+        }
+        .ls-fullscreen.ls-original-mode .ls-track .ls-slide { background-image: none !important; }
+        .ls-fullscreen.ls-original-mode .ls-track .ls-slide img { display: block; }
+        .ls-fullscreen:not(.ls-original-mode) .ls-track .ls-slide img { display: none; }
+        .ls-fullscreen .ls-preview-content {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 0;
+            margin-top: 60px;
+            text-align: center;
+            pointer-events: none;
+        }
+        .ls-fullscreen .ls-original-img {
+            display: none;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            pointer-events: none;
+        }
+        .ls-fullscreen.ls-original-mode .ls-original-img { display: block; }
+        .ls-fullscreen.ls-original-mode .ls-preview-content { display: none; }
+        .ls-fullscreen .ls-bottom {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 16px 20px;
+            padding-bottom: calc(16px + env(safe-area-inset-bottom, 0));
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+        .ls-fullscreen .ls-toggle-btn {
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 700;
+            background: rgba(0,0,0,0.5);
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .ls-fullscreen .ls-toggle-btn:active { opacity: 0.9; }
+        .ls-fullscreen .ls-hint { font-size: 14px; opacity: 0.8; }
+        .ls-fullscreen .ls-index {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        /* Toast */
+        .toast-b {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            background: rgba(0,0,0,0.75);
+            backdrop-filter: blur(12px);
+            color: #fff;
+            padding: 14px 28px;
+            border-radius: 14px;
+            font-size: 14px;
+            font-weight: 500;
+            z-index: 999;
+            opacity: 0;
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+        .toast-b.show {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        /* 相册权限弹窗：iOS / Android 系统样式（复刻原生，便于 H5 复刻到原生） */
+        #photo-permission-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 300;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding: 0;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease;
+        }
+        #photo-permission-modal.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        #photo-permission-modal .perm-backdrop {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.4);
+        }
+        #photo-permission-modal .perm-content {
+            position: relative;
+            width: 100%;
+            max-width: 28rem;
+            margin: 0 auto;
+        }
+
+        /* ---------- iOS 样式（底部 Action Sheet + 标题区） ---------- */
+        .photo-permission-ios {
+            background: rgba(242,242,247,0.98);
+            border-radius: 14px 14px 0 0;
+            padding-bottom: env(safe-area-inset-bottom, 0);
+            box-shadow: 0 -2px 20px rgba(0,0,0,0.15);
+            overflow: hidden;
+        }
+        .photo-permission-ios .perm-ios-header {
+            padding: 20px 16px 12px;
+            text-align: center;
+        }
+        .photo-permission-ios .perm-ios-icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 12px;
+            border-radius: 13px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 28px;
+        }
+        .photo-permission-ios .perm-ios-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #1c1c1e;
+            margin-bottom: 2px;
+        }
+        .photo-permission-ios .perm-ios-desc {
+            font-size: 12px;
+            color: #8e8e93;
+        }
+        .photo-permission-ios .perm-ios-actions {
+            padding: 8px 12px 20px;
+        }
+        .photo-permission-ios .perm-ios-btn {
+            display: block;
+            width: 100%;
+            padding: 14px 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            background: transparent;
+            transition: background 0.15s;
+            margin-bottom: 6px;
+        }
+        .photo-permission-ios .perm-ios-btn:last-child { margin-bottom: 0; }
+        .photo-permission-ios .perm-ios-btn:active { opacity: 0.8; }
+        .photo-permission-ios .perm-ios-btn:focus { outline: none; }
+        .photo-permission-ios .perm-ios-btn { -webkit-tap-highlight-color: transparent; min-height: 44px; }
+        .photo-permission-ios .perm-ios-btn-full {
+            color: #007AFF;
+            background: transparent;
+        }
+        .photo-permission-ios .perm-ios-btn-limited {
+            color: #007AFF;
+            background: transparent;
+        }
+        .photo-permission-ios .perm-ios-btn-deny {
+            color: #FF3B30;
+            background: transparent;
+        }
+
+        /* ---------- Android 样式（Material 居中对话框） ---------- */
+        .photo-permission-android {
+            position: fixed;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: calc(100% - 32px);
+            max-width: 320px;
+            background: #fff;
+            border-radius: 28px;
+            box-shadow: 0 24px 48px rgba(0,0,0,0.2);
+            padding: 24px 24px 20px;
+            overflow: hidden;
+        }
+        .photo-permission-android .perm-android-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 24px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 22px;
+            margin-bottom: 16px;
+        }
+        .photo-permission-android .perm-android-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+        .photo-permission-android .perm-android-desc {
+            font-size: 14px;
+            color: #5f6368;
+            line-height: 1.4;
+            margin-bottom: 24px;
+        }
+        .photo-permission-android .perm-android-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .photo-permission-android .perm-android-btn {
+            display: block;
+            width: 100%;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 20px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.15s, box-shadow 0.15s;
+        }
+        .photo-permission-android .perm-android-btn:active { opacity: 0.9; }
+        .photo-permission-android .perm-android-btn { -webkit-tap-highlight-color: transparent; min-height: 48px; }
+        .photo-permission-android .perm-android-btn-full {
+            background: #6366f1;
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(99,102,241,0.35);
+        }
+        .photo-permission-android .perm-android-btn-limited {
+            background: #e8e0fc;
+            color: #6366f1;
+        }
+        .photo-permission-android .perm-android-btn-deny {
+            background: transparent;
+            color: #5f6368;
+        }
+
+        /* 相册选择器弹窗 */
+        #photo-picker-modal {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            width: 100%;
+            max-width: 28rem;
+            transform: translate(-50%, 100%);
+            z-index: 301;
+            background: var(--bg);
+            border-radius: 20px 20px 0 0;
+            box-shadow: 0 -8px 32px rgba(0,0,0,0.12);
+            transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+            display: flex;
+            flex-direction: column;
+        }
+        #photo-picker-modal.show { transform: translate(-50%, 0); }
+        .photo-picker-header {
+            flex-shrink: 0;
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .photo-picker-header h2 { font-size: 1.125rem; font-weight: 800; color: #1e293b; }
+        .photo-picker-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+        }
+        .photo-picker-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+        .photo-picker-item {
+            aspect-ratio: 1;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: all 0.2s;
+        }
+        .photo-picker-item.selected { border-color: #6366f1; box-shadow: 0 0 0 1px #fff; }
+        .photo-picker-item img { width: 100%; height: 100%; object-fit: cover; }
+        .photo-picker-item .check {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: #6366f1;
+            color: #fff;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+        }
+        .photo-picker-item.selected .check { opacity: 1; }
+        .photo-picker-footer {
+            flex-shrink: 0;
+            padding: 1rem 1.25rem;
+            padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0));
+            border-top: 1px solid #e2e8f0;
+        }
+        .photo-picker-footer button {
+            width: 100%;
+            min-height: 48px;
+            padding: 1rem;
+            border-radius: 1.25rem;
+            font-size: 16px;
+            font-weight: 800;
+            background: #1e293b;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.15s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .photo-picker-footer button:active { transform: scale(0.98); }
+        .photo-picker-footer button:disabled {
+            background: #cbd5e1;
+            color: #94a3b8;
+            cursor: not-allowed;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .animate-spin { animation: spin 0.8s linear infinite; }
+
+        #review-modal { z-index: 302; }
+        #review-modal.show { opacity: 1; pointer-events: auto; }
+        #review-modal button[type="button"]:not(.review-star) {
+            min-height: 48px;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* ========== 弹窗规范（统一底部抽屉风格） ========== */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 302;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease;
+        }
+        .modal-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal-backdrop {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.45);
+            -webkit-tap-highlight-color: transparent;
+        }
+        .modal-sheet {
+            position: relative;
+            width: 100%;
+            max-width: 28rem;
+            margin-left: auto;
+            margin-right: auto;
+            background: var(--bg);
+            border-radius: 20px 20px 0 0;
+            padding: 12px 24px 24px;
+            padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+            box-shadow: 0 -8px 32px rgba(0,0,0,0.12);
+            transform: translateY(100%);
+            transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+        }
+        .modal-overlay.show .modal-sheet {
+            transform: translateY(0);
+        }
+        /* 账号管理：居中弹窗，非抽屉 */
+        .modal-overlay.modal-center { align-items: center; justify-content: center; }
+        .modal-overlay.modal-center .modal-sheet,
+        .modal-overlay.modal-center.show .modal-sheet {
+            transform: none;
+            border-radius: 20px;
+            margin: 20px;
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
+        }
+        .modal-overlay.modal-center .modal-drag-bar { display: none; }
+        /* ========== 二级页面（模拟 Android/iOS 启动新页面：从右滑入） ========== */
+        #secondary-page {
+            position: fixed;
+            inset: 0;
+            z-index: 400;
+            background: var(--bg);
+            transform: translateX(100%);
+            transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+            display: flex;
+            flex-direction: column;
+            max-width: 28rem;
+            margin-left: auto;
+            margin-right: auto;
+            left: 0;
+            right: 0;
+            box-shadow: -4px 0 24px rgba(0,0,0,0.08);
+            visibility: hidden;
+            pointer-events: none;
+        }
+        #secondary-page.show {
+            transform: translateX(0);
+            visibility: visible;
+            pointer-events: auto;
+        }
+        /* 关闭动画中保持可见，动画结束后由 JS 移除此类并变为隐藏 */
+        #secondary-page.secondary-page-closing {
+            transform: translateX(100%);
+            visibility: visible;
+            pointer-events: none;
+        }
+        #secondary-page .secondary-header {
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            padding-top: calc(12px + env(safe-area-inset-top, 0px));
+            padding-bottom: 12px;
+            background: var(--bg);
+            border-bottom: 1px solid #e2e8f0;
+            min-height: 56px;
+        }
+        #secondary-page.secondary-ios .secondary-header {
+            min-height: 44px;
+            padding-top: calc(8px + env(safe-area-inset-top, 0px));
+            border-bottom-color: rgba(0,0,0,0.08);
+        }
+        #secondary-page.secondary-android .secondary-header {
+            min-height: 56px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        }
+        #secondary-page .secondary-back {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            background: transparent;
+            color: #6366f1;
+            font-size: 18px;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+            border-radius: 50%;
+        }
+        #secondary-page .secondary-back:active { background: rgba(0,0,0,0.06); }
+        #secondary-page.secondary-ios .secondary-back { color: #6366f1; font-size: 20px; }
+        #secondary-page.secondary-android .secondary-back { color: #1e293b; }
+        #secondary-page .secondary-title {
+            flex: 1;
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+        #secondary-page.secondary-ios .secondary-title { font-size: 17px; font-weight: 600; }
+        #secondary-page .secondary-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+            -webkit-overflow-scrolling: touch;
+        }
+        .modal-drag-bar {
+            width: 36px;
+            height: 4px;
+            border-radius: 2px;
+            background: #cbd5e1;
+            margin: 0 auto 16px;
+            flex-shrink: 0;
+        }
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #1e293b;
+            margin-bottom: 6px;
+            line-height: 1.3;
+        }
+        .modal-desc {
+            font-size: 15px;
+            color: #64748b;
+            line-height: 1.5;
+            margin-bottom: 24px;
+        }
+        .modal-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .modal-actions button,
+        .modal-actions .modal-btn-primary,
+        .modal-actions .modal-btn-secondary {
+            width: 100%;
+            min-height: 48px;
+            padding: 14px 20px;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.15s, background-color 0.15s;
+            -webkit-tap-highlight-color: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-actions button:active,
+        .modal-actions .modal-btn-primary:active,
+        .modal-actions .modal-btn-secondary:active { transform: scale(0.98); }
+        .modal-btn-primary {
+            background: #1e293b;
+            color: #fff;
+        }
+        .modal-btn-secondary {
+            background: transparent;
+            color: #64748b;
+        }
+        .modal-link {
+            display: block;
+            width: 100%;
+            padding: 14px 20px;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 700;
+            color: #fff;
+            background: #1e293b;
+            text-align: center;
+            text-decoration: none;
+            min-height: 48px;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .modal-link:active { transform: scale(0.98); }
+
+        /* 锁屏壁纸引导弹窗（使用规范类） */
+        #lock-screen-guide-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 303;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease;
+        }
+        #lock-screen-guide-modal.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        #lock-screen-guide-modal .guide-card {
+            position: relative;
+            width: 100%;
+            max-width: 28rem;
+            margin-left: auto;
+            margin-right: auto;
+            background: var(--bg);
+            border-radius: 20px 20px 0 0;
+            padding: 12px 24px 24px;
+            padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+            box-shadow: 0 -8px 32px rgba(0,0,0,0.12);
+            transform: translateY(100%);
+            transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+        }
+        #lock-screen-guide-modal.show .guide-card {
+            transform: translateY(0);
+        }
+        #lock-screen-guide-modal .guide-backdrop {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.45);
+            -webkit-tap-highlight-color: transparent;
+        }
+        #lock-screen-guide-modal .guide-drag-bar {
+            width: 36px;
+            height: 4px;
+            border-radius: 2px;
+            background: #cbd5e1;
+            margin: 0 auto 16px;
+        }
+        #lock-screen-guide-modal .guide-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #1e293b;
+            margin-bottom: 6px;
+            line-height: 1.3;
+        }
+        #lock-screen-guide-modal .guide-desc {
+            font-size: 15px;
+            color: #64748b;
+            line-height: 1.5;
+            margin-bottom: 24px;
+        }
+        #lock-screen-guide-modal .guide-btns {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        #lock-screen-guide-modal .guide-btns button {
+            width: 100%;
+            min-height: 48px;
+            padding: 14px 20px;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.15s, background-color 0.15s;
+            -webkit-tap-highlight-color: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #lock-screen-guide-modal .guide-btns button:active { transform: scale(0.98); }
+        #lock-screen-guide-modal .guide-btn-primary {
+            background: #1e293b;
+            color: #fff;
+        }
+        #lock-screen-guide-modal .guide-btn-secondary {
+            background: transparent;
+            color: #64748b;
+        }
+
+        /* 大图查看层（壁纸预览 / 我的照片 点击放大） */
+        #image-viewer-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 400;
+            background: rgba(0,0,0,0.92);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+        #image-viewer-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        #image-viewer-overlay img {
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+        #image-viewer-overlay .viewer-close {
+            position: absolute;
+            top: env(safe-area-inset-top, 16px);
+            right: 16px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            -webkit-tap-highlight-color: transparent;
+        }
+        #image-viewer-overlay .viewer-close:active { opacity: 0.8; }
+
+        /* ========== 启动页（浅底，与首页一致）========== */
+        #splash-screen {
+            position: fixed;
+            inset: 0;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #fdfdfe;
+            transition: opacity 0.5s ease-out;
+        }
+        #splash-screen.hide { opacity: 0; pointer-events: none; }
+        #splash-screen .splash-logo {
+            width: 88px;
+            height: 88px;
+            border-radius: 22px;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: splashLogoIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        #splash-screen .splash-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        #splash-screen .splash-logo-img-ios { display: none; }
+        #splash-screen .splash-logo-img-android { display: block; }
+        .platform-ios #splash-screen .splash-logo-img-ios { display: block; }
+        .platform-ios #splash-screen .splash-logo-img-android { display: none; }
+        #splash-screen .splash-title {
+            font-size: 1.75rem;
+            font-weight: 900;
+            color: #0f172a;
+            letter-spacing: -0.02em;
+            animation: splashTextIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both;
+        }
+        #splash-screen .splash-tagline {
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-top: 6px;
+            animation: splashTextIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) 0.25s both;
+        }
+        @keyframes splashLogoIn {
+            from { opacity: 0; transform: scale(0.85); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        @keyframes splashTextIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ========== 隐私合规弹窗（与首页卡片风格一致）========== */
+        #privacy-consent {
+            position: fixed;
+            inset: 0;
+            z-index: 10001;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            background: rgba(15, 23, 42, 0.35);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        #privacy-consent.show { display: flex; }
+        #privacy-consent .privacy-card {
+            width: 100%;
+            max-width: 22rem;
+            background: #fdfdfe;
+            border-radius: 2rem;
+            padding: 28px 24px;
+            box-shadow: 0 24px 48px rgba(0,0,0,0.08);
+            border: 1px solid rgba(226, 232, 240, 0.9);
+            animation: privacyCardIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes privacyCardIn {
+            from { opacity: 0; transform: scale(0.96) translateY(16px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        #privacy-consent .privacy-title {
+            font-size: 1.25rem;
+            font-weight: 900;
+            color: #0f172a;
+            letter-spacing: -0.02em;
+            margin-bottom: 12px;
+        }
+        #privacy-consent .privacy-desc {
+            font-size: 0.8125rem;
+            color: #64748b;
+            line-height: 1.55;
+            margin-bottom: 24px;
+        }
+        #privacy-consent .privacy-desc a { color: #6366f1; font-weight: 700; text-decoration: none; }
+        #privacy-consent .privacy-btns {
+            display: flex;
+            gap: 12px;
+        }
+        #privacy-consent .privacy-btns button {
+            flex: 1;
+            padding: 14px 20px;
+            border-radius: 1rem;
+            font-size: 0.9375rem;
+            font-weight: 800;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.15s;
+        }
+        #privacy-consent .privacy-btns button:active { transform: scale(0.98); }
+        #privacy-consent .privacy-btn-reject {
+            background: #f1f5f9;
+            color: #64748b;
+        }
+        #privacy-consent .privacy-btn-accept {
+            background: #6366f1;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 启动页 -->
+    <div id="splash-screen">
+        <div class="splash-logo">
+            <img class="splash-logo-img splash-logo-img-ios" src="https://hk-h5-cdn.levect.com/html/xiefeng/PhotoFrame/logo-ios.png" alt="好看云壁纸" width="88" height="88">
+            <img class="splash-logo-img splash-logo-img-android" src="https://hk-h5-cdn.levect.com/html/xiefeng/PhotoFrame/logo-android.png" alt="好看云壁纸" width="88" height="88">
+        </div>
+        <h1 class="splash-title">好看云壁纸</h1>
+        <p class="splash-tagline">发现精彩，看到爱</p>
+    </div>
+
+    <!-- 隐私与条款合规弹窗（启动页之后展示，同意后进入主应用） -->
+    <div id="privacy-consent">
+        <div class="privacy-card">
+            <h2 class="privacy-title">隐私与条款</h2>
+            <p class="privacy-desc">我们重视您的隐私与信息安全。使用本服务即表示您已阅读并同意<a id="privacy-link-user" href="https://92-cn.levect.com/92china/user_agreement" target="_blank" rel="noopener">《用户协议》</a>和<a id="privacy-link-policy" href="https://92-cn.levect.com/92china/privacy_policy" target="_blank" rel="noopener">《隐私政策》</a>。</p>
+            <div class="privacy-btns">
+                <button type="button" class="privacy-btn-reject" id="privacy-btn-reject">不同意</button>
+                <button type="button" class="privacy-btn-accept" id="privacy-btn-accept">同意</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="app" class="max-w-md mx-auto min-h-screen flex flex-col bg-[#fdfdfe] w-full overflow-x-hidden">
+        
+        <!-- 顶部标题区（随页面一起滚动） -->
+        <header id="main-header" class="px-8 pt-16 pb-6 z-40 bg-[#fdfdfe] border-b border-slate-200/60" style="padding-top: max(1rem, env(safe-area-inset-top));">
+            <div class="flex justify-between items-end">
+                <div>
+                    <p id="date-label" class="text-[10px] font-black text-indigo-500 uppercase tracking-[0.2em] mb-1">THURSDAY, MAR 5</p>
+                    <h1 id="view-title" class="text-4xl font-black tracking-tighter text-slate-900">订阅壁纸</h1>
+                </div>
+                <div id="header-actions" class="flex gap-3 mb-1">
+                    <button class="w-11 h-11 rounded-2xl bg-white shadow-sm flex items-center justify-center text-slate-500 border border-slate-200" aria-label="搜索">
+                        <i class="fa-solid fa-magnifying-glass text-lg"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- 主内容区域 -->
+        <main class="flex-1 pt-5 pb-40">
+            
+            <!-- 壁纸订阅视图 -->
+            <section id="category-view" class="view-content">
+                <!-- 教程入口 -->
+                <div class="px-6 mb-4">
+                    <div onclick="toggleHelp(true, 'category')" class="flex items-center gap-3 p-4 bg-slate-100 rounded-[2rem] cursor-pointer active:scale-[0.98] transition-transform border border-slate-200">
+                        <div class="w-10 h-10 rounded-2xl bg-white flex items-center justify-center shadow-sm shrink-0">
+                            <i class="fa-solid fa-wand-magic-sparkles text-indigo-500"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="text-sm font-black text-slate-700 truncate">让锁屏每天自动变好看</div>
+                            <div class="text-[10px] text-slate-500 mt-0.5 truncate">简单3步，解锁手机的"换装魔法"</div>
+                        </div>
+                        <span class="shrink-0 px-3 py-2 bg-slate-900 text-white text-[10px] font-black rounded-xl whitespace-nowrap">去试试</span>
+                    </div>
+                </div>
+                <div class="cat-tabs-scroll scrollbar-hide" id="catTabsB">
+                    <button class="cat-tab-b active" data-cat="recommend">热门推荐</button>
+                    <button class="cat-tab-b" data-cat="travel">旅行日记</button>
+                    <button class="cat-tab-b" data-cat="culture">文化艺术</button>
+                    <button class="cat-tab-b" data-cat="ip">知名IP</button>
+                    <button class="cat-tab-b" data-cat="pet">治愈萌宠</button>
+                    <button class="cat-tab-b" data-cat="minimal">极简生活</button>
+                    <button class="cat-tab-b" data-cat="nature">自然风光</button>
+                    <button class="cat-tab-b" data-cat="trend">潮流明星</button>
+                    <button class="cat-tab-b" data-cat="creative">创意脑洞</button>
+                </div>
+                <div class="px-6 space-y-6" id="catProductGrid"></div>
+            </section>
+
+            <!-- 相册视图 -->
+            <section id="photo-view" class="view-content hidden px-6">
+                <!-- 上传照片 Hero -->
+                <div class="relative overflow-hidden rounded-[3rem] bg-gradient-to-br from-indigo-600 via-violet-500 to-fuchsia-500 p-8 text-white mb-8 shadow-xl shadow-indigo-200">
+                    <div class="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-white/10"></div>
+                    <h2 class="text-2xl font-black tracking-tight mb-2 relative z-10">让照片登上锁屏</h2>
+                    <p class="text-xs opacity-80 leading-relaxed mb-6 relative z-10">上传喜欢的照片，自动设为锁屏轮播壁纸，每次亮屏都是美好回忆。</p>
+                    <button id="photo-hero-upload-btn" class="inline-flex items-center gap-2 bg-white text-indigo-600 px-6 py-3 rounded-2xl text-sm font-black shadow-lg relative z-10 active:scale-95 transition-transform">
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                        <span id="photo-hero-upload-text">上传照片</span>
+                    </button>
+                </div>
+
+                <!-- 加载相册中（授权后短暂显示） -->
+                <div id="photo-loading-block" class="mb-8 hidden">
+                    <div class="bg-white rounded-[2.5rem] p-8 shadow-sm border border-slate-200 text-center">
+                        <div class="w-12 h-12 rounded-full border-2 border-indigo-500 border-t-transparent animate-spin mx-auto mb-4"></div>
+                        <p class="text-sm font-bold text-slate-700">正在加载相册…</p>
+                        <p class="text-xs text-slate-500 mt-1">请稍候</p>
+                    </div>
+                </div>
+
+                <!-- 自动换壁纸玩法横幅（已授权时显示，有/无照片均展示） -->
+                <div id="photo-intro-bar" class="mb-8 hidden">
+                    <div onclick="toggleHelp(true, 'photo')" class="flex items-center gap-3 p-4 bg-slate-100 rounded-[2rem] cursor-pointer active:scale-[0.98] transition-transform border border-slate-200">
+                        <div class="w-10 h-10 rounded-2xl bg-white flex items-center justify-center shadow-sm shrink-0 overflow-hidden">
+                            <img id="lsImgB" src="https://images.unsplash.com/photo-1519681393784-d120267933ba?w=320&h=692&fit=crop" alt="" class="w-full h-full object-cover">
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="text-sm font-black text-slate-700 truncate">锁屏照片自动轮播</div>
+                            <div class="text-[10px] text-slate-500 mt-0.5 truncate" id="photo-intro-bar-sub">你的 6 张照片将在锁屏自动轮播，每次亮屏都是回忆</div>
+                        </div>
+                        <span class="shrink-0 px-3 py-2 bg-slate-900 text-white text-[10px] font-black rounded-xl whitespace-nowrap">自动换壁纸玩法</span>
+                    </div>
+                </div>
+
+                <!-- 照片网格（已授权后显示） -->
+                <div id="photo-grid-section" class="mb-8 hidden">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-black text-slate-800 tracking-tight">我的照片</h3>
+                        <span id="photoManageTrigger" class="text-xs text-indigo-600 font-bold cursor-pointer" onclick="togglePhotoManageMode()">管理</span>
+                    </div>
+                    <div class="photo-grid-b" id="photoGridB"></div>
+                </div>
+
+                <!-- 空相册提示（已授权但未选照片时显示） -->
+                <div id="photo-empty-section" class="mb-8 hidden">
+                    <div class="bg-slate-50 rounded-[2.5rem] p-8 border-2 border-dashed border-slate-200 text-center">
+                        <div class="w-16 h-16 rounded-2xl bg-white flex items-center justify-center mx-auto mb-4 shadow-sm">
+                            <i class="fa-solid fa-images text-2xl text-slate-400"></i>
+                        </div>
+                        <p class="text-sm font-bold text-slate-700 mb-1">还没有添加照片</p>
+                        <p class="text-xs text-slate-500 mb-4">选择照片后将用于锁屏轮播</p>
+                        <button onclick="requestAddPhoto()" class="px-6 py-3 bg-indigo-600 text-white rounded-2xl text-sm font-black active:scale-95">选择照片</button>
+                    </div>
+                </div>
+
+                <!-- 照片管理底栏（多选模式下勾选后显示） -->
+                <div id="photoManageBar" class="photo-manage-bar">
+                    <span id="photoManageBarCount" class="count">已选 0 张</span>
+                    <button type="button" class="btn-delete" onclick="deleteSelectedPhotos()">
+                        <i class="fa-solid fa-trash-can"></i> 删除
+                    </button>
+                </div>
+
+                <!-- 使用小贴士 -->
+                <div class="bg-white rounded-[2rem] p-5 shadow-sm border border-slate-200 mb-8">
+                    <div class="flex items-center gap-2 mb-3">
+                        <div class="w-6 h-6 rounded-lg bg-indigo-50 text-indigo-500 flex items-center justify-center">
+                            <i class="fa-solid fa-circle-info text-xs"></i>
+                        </div>
+                        <span class="text-sm font-black text-slate-700">使用小贴士</span>
+                    </div>
+                    <div class="text-xs text-slate-500 leading-loose">
+                        • 推荐上传高清竖版照片，效果更佳<br>
+                        • 照片会自动适配你的手机屏幕尺寸<br>
+                        • 支持 JPG、PNG、HEIC 格式<br>
+                        • 轮播间隔可在设置中自定义
+                    </div>
+                </div>
+            </section>
+
+            <!-- 个人视图 -->
+            <section id="profile-view" class="view-content hidden px-6">
+                <!-- 用户信息：游客 / 已登录 由 JS 切换 -->
+                <div id="profile-header" class="flex flex-col items-center text-center pt-2 pb-8">
+                    <!-- 游客态 -->
+                    <div id="profile-guest" class="flex flex-col items-center w-full">
+                        <div class="w-20 h-20 rounded-full bg-slate-200 flex items-center justify-center mb-4">
+                            <i class="fa-solid fa-user text-3xl text-slate-400"></i>
+                        </div>
+                        <h2 class="text-xl font-black text-slate-600 tracking-tight">游客</h2>
+                        <p class="text-[10px] text-slate-400 mt-1">登录后同步订阅与设置</p>
+                        <button type="button" onclick="openProfileLoginModal()" class="mt-4 px-8 py-3 bg-slate-900 text-white rounded-2xl text-sm font-black active:scale-95 transition-transform">登录</button>
+                    </div>
+                    <!-- 已登录态 -->
+                    <div id="profile-user" class="hidden flex-col items-center w-full">
+                        <img id="profile-user-avatar" class="w-20 h-20 rounded-full object-cover shadow-xl shadow-slate-300 mb-4 cursor-pointer active:opacity-90" src="" alt="" onclick="if(profileUser)openProfileAvatarModal()" role="button" tabindex="0" aria-label="修改头像">
+                        <h2 id="profile-user-name" class="text-2xl font-black text-slate-800 tracking-tight cursor-pointer active:opacity-90" onclick="if(profileUser)openProfileNicknameModal()" role="button" tabindex="0" aria-label="修改昵称"></h2>
+                        <p id="profile-user-id" class="text-[10px] text-slate-500 font-mono tracking-wider mt-1"></p>
+                    </div>
+                </div>
+
+                <!-- 统计数据 -->
+                <div class="flex justify-around py-5 mb-6 border-y border-slate-200">
+                    <div class="text-center">
+                        <div class="text-xl font-black text-slate-800">12</div>
+                        <div class="text-[10px] text-slate-500 font-bold uppercase tracking-wider mt-1">我的订阅</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-xl font-black text-slate-800">6</div>
+                        <div class="text-[10px] text-slate-500 font-bold uppercase tracking-wider mt-1">锁屏照片</div>
+                    </div>
+                </div>
+
+                <!-- 我的内容 -->
+                <div class="mb-6">
+                    <h4 class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 px-1">我的内容</h4>
+                    <div class="bg-white rounded-[2rem] p-2 shadow-sm border border-slate-200 space-y-0.5">
+                        <button onclick="openMySubscriptionsModal()" class="w-full flex items-center justify-between p-4 hover:bg-slate-100 rounded-[1.5rem] transition-all">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 bg-indigo-50 text-indigo-500 rounded-xl flex items-center justify-center"><i class="fa-solid fa-bookmark"></i></div>
+                                <span class="text-sm font-bold text-slate-700">我的订阅</span>
+                            </div>
+                            <i class="fa-solid fa-chevron-right text-slate-400 text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 功能设置 -->
+                <div class="mb-6">
+                    <h4 class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 px-1">功能设置</h4>
+                    <div class="bg-white rounded-[2rem] p-2 shadow-sm border border-slate-200 space-y-0.5">
+                        <button onclick="toggleHelp(true, 'category')" class="w-full flex items-center justify-between p-4 hover:bg-slate-100 rounded-[1.5rem] transition-all">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 bg-amber-50 text-amber-500 rounded-xl flex items-center justify-center"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+                                <div class="text-left">
+                                    <span class="text-sm font-bold text-slate-700 block">自动换壁纸玩法</span>
+                                    <span class="text-[10px] text-slate-500">让你的锁屏动起来</span>
+                                </div>
+                            </div>
+                            <i class="fa-solid fa-chevron-right text-slate-400 text-xs"></i>
+                        </button>
+                        <div id="profile-lock-switch-row" class="profile-android-only w-full flex items-center justify-between p-4">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 bg-violet-50 text-violet-500 rounded-xl flex items-center justify-center"><i class="fa-solid fa-lock"></i></div>
+                                <span class="text-sm font-bold text-slate-700">锁屏自动切换</span>
+                            </div>
+                            <div class="w-11 h-[26px] rounded-full bg-slate-900 relative cursor-pointer transition-colors" onclick="toggleSwitch(this)">
+                                <div class="absolute top-[3px] left-[3px] w-5 h-5 rounded-full bg-white shadow-sm transition-transform" style="transform:translateX(18px);"></div>
+                            </div>
+                        </div>
+                        <button id="profile-interval-row" class="profile-android-only w-full flex items-center justify-between p-4 hover:bg-slate-100 rounded-[1.5rem] transition-all" onclick="openProfileIntervalModal()">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 bg-cyan-50 text-cyan-500 rounded-xl flex items-center justify-center"><i class="fa-solid fa-clock"></i></div>
+                                <div class="text-left">
+                                    <span class="text-sm font-bold text-slate-700 block">切换间隔</span>
+                                    <span id="profile-interval-label" class="text-[10px] text-slate-500">每次亮屏</span>
+                                </div>
+                            </div>
+                            <i class="fa-solid fa-chevron-right text-slate-400 text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 更多 -->
+                <div class="mb-6">
+                    <h4 class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 px-1">更多</h4>
+                    <div class="bg-white rounded-[2rem] p-2 shadow-sm border border-slate-200 space-y-0.5">
+                        <button onclick="openProfileAccountModal()" class="w-full flex items-center justify-between p-4 hover:bg-slate-100 rounded-[1.5rem] transition-all">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 bg-slate-100 text-slate-500 rounded-xl flex items-center justify-center"><i class="fa-solid fa-gear"></i></div>
+                                <span class="text-sm font-bold text-slate-700">账号管理</span>
+                            </div>
+                            <i class="fa-solid fa-chevron-right text-slate-400 text-xs"></i>
+                        </button>
+                        <button onclick="window.open('https://92-cn.levect.com/92china/privacy_policy', '_blank')" class="w-full flex items-center justify-between p-4 hover:bg-slate-100 rounded-[1.5rem] transition-all">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 bg-slate-100 text-slate-500 rounded-xl flex items-center justify-center"><i class="fa-solid fa-shield-halved"></i></div>
+                                <span class="text-sm font-bold text-slate-700">隐私政策</span>
+                            </div>
+                            <i class="fa-solid fa-chevron-right text-slate-400 text-xs"></i>
+                        </button>
+                        <button onclick="window.open('https://92-cn.levect.com/92china/user_agreement', '_blank')" class="w-full flex items-center justify-between p-4 hover:bg-slate-100 rounded-[1.5rem] transition-all">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 bg-slate-100 text-slate-500 rounded-xl flex items-center justify-center"><i class="fa-solid fa-file-lines"></i></div>
+                                <span class="text-sm font-bold text-slate-700">用户协议</span>
+                            </div>
+                            <i class="fa-solid fa-chevron-right text-slate-400 text-xs"></i>
+                        </button>
+                        <button onclick="openAboutPage()" class="w-full flex items-center justify-between p-4 hover:bg-slate-100 rounded-[1.5rem] transition-all">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 bg-slate-100 text-slate-500 rounded-xl flex items-center justify-center"><i class="fa-solid fa-circle-info"></i></div>
+                                <div class="text-left">
+                                    <span class="text-sm font-bold text-slate-700 block">关于我们</span>
+                                    <span class="text-[10px] text-slate-500">v2.6.0</span>
+                                </div>
+                            </div>
+                            <i class="fa-solid fa-chevron-right text-slate-400 text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 退出登录（已登录时显示） -->
+                <div id="profile-logout-wrap" class="hidden text-center py-6 mb-10">
+                    <button type="button" onclick="doProfileLogout()" class="px-12 py-3 border border-slate-200 rounded-2xl text-sm text-slate-500 font-bold active:scale-95 transition-transform">退出登录</button>
+                </div>
+            </section>
+        </main>
+
+        <!-- 二级页面（我的订阅 / 账号管理 / 关于我们，模拟原生从右滑入） -->
+        <div id="secondary-page">
+            <header class="secondary-header">
+                <button type="button" class="secondary-back" onclick="secondaryPageBack()" aria-label="返回"><i class="fa-solid fa-chevron-left"></i></button>
+                <h1 id="secondary-page-title" class="secondary-title"></h1>
+            </header>
+            <div id="secondary-page-body" class="secondary-body"></div>
+        </div>
+
+        <!-- 订阅详情模态框 -->
+        <div id="detail-modal">
+            <div style="height:100vh;overflow-y:auto;" class="scrollbar-hide">
+                <!-- 返回按钮 -->
+                <div onclick="closeDetail()" class="absolute top-4 left-4 z-10 w-10 h-10 rounded-full bg-black/30 backdrop-blur-md flex items-center justify-center cursor-pointer active:scale-90 transition-transform">
+                    <i class="fa-solid fa-chevron-left text-white text-sm"></i>
+                </div>
+                <!-- 封面图 -->
+                <img class="detail-cover-b" id="detailCoverB" src="" alt="">
+                <!-- 内容区 -->
+                <div class="detail-body">
+                    <h2 id="detailTitleB" class="text-2xl font-black text-slate-900 tracking-tight mb-3"></h2>
+                    <div id="detailMetaB" class="mb-4"></div>
+                    <p id="detailDescB" class="text-sm text-slate-500 leading-relaxed mb-6"></p>
+
+                    <!-- 预览锁屏效果 -->
+                    <button onclick="showDetailLockScreen()" class="w-full mb-8 py-4 bg-slate-100 rounded-2xl text-sm font-black text-slate-700 flex items-center justify-center gap-2 active:scale-[0.98] transition-transform">
+                        <i class="fa-solid fa-mobile-screen text-base"></i>
+                        预览锁屏效果
+                    </button>
+
+                    <!-- 壁纸预览 -->
+                    <h3 class="text-base font-black text-slate-800 mb-3">壁纸预览</h3>
+                    <div class="detail-previews-b scrollbar-hide mb-8" id="detailPreviewsB"></div>
+
+                    <!-- 订阅权益 -->
+                    <h3 class="text-base font-black text-slate-800 mb-3">订阅权益</h3>
+                    <div class="benefit-grid-b mb-8">
+                        <div class="flex items-center gap-3 p-3.5 bg-indigo-50/60 rounded-2xl border border-indigo-100/50">
+                            <div class="w-9 h-9 rounded-xl bg-white flex items-center justify-center text-indigo-500 shadow-sm shrink-0">
+                                <i class="fa-solid fa-wand-magic-sparkles text-sm"></i>
+                            </div>
+                            <div>
+                                <div class="text-xs font-black text-slate-700">自动换壁纸</div>
+                                <div class="text-[10px] text-slate-500 mt-0.5">每天亮屏即新图，无需动手</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3 p-3.5 bg-amber-50/60 rounded-2xl border border-amber-100/50">
+                            <div class="w-9 h-9 rounded-xl bg-white flex items-center justify-center text-amber-500 shadow-sm shrink-0">
+                                <i class="fa-solid fa-image text-sm"></i>
+                            </div>
+                            <div>
+                                <div class="text-xs font-black text-slate-700">高清原图</div>
+                                <div class="text-[10px] text-slate-500 mt-0.5">4K 超清无水印，锁屏也清晰</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3 p-3.5 bg-emerald-50/60 rounded-2xl border border-emerald-100/50">
+                            <div class="w-9 h-9 rounded-xl bg-white flex items-center justify-center text-emerald-500 shadow-sm shrink-0">
+                                <i class="fa-solid fa-bookmark text-sm"></i>
+                            </div>
+                            <div>
+                                <div class="text-xs font-black text-slate-700">专属壁纸库</div>
+                                <div class="text-[10px] text-slate-500 mt-0.5">仅订阅可看，持续更新</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3 p-3.5 bg-rose-50/60 rounded-2xl border border-rose-100/50">
+                            <div class="w-9 h-9 rounded-xl bg-white flex items-center justify-center text-rose-500 shadow-sm shrink-0">
+                                <i class="fa-solid fa-bolt text-sm"></i>
+                            </div>
+                            <div>
+                                <div class="text-xs font-black text-slate-700">优先体验</div>
+                                <div class="text-[10px] text-slate-500 mt-0.5">新图抢先看，随时可取消</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 用户评价 -->
+                    <h3 class="text-base font-black text-slate-800 mb-3">用户评价</h3>
+                    <div id="detailReviewsB" class="mb-8"></div>
+
+                    <!-- 写评价入口（已订阅且未评价时显示，由 JS 控制） -->
+                    <div id="detailReviewEntry" class="hidden mb-8">
+                        <button type="button" onclick="openReviewModal()" class="w-full py-4 border-2 border-dashed border-slate-200 rounded-2xl text-sm font-bold text-slate-500 hover:border-indigo-300 hover:text-indigo-600 transition-colors">
+                            <i class="fa-solid fa-pen-to-square mr-2"></i>写一条评价
+                        </button>
+                    </div>
+
+                    <!-- 底部占位 -->
+                    <div style="height:100px;"></div>
+                </div>
+            </div>
+            <!-- 底部订阅/操作栏 -->
+            <div class="detail-sub-bar-b" id="detailSubBarB">
+                <div>
+                    <span class="text-2xl font-black text-slate-900">免费</span>
+                </div>
+                <div class="flex flex-1 gap-3 items-center" id="detailSubBarBtns">
+                    <button id="detailSubBarBtn" onclick="handleDetailSubscribe()" class="flex-1 py-4 bg-slate-900 text-white rounded-2xl text-sm font-black shadow-xl shadow-slate-300 active:scale-[0.97] transition-transform">
+                        立即订阅
+                    </button>
+                    <button id="detailSubBarBtn2" class="hidden flex-1 py-4 px-5 rounded-2xl text-sm font-black border-2 border-slate-200 text-slate-600 active:scale-[0.97] transition-transform" onclick="handleDetailUnsubscribe()">
+                        取消订阅
+                    </button>
+                    <button id="detailReviewIconBtn" class="hidden w-12 h-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center shrink-0 active:scale-95 transition-transform" onclick="openReviewModal()" title="写评价">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 教程模态框 -->
+        <div id="tutorial-modal">
+            <div style="height:100vh;overflow-y:auto;" class="scrollbar-hide">
+                <!-- 顶部拖拽条（与弹窗规范统一） -->
+                <div class="modal-drag-bar" style="margin-top:12px;"></div>
+                <!-- 顶部栏 -->
+                <div class="sticky top-0 z-30 bg-[#fdfdfe] px-6 pt-14 pb-4 border-b border-slate-200">
+                    <div class="flex items-center justify-between gap-3">
+                        <div class="min-w-0 flex-1">
+                            <h2 id="tutorial-modal-title" class="text-lg font-black text-slate-900">玩法中心</h2>
+                            <p id="tutorial-modal-intro" class="text-xs text-slate-500 mt-0.5"></p>
+                        </div>
+                        <div onclick="toggleHelp(false)" class="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center cursor-pointer active:scale-90 transition-transform shrink-0">
+                            <i class="fa-solid fa-xmark text-slate-500"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 平台切换 -->
+                <div class="flex gap-3 px-6 py-4">
+                    <div class="tut-tab active" data-platform="ios" onclick="switchTutorial('ios')">iOS 快捷指令</div>
+                    <div class="tut-tab" data-platform="android" onclick="switchTutorial('android')">Android 动态壁纸</div>
+                </div>
+
+                <!-- iOS 教程 -->
+                <div class="px-6 pb-10" id="tut-ios">
+                    <div class="space-y-10 pt-2">
+                        <div class="flex gap-4 relative">
+                            <div class="step-line"></div>
+                            <div class="w-6 h-6 rounded-full bg-slate-900 text-white text-[11px] font-black flex items-center justify-center shrink-0 z-10 ring-4 ring-[#fdfdfe]">1</div>
+                            <div class="flex-1 -mt-0.5">
+                                <h4 class="text-sm font-black text-slate-800 mb-1.5">添加快捷指令</h4>
+                                <p class="text-xs text-slate-500 leading-relaxed mb-3">点击下方按钮，获取「好看云壁纸」专属快捷指令。</p>
+                                <button type="button" class="px-5 py-2.5 bg-[#007AFF] text-white text-xs font-black rounded-xl active:scale-95 transition-transform" onclick="window.open('https://www.icloud.com/shortcuts/86bd7a623e0e42ff80ef7121acdea0e9', '_blank')">获取快捷指令</button>
+                            </div>
+                        </div>
+                        <div class="flex gap-4 relative">
+                            <div class="step-line"></div>
+                            <div class="w-6 h-6 rounded-full bg-slate-900 text-white text-[11px] font-black flex items-center justify-center shrink-0 z-10 ring-4 ring-[#fdfdfe]">2</div>
+                            <div class="flex-1 -mt-0.5">
+                                <h4 class="text-sm font-black text-slate-800 mb-1.5">设置自动化</h4>
+                                <p class="text-xs text-slate-500 leading-relaxed mb-3">打开「快捷指令」App，点击底部「自动化」，创建个人自动化。选择「特定时间」或「充电时」。</p>
+                                <div class="rounded-2xl overflow-hidden border border-slate-200 aspect-[16/9]">
+                                    <img src="https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=600&h=340&fit=crop" class="w-full h-full object-cover" alt="">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex gap-4 relative">
+                            <div class="step-line"></div>
+                            <div class="w-6 h-6 rounded-full bg-slate-900 text-white text-[11px] font-black flex items-center justify-center shrink-0 z-10 ring-4 ring-[#fdfdfe]">3</div>
+                            <div class="flex-1 -mt-0.5">
+                                <h4 class="text-sm font-black text-slate-800 mb-1.5">运行快捷指令</h4>
+                                <p class="text-xs text-slate-500 leading-relaxed mb-3">在操作中搜索并添加「运行快捷指令」，选择刚才添加的「好看云壁纸」。</p>
+                                <div class="rounded-2xl overflow-hidden border border-slate-200 aspect-[16/9]">
+                                    <img src="https://images.unsplash.com/photo-1551650975-87deedd944c3?w=600&h=340&fit=crop" class="w-full h-full object-cover" alt="">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex gap-4 relative">
+                            <div class="w-6 h-6 rounded-full bg-emerald-500 text-white text-[11px] font-black flex items-center justify-center shrink-0 z-10 ring-4 ring-[#fdfdfe]">
+                                <i class="fa-solid fa-check text-[10px]"></i>
+                            </div>
+                            <div class="flex-1 -mt-0.5">
+                                <h4 class="text-sm font-black text-slate-800 mb-1.5">完成设置</h4>
+                                <p class="text-xs text-slate-500 leading-relaxed">关闭「运行前询问」，点击完成。现在你的壁纸就会自动更新啦！</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Android 教程 -->
+                <div class="px-6 pb-10 hidden" id="tut-android">
+                    <div class="space-y-10 pt-2">
+                        <div class="flex gap-4 relative">
+                            <div class="step-line"></div>
+                            <div class="w-6 h-6 rounded-full bg-slate-900 text-white text-[11px] font-black flex items-center justify-center shrink-0 z-10 ring-4 ring-[#fdfdfe]">1</div>
+                            <div class="flex-1 -mt-0.5">
+                                <h4 class="text-sm font-black text-slate-800 mb-1.5">开启服务</h4>
+                                <p class="text-xs text-slate-500 leading-relaxed mb-3">点击下方按钮，跳转至系统动态壁纸设置页。</p>
+                                <button class="px-5 py-2.5 bg-[#3DDC84] text-slate-900 text-xs font-black rounded-xl active:scale-95 transition-transform">去开启服务</button>
+                            </div>
+                        </div>
+                        <div class="flex gap-4 relative">
+                            <div class="step-line"></div>
+                            <div class="w-6 h-6 rounded-full bg-slate-900 text-white text-[11px] font-black flex items-center justify-center shrink-0 z-10 ring-4 ring-[#fdfdfe]">2</div>
+                            <div class="flex-1 -mt-0.5">
+                                <h4 class="text-sm font-black text-slate-800 mb-1.5">选择好看云壁纸</h4>
+                                <p class="text-xs text-slate-500 leading-relaxed mb-3">在动态壁纸列表中找到并选择「好看云壁纸」。</p>
+                                <div class="rounded-2xl overflow-hidden border border-slate-200 aspect-[16/9]">
+                                    <img src="https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=600&h=340&fit=crop" class="w-full h-full object-cover" alt="">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex gap-4 relative">
+                            <div class="w-6 h-6 rounded-full bg-emerald-500 text-white text-[11px] font-black flex items-center justify-center shrink-0 z-10 ring-4 ring-[#fdfdfe]">
+                                <i class="fa-solid fa-check text-[10px]"></i>
+                            </div>
+                            <div class="flex-1 -mt-0.5">
+                                <h4 class="text-sm font-black text-slate-800 mb-1.5">应用壁纸</h4>
+                                <p class="text-xs text-slate-500 leading-relaxed">点击「应用」或「设为壁纸」，选择「主屏幕和锁屏」。大功告成！</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="height:60px;"></div>
+            </div>
+        </div>
+
+        <!-- 相册权限弹窗（iOS / Android 系统样式，复刻原生便于落地到 App） -->
+        <div id="photo-permission-modal">
+            <div class="perm-backdrop" onclick="hidePhotoPermissionModal()"></div>
+            <div class="perm-content">
+                <!-- iOS 样式：底部 Action Sheet -->
+                <div class="photo-permission-ios" id="photo-permission-ios">
+                    <div class="perm-ios-header">
+                        <div class="perm-ios-icon"><i class="fa-solid fa-image"></i></div>
+                        <div class="perm-ios-title">「好看云壁纸」想要访问你的照片</div>
+                        <div class="perm-ios-desc">用于选择要设为锁屏轮播的照片</div>
+                    </div>
+                    <div class="perm-ios-actions">
+                        <button type="button" class="perm-ios-btn perm-ios-btn-full" onclick="onPhotoPermissionAllow()">允许访问所有照片</button>
+                        <button type="button" class="perm-ios-btn perm-ios-btn-limited" onclick="onPhotoPermissionLimited()">选择照片…</button>
+                        <button type="button" class="perm-ios-btn perm-ios-btn-deny" onclick="onPhotoPermissionDeny()">不允许</button>
+                    </div>
+                </div>
+                <!-- Android 样式：居中 Material 对话框 -->
+                <div class="photo-permission-android" id="photo-permission-android">
+                    <div class="perm-android-icon"><i class="fa-solid fa-image"></i></div>
+                    <div class="perm-android-title">允许「好看云壁纸」访问设备上的照片吗？</div>
+                    <div class="perm-android-desc">用于选择要设为锁屏轮播的照片</div>
+                    <div class="perm-android-actions">
+                        <button type="button" class="perm-android-btn perm-android-btn-full" onclick="onPhotoPermissionAllow()">允许完全访问</button>
+                        <button type="button" class="perm-android-btn perm-android-btn-limited" onclick="onPhotoPermissionLimited()">限制访问</button>
+                        <button type="button" class="perm-android-btn perm-android-btn-deny" onclick="onPhotoPermissionDeny()">不允许</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 相册选择器弹窗 -->
+        <div id="photo-picker-modal">
+            <div class="modal-drag-bar" style="margin-top:12px;"></div>
+            <div class="photo-picker-header">
+                <h2 id="photo-picker-title">选择照片</h2>
+                <div class="flex items-center gap-3">
+                    <span id="photo-picker-count" class="text-xs font-bold text-slate-500">已选 0 张</span>
+                    <button type="button" onclick="closePhotoPicker()" class="text-sm font-bold text-slate-500 active:opacity-70">取消</button>
+                </div>
+            </div>
+            <div class="photo-picker-body scrollbar-hide">
+                <div class="photo-picker-grid" id="photoPickerGrid"></div>
+            </div>
+            <div class="photo-picker-footer">
+                <button type="button" id="photo-picker-done-btn" onclick="confirmPhotoPicker()" disabled>完成选择</button>
+            </div>
+        </div>
+
+        <!-- 评价弹窗 -->
+        <div id="review-modal" class="modal-overlay">
+            <div class="modal-backdrop" onclick="closeReviewModal()"></div>
+            <div class="modal-sheet review-sheet">
+                <div class="modal-drag-bar"></div>
+                <h3 class="modal-title mb-4">评价该壁纸</h3>
+                <div class="flex gap-1 mb-4" id="reviewStars">
+                    <button type="button" class="review-star w-10 h-10 rounded-xl border-2 border-slate-200 flex items-center justify-center text-amber-500 hover:border-amber-500 transition-colors" data-r="1" style="-webkit-tap-highlight-color: transparent;"><i class="fa-regular fa-star"></i></button>
+                    <button type="button" class="review-star w-10 h-10 rounded-xl border-2 border-slate-200 flex items-center justify-center text-amber-500 hover:border-amber-500 transition-colors" data-r="2" style="-webkit-tap-highlight-color: transparent;"><i class="fa-regular fa-star"></i></button>
+                    <button type="button" class="review-star w-10 h-10 rounded-xl border-2 border-slate-200 flex items-center justify-center text-amber-500 hover:border-amber-500 transition-colors" data-r="3" style="-webkit-tap-highlight-color: transparent;"><i class="fa-regular fa-star"></i></button>
+                    <button type="button" class="review-star w-10 h-10 rounded-xl border-2 border-slate-200 flex items-center justify-center text-amber-500 hover:border-amber-500 transition-colors" data-r="4" style="-webkit-tap-highlight-color: transparent;"><i class="fa-regular fa-star"></i></button>
+                    <button type="button" class="review-star w-10 h-10 rounded-xl border-2 border-slate-200 flex items-center justify-center text-amber-500 hover:border-amber-500 transition-colors" data-r="5" style="-webkit-tap-highlight-color: transparent;"><i class="fa-regular fa-star"></i></button>
+                </div>
+                <div class="relative">
+                    <textarea id="reviewContent" maxlength="200" placeholder="分享你的使用体验…（最多200字）" class="w-full h-24 px-4 py-3 rounded-2xl border border-slate-200 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent placeholder:text-slate-400" oninput="updateReviewCount()" style="font-size: 16px;"></textarea>
+                    <span id="reviewCount" class="absolute bottom-2 right-3 text-[10px] text-slate-400 pointer-events-none">0/200</span>
+                </div>
+                <div class="modal-actions mt-4">
+                    <button type="button" onclick="submitReview()" class="modal-btn-primary">提交评价</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 个人页：切换间隔（每次亮屏 / 按时间维度自动更换锁屏壁纸） -->
+        <div id="profile-interval-modal" class="modal-overlay">
+            <div class="modal-backdrop" onclick="closeProfileIntervalModal()"></div>
+            <div class="modal-sheet">
+                <div class="modal-drag-bar"></div>
+                <h3 class="modal-title mb-2">切换间隔</h3>
+                <p class="modal-desc">选择锁屏壁纸自动更换的时机：按每次亮屏或按时间间隔。</p>
+                <div class="mb-4">
+                    <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 px-1">按亮屏</p>
+                    <button type="button" class="profile-interval-opt w-full flex items-center justify-between p-4 rounded-2xl border-2 border-slate-200 text-left text-sm font-bold text-slate-700 hover:bg-slate-50 active:scale-[0.99] transition-all mb-1" data-value="screen">
+                        <span>每次亮屏</span>
+                        <span class="text-[10px] text-slate-400 font-normal">亮屏时自动换一张</span>
+                    </button>
+                </div>
+                <div>
+                    <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 px-1">按时间间隔</p>
+                    <div class="space-y-1">
+                        <button type="button" class="profile-interval-opt w-full flex items-center justify-between p-4 rounded-2xl border-2 border-slate-200 text-left text-sm font-bold text-slate-700 hover:bg-slate-50 active:scale-[0.99] transition-all" data-value="15">15 分钟</button>
+                        <button type="button" class="profile-interval-opt w-full flex items-center justify-between p-4 rounded-2xl border-2 border-slate-200 text-left text-sm font-bold text-slate-700 hover:bg-slate-50 active:scale-[0.99] transition-all" data-value="30">30 分钟</button>
+                        <button type="button" class="profile-interval-opt w-full flex items-center justify-between p-4 rounded-2xl border-2 border-slate-200 text-left text-sm font-bold text-slate-700 hover:bg-slate-50 active:scale-[0.99] transition-all" data-value="60">1 小时</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 我的订阅列表（与首页订阅 item 样式一致） -->
+        <div id="my-subscriptions-modal" class="modal-overlay">
+            <div class="modal-backdrop" onclick="closeMySubscriptionsModal()"></div>
+            <div class="modal-sheet" style="max-height: 85vh; display: flex; flex-direction: column;">
+                <div class="modal-drag-bar"></div>
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="modal-title mb-0">我的订阅</h3>
+                    <button type="button" onclick="closeMySubscriptionsModal()" class="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500 active:scale-95"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <div id="mySubscriptionsGrid" class="flex-1 overflow-y-auto space-y-6 pb-4 scrollbar-hide px-1"></div>
+            </div>
+        </div>
+
+        <!-- 个人中心：修改昵称弹窗（点击个人中心昵称打开） -->
+        <div id="profile-nickname-modal" class="modal-overlay">
+            <div class="modal-backdrop" onclick="closeProfileNicknameModal()"></div>
+            <div class="modal-sheet">
+                <div class="modal-drag-bar"></div>
+                <h3 class="modal-title mb-2">修改昵称</h3>
+                <div id="profile-nickname-modal-body" class="mb-4"></div>
+            </div>
+        </div>
+
+        <!-- 个人中心：修改头像弹窗（点击个人中心头像打开） -->
+        <div id="profile-avatar-modal" class="modal-overlay">
+            <div class="modal-backdrop" onclick="closeProfileAvatarModal()"></div>
+            <div class="modal-sheet">
+                <div class="modal-drag-bar"></div>
+                <h3 class="modal-title mb-2">修改头像</h3>
+                <div id="profile-avatar-modal-body" class="mb-4"></div>
+            </div>
+        </div>
+
+        <!-- 个人中心：手机号登录（模拟：验证码 / 密码两种方式） -->
+        <div id="profile-login-modal" class="modal-overlay">
+            <div class="modal-backdrop" onclick="closeProfileLoginModal()"></div>
+            <div class="modal-sheet">
+                <div class="modal-drag-bar"></div>
+                <h3 class="modal-title mb-2">手机号登录</h3>
+                <p class="modal-desc mb-4">支持验证码登录或密码登录</p>
+                <input type="tel" id="profile-login-phone" placeholder="请输入手机号" maxlength="11" class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent mb-3" style="font-size: 16px;">
+                <!-- 验证码登录 -->
+                <div id="profile-login-code-wrap" class="flex gap-2 mb-3">
+                    <input type="text" id="profile-login-code" placeholder="请输入验证码" maxlength="6" class="flex-1 px-4 py-3 rounded-2xl border border-slate-200 text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500" style="font-size: 16px;">
+                    <button type="button" id="profile-login-code-btn" onclick="sendLoginCode()" class="px-4 py-3 rounded-2xl bg-slate-100 text-slate-700 text-sm font-bold whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed">获取验证码</button>
+                </div>
+                <!-- 密码登录 -->
+                <div id="profile-login-pwd-wrap" class="hidden mb-3">
+                    <input type="password" id="profile-login-pwd" placeholder="请输入密码" maxlength="20" class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500" style="font-size: 16px;">
+                </div>
+                <p class="text-xs text-slate-500 mb-4">
+                    <button type="button" id="profile-login-switch-btn" onclick="switchLoginMode()" class="text-indigo-600 font-bold">切换为密码登录</button>
+                </p>
+                <div class="modal-actions">
+                    <button type="button" onclick="submitProfileLogin()" class="modal-btn-primary">登录</button>
+                    <button type="button" onclick="closeProfileLoginModal()" class="modal-btn-secondary">取消</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 个人中心：账号管理 -->
+        <div id="profile-account-modal" class="modal-overlay modal-center">
+            <div class="modal-backdrop" onclick="closeProfileAccountModal()"></div>
+            <div class="modal-sheet">
+                <div class="modal-drag-bar"></div>
+                <h3 class="modal-title mb-4">账号管理</h3>
+                <div class="space-y-1">
+                    <button type="button" onclick="closeProfileAccountModal();showToast('请前往 App 内修改')" class="w-full flex items-center justify-between p-4 rounded-2xl border border-slate-200 text-sm font-bold text-slate-700 hover:bg-slate-50 transition-all"><span>修改昵称</span><i class="fa-solid fa-chevron-right text-slate-400 text-xs"></i></button>
+                    <button type="button" onclick="closeProfileAccountModal();showToast('请前往 App 内修改')" class="w-full flex items-center justify-between p-4 rounded-2xl border border-slate-200 text-sm font-bold text-slate-700 hover:bg-slate-50 transition-all"><span>修改头像</span><i class="fa-solid fa-chevron-right text-slate-400 text-xs"></i></button>
+                    <button type="button" onclick="closeProfileAccountModal();showToast('请前往 App 内绑定')" class="w-full flex items-center justify-between p-4 rounded-2xl border border-slate-200 text-sm font-bold text-slate-700 hover:bg-slate-50 transition-all"><span>绑定手机</span><i class="fa-solid fa-chevron-right text-slate-400 text-xs"></i></button>
+                    <button type="button" onclick="closeProfileAccountModal();showToast('请前往 App 内修改')" class="w-full flex items-center justify-between p-4 rounded-2xl border border-slate-200 text-sm font-bold text-slate-700 hover:bg-slate-50 transition-all"><span>修改密码</span><i class="fa-solid fa-chevron-right text-slate-400 text-xs"></i></button>
+                    <button type="button" onclick="closeProfileAccountModal();openProfileCancelAccountModal()" class="w-full flex items-center justify-between p-4 rounded-2xl border border-slate-200 text-sm font-bold text-rose-600 hover:bg-rose-50 transition-all"><span>账号注销</span><i class="fa-solid fa-chevron-right text-slate-400 text-xs"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 个人中心：账号注销确认 -->
+        <div id="profile-cancel-account-modal" class="modal-overlay">
+            <div class="modal-backdrop" onclick="closeProfileCancelAccountModal()"></div>
+            <div class="modal-sheet">
+                <div class="modal-drag-bar"></div>
+                <h3 class="modal-title mb-2">账号注销</h3>
+                <p class="modal-desc">注销后，账号及相关数据将被清空且无法恢复。确定要注销账号吗？</p>
+                <div class="modal-actions">
+                    <button type="button" onclick="doProfileCancelAccount()" class="modal-btn-primary bg-rose-600 hover:bg-rose-700">确定注销</button>
+                    <button type="button" onclick="closeProfileCancelAccountModal()" class="modal-btn-secondary">再想想</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 锁屏壁纸引导弹窗（订阅/添加照片成功后弹出，按平台直接展示对应引导，单层） -->
+        <div id="lock-screen-guide-modal">
+            <div class="guide-backdrop" onclick="closeLockScreenGuideModal()"></div>
+            <div class="guide-card">
+                <div class="guide-drag-bar"></div>
+
+                <!-- iOS：添加快捷指令引导 -->
+                <div id="lockScreenGuideIosInstall" class="hidden">
+                    <h3 class="guide-title">更换锁屏壁纸：请先添加「快捷指令」</h3>
+                    <p class="guide-desc" id="lockScreenGuideIosDesc">完成下方一步，锁屏就能自动换上壁纸。添加完成后返回本页，点击下方按钮继续。</p>
+                    <div class="guide-btns">
+                        <button type="button" class="guide-btn-primary w-full" onclick="window.open('https://www.icloud.com/shortcuts/86bd7a623e0e42ff80ef7121acdea0e9', '_blank')">
+                            <i class="fa-solid fa-plus mr-2"></i>去添加快捷指令
+                        </button>
+                        <button type="button" class="guide-btn-secondary" onclick="onIosShortcutsInstalled()">模拟添加成功</button>
+                        <button type="button" class="block w-full py-3 text-slate-500 text-sm font-medium" onclick="closeLockScreenGuideModal()">稍后再说</button>
+                    </div>
+                </div>
+
+                <!-- iOS：正在设置壁纸... -->
+                <div id="lockScreenGuideIosSetting" class="hidden">
+                    <h3 class="guide-title">更换锁屏壁纸：正在设置…</h3>
+                    <p class="guide-desc">正在设置壁纸，请稍后。</p>
+                    <div class="py-4 flex justify-center">
+                        <div class="w-10 h-10 rounded-full border-2 border-indigo-500 border-t-transparent animate-spin"></div>
+                    </div>
+                </div>
+
+                <!-- Android：开启动态壁纸服务引导 -->
+                <div id="lockScreenGuideAndroidEnable" class="hidden">
+                    <h3 class="guide-title">更换锁屏壁纸：开启动态壁纸服务</h3>
+                    <p class="guide-desc" id="lockScreenGuideAndroidDesc">开启服务后即可自动更换壁纸。请点击「去设置」按提示操作。</p>
+                    <div class="guide-btns">
+                        <button type="button" class="guide-btn-primary" onclick="openAndroidWallpaperSettings()">
+                            <i class="fa-solid fa-external-link mr-2"></i>去设置
+                        </button>
+                        <button type="button" class="block w-full py-3 text-slate-500 text-sm font-medium" onclick="closeLockScreenGuideModal()">稍后再说</button>
+                    </div>
+                </div>
+
+                <!-- Android：正在设置壁纸...（模拟从系统设置返回后的流程） -->
+                <div id="lockScreenGuideAndroidSetting" class="hidden">
+                    <h3 class="guide-title">更换锁屏壁纸：正在设置…</h3>
+                    <p class="guide-desc">正在设置壁纸，请稍后。</p>
+                    <div class="py-4 flex justify-center">
+                        <div class="w-10 h-10 rounded-full border-2 border-indigo-500 border-t-transparent animate-spin"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 底部导航栏 -->
+        <div class="fixed bottom-0 left-0 right-0 z-50 px-8 pb-10 pointer-events-none">
+            <nav class="nav-blur h-20 max-w-sm mx-auto rounded-[2.5rem] flex items-center justify-between px-3 shadow-[0_20px_50px_rgba(0,0,0,0.15)] pointer-events-auto">
+                <button onclick="switchTab('category')" class="nav-btn flex-1 flex flex-col items-center justify-center h-full text-indigo-600" id="btn-category">
+                    <i class="fa-solid fa-compass text-xl mb-1"></i>
+                    <span class="text-[9px] font-black uppercase tracking-tighter">壁纸</span>
+                </button>
+                <button onclick="switchTab('photo')" class="nav-btn flex-1 flex flex-col items-center justify-center h-full text-slate-500" id="btn-photo">
+                    <i class="fa-solid fa-image text-xl mb-1"></i>
+                    <span class="text-[9px] font-black uppercase tracking-tighter">相册</span>
+                </button>
+                <button onclick="switchTab('profile')" class="nav-btn flex-1 flex flex-col items-center justify-center h-full text-slate-500" id="btn-profile">
+                    <i class="fa-solid fa-user-circle text-xl mb-1"></i>
+                    <span class="text-[9px] font-black uppercase tracking-tighter">我的</span>
+                </button>
+            </nav>
+        </div>
+
+    </div>
+
+    <!-- Toast -->
+    <div class="toast-b" id="toastB"></div>
+
+    <!-- 大图查看层 -->
+    <div id="image-viewer-overlay" onclick="closeImageViewer()">
+        <img id="image-viewer-img" src="" alt="" onclick="event.stopPropagation()">
+        <button type="button" class="viewer-close" onclick="closeImageViewer()" aria-label="关闭"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
+    <script>
+        // 刷新即重置：不持久化任何数据
+        try { localStorage.clear(); sessionStorage.clear(); } catch (e) {}
+
+        // ========== 产品数据 ==========
+        const CAT_PRODUCTS = [
+            { id: 401, name: '文观壁纸', artist: '文观WENGUAN', cover: 'https://92cn-image.levect.com/release/image/8280e343d1199df8b2eae257020515ba.jpg', subs: '9.8万', subtitle: '撷诗经草木，揽唐诗月色，掬宋词烟雨', desc: '撷诗经草木，揽唐诗月色，掬宋词烟雨，东方气韵，栖于方寸屏幕。以中国古典诗词为灵感，将千年诗意化为指间风景，每一张壁纸都是一首可以看见的诗。', update: '每日更新', cats: ['recommend', 'culture'], previews: ['https://92cn-image.levect.com/release/image/c695c62ee0c73d56e451167addcd60a8.jpg@!fw360.webp?k=1&p=1&eid=1', 'https://92cn-image.levect.com/release/image/daa325ac0e7ebc62d2eebf813f49949b.jpg@!fw360.webp?k=1&p=1&eid=1', 'https://92cn-image.levect.com/release/image/b5df685752ed6af077fb9c33e945b7dd.jpg@!fw360.webp?k=1&p=1&eid=1'] },
+            { id: 101, name: '千里江山图 · 新绎', artist: '墨染山河', cover: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=800', subs: '28.7万', subtitle: '传世名画与现代插画的梦幻联动', desc: '以《千里江山图》为蓝本，墨染山河工作室用全新的数字绘画手法重新诠释了这幅传世之作。每一张壁纸都是一次跨越千年的对话。', update: '每周更新', cats: ['recommend', 'culture'] },
+            { id: 102, name: '三丽鸥 · 梦幻花园', artist: '三丽鸥官方', cover: 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=800', subs: '45.3万', subtitle: 'Hello Kitty × My Melody 限定壁纸', desc: '三丽鸥官方授权，Hello Kitty、My Melody、库洛米等人气角色齐聚梦幻花园。独家设计，全网首发。', update: '每周三更新', cats: ['recommend', 'ip', 'trend'] },
+            { id: 103, name: '银河漫游指南', artist: 'Artflow', cover: 'https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=800', subs: '16.9万', subtitle: '从近地轨道到仙女座的视觉旅程', desc: '由概念艺术家Artflow倾力打造，用电影级别的画面质感呈现宇宙的壮阔。星云、黑洞、空间站......每一帧都值得凝视。', update: '每周五更新', cats: ['recommend', 'creative'] },
+            { id: 1, name: '樱花物语', artist: '猫小姐', cover: 'https://images.unsplash.com/photo-1522383225653-ed111181a951?w=800', subs: '12.6万', subtitle: '以日本樱花季为灵感的粉色梦境', desc: '以日本樱花季为灵感，每一张壁纸都是一段粉色的梦。插画师猫小姐用细腻的笔触描绘了樱花树下的故事，温暖治愈。', update: '每周三更新', cats: ['recommend', 'nature'] },
+            { id: 2, name: '赛博之城', artist: '像素光年', cover: 'https://images.unsplash.com/photo-1514565131-fce0801e5785?w=800', subs: '8.3万', subtitle: '赛博朋克风格的未来都市', desc: '赛博朋克风格的未来都市，霓虹灯闪烁的街道，飞行器穿梭的天空。每一帧都是一场视觉盛宴。', update: '每周五更新', cats: ['recommend', 'creative', 'trend'] },
+            { id: 3, name: '山水画卷', artist: '墨染山河', cover: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800', subs: '15.2万', subtitle: '传统国风水墨与现代审美的融合', desc: '传统国风水墨与现代审美的完美融合，将千里江山浓缩在方寸之间，让你的屏幕也能感受到东方美学的意境。', update: '每周一更新', cats: ['recommend', 'culture'] },
+            { id: 4, name: '深海秘境', artist: '鲸落Studio', cover: 'https://images.unsplash.com/photo-1551244072-5d12893278ab?w=800', subs: '6.8万', subtitle: '探索万米深海的奇幻世界', desc: '探索万米深海的奇幻世界，荧光水母、巨型鲸鱼、神秘海底遗迹......跟着鲸落Studio一起潜入蔚蓝深处。', update: '双周更新', cats: ['recommend', 'nature'] },
+            { id: 5, name: '萌宠日记', artist: '泡芙酱', cover: 'https://images.unsplash.com/photo-1574158622682-e40e69881006?w=800', subs: '20.1万', subtitle: '超可爱的猫猫狗狗插画', desc: '超可爱的猫猫狗狗插画，每一张都能治愈你疲惫的心。泡芙酱的作品风格温暖柔和，是最受欢迎的萌宠壁纸合辑。', update: '每日更新', cats: ['recommend', 'pet'] },
+            { id: 6, name: '星际迷航', artist: 'Artflow', cover: 'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?w=800', subs: '9.4万', subtitle: '浩瀚星河与未知星球', desc: '浩瀚星河、未知星球、星际战舰......Artflow工作室用概念设计级别的画面，带你领略宇宙的壮阔与神秘。', update: '每周二更新', cats: ['recommend', 'creative'] },
+            { id: 201, name: '东京散步', artist: 'CityWalker', cover: 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=800', subs: '3.2万', subtitle: '穿梭在涩谷的十字路口与街头', desc: '穿梭在涩谷的十字路口，漫步在下北泽的街头。记录东京街头的日与夜，感受城市脉搏的跳动。', update: '每周更新', cats: ['travel'] },
+            { id: 202, name: '北欧秘境', artist: '极地摄影', cover: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=800', subs: '4.5万', subtitle: '冰岛黑沙滩与挪威峡湾', desc: '冰岛的黑沙滩，挪威的峡湾。带你领略世界尽头的冷酷仙境，感受极地的纯净与壮美。', update: '双周更新', cats: ['travel', 'nature'] },
+            { id: 203, name: '地中海假日', artist: 'Sunny', cover: 'https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?w=800', subs: '2.8万', subtitle: '圣托里尼的蓝白建筑与落日', desc: '圣托里尼的蓝白建筑，西西里岛的落日。把地中海的阳光装进手机，随时感受度假般的惬意。', update: '月更', cats: ['travel'] },
+            { id: 204, name: '公路电影', artist: 'OnTheRoad', cover: 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=800', subs: '1.9万', subtitle: '66号公路的自由与加州黄昏', desc: '66号公路的自由，加州旅馆的黄昏。像电影一样的胶片质感壁纸，每张都是一段公路上的故事。', update: '不定期', cats: ['travel'] },
+            { id: 205, name: '纯白空间', artist: 'Minimalist', cover: 'https://images.unsplash.com/photo-1494438639946-1ebd1d20bf85?w=800', subs: '6.7万', subtitle: '用光影和线条构建纯净空间', desc: '少即是多。用光影和线条构建的纯净空间，给你的眼睛放个假。极简主义美学的最佳诠释。', update: '每日更新', cats: ['minimal'] },
+            { id: 206, name: '莫兰迪色系', artist: 'Colorist', cover: 'https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?w=800', subs: '5.4万', subtitle: '低饱和度的灰色调，温柔高级', desc: '低饱和度的灰色调，温柔而高级。最适合作为手机背景的色系，让你的屏幕质感瞬间提升。', update: '每周更新', cats: ['minimal', 'creative'] },
+            { id: 207, name: '国家地理', artist: 'NatGeo', cover: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=800', subs: '15.6万', subtitle: '精选全球最震撼的自然景观', desc: '精选全球最震撼的自然景观，探索地球的每一个角落。每一张照片都是摄影师追逐光影的结晶。', update: '每日更新', cats: ['nature'] },
+            { id: 208, name: '超现实梦境', artist: 'Dreamer', cover: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?w=800', subs: '3.9万', subtitle: '打破物理规则的不可能空间', desc: '打破物理规则，构建不可能的空间。充满想象力的3D数字艺术，让你的锁屏成为通往梦境的入口。', update: '每周更新', cats: ['creative'] },
+            { id: 209, name: '星瞳 · 虚拟偶像', artist: '腾讯互娱', cover: 'https://images.unsplash.com/photo-1633356122102-3fe601e05bd2?w=800', subs: '28.5万', subtitle: '来自未来的虚拟偶像世界', desc: '来自未来的虚拟偶像，带你探索数字世界的无限可能。每一张壁纸都是一次与未来的对话。', update: '每周五更新', cats: ['trend', 'ip'] },
+            { id: 210, name: 'VOGUE · 时尚封面', artist: 'VOGUE', cover: 'https://images.unsplash.com/photo-1558171813-4c088753af8f?w=800', subs: '45.2万', subtitle: '全球顶尖时尚杂志封面', desc: '全球顶尖时尚杂志封面，每日一张，提升你的审美格调。时尚不止于穿搭，更在于生活的每个细节。', update: '每日更新', cats: ['trend'] },
+            { id: 211, name: 'NASA · 每日一天文图', artist: 'NASA', cover: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800', subs: '62.1万', subtitle: '探索宇宙的奥秘', desc: '来自NASA的每日一天文图，探索宇宙的奥秘。从星云到黑洞，从近地轨道到银河深处，宇宙从不缺少奇迹。', update: '每日更新', cats: ['trend', 'nature'] },
+            { id: 8, name: '猫咪咖啡馆', artist: '泡芙酱', cover: 'https://images.unsplash.com/photo-1526336024174-e58f5cdd8e13?w=800', subs: '3.5万', subtitle: '温暖午后的慵懒喵星人', desc: '一家有猫的咖啡馆，温暖的午后阳光、香浓的拿铁、慵懒的喵星人......每一张都让人心生向往。', update: '每周六更新', cats: ['pet'] },
+            { id: 10, name: '古风人物志', artist: '墨染山河', cover: 'https://images.unsplash.com/photo-1528164344705-47542687000d?w=800', subs: '4.2万', subtitle: '穿越千年的古风人物系列', desc: '穿越千年的古风人物系列，汉服之美、盛唐风华、宋韵雅致......每个朝代都有独特的故事。', update: '双周更新', cats: ['culture'] },
+            { id: 301, name: '历史上的今天', artist: '时光记录者', cover: 'https://images.unsplash.com/photo-1461360370896-922624d12aa1?w=800', subs: '8.9万', subtitle: '时光刻痕 · 每日一段历史', desc: '让每一次解锁都成为一次跨越时空的旅行，回顾那些改变人类进程的辉煌瞬间。每天一张壁纸，讲述一个历史故事。', update: '每日 07:00', cats: ['recommend', 'culture'] },
+            { id: 302, name: '城市流光', artist: '像素光年', cover: 'https://images.unsplash.com/photo-1514565131-fce0801e5785?w=800', subs: '5.2万', subtitle: '赛博朋克 · 霓虹都市', desc: '捕捉深夜都市中闪烁的霓虹与极速掠过的光影，感受现代工业与未来美学的交织。每一帧都是一场视觉盛宴。', update: '每周一更新', cats: ['recommend', 'creative', 'trend'] },
+            { id: 303, name: '繁花', artist: '植物美学社', cover: 'https://images.unsplash.com/photo-1490750967868-88aa4f44baee?w=800', subs: '18.6万', subtitle: '四季花事 · 以花为媒', desc: '从春天的樱花、夏日的荷花、秋天的桂花到冬日的梅花，精选全球各地最美的花卉摄影。每一张壁纸都是一首写给自然的情诗，让芬芳与色彩治愈每一次亮屏时刻。', update: '每周三更新', cats: ['recommend', 'nature'] },
+            { id: 304, name: '国色', artist: '东方色彩研究所', cover: 'https://images.unsplash.com/photo-1547981609-4b6bfe67ca0b?w=800', subs: '12.3万', subtitle: '中国传统色 · 千年美学', desc: '取自《天工开物》《本草纲目》等古典文献中的东方色谱——黛青、月白、胭脂、缃叶、竹青、藕荷……每种颜色背后都是一段跨越千年的文化记忆。用中国传统色装点你的屏幕，感受东方美学的含蓄与隽永。', update: '每周一更新', cats: ['recommend', 'culture'] },
+        ];
+
+        // ========== 用户照片数据（模拟相册选中的初始数据，授权流程会覆盖） ==========
+        const USER_PHOTOS_B = [
+            { src: 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=300&h=300&fit=crop', on: true },
+            { src: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=300&h=300&fit=crop', on: true },
+            { src: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=300&h=300&fit=crop', on: true },
+            { src: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=300&h=300&fit=crop', on: true },
+            { src: 'https://images.unsplash.com/photo-1477346611705-65d1883cee1e?w=300&h=300&fit=crop', on: false },
+            { src: 'https://images.unsplash.com/photo-1557682250-33bd709cbe85?w=300&h=300&fit=crop', on: true },
+        ];
+
+        // ========== 照片模块状态（授权 → 选择 → 展示） ==========
+        let photoModuleState = {
+            auth: 'none',   // 'none' | 'limited' | 'granted' | 'denied'
+            photos: []      // [{ src, on }]
+        };
+        const ALBUM_PICKER_PHOTOS = [
+            'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=300&h=300&fit=crop',
+            'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=300&h=300&fit=crop',
+            'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=300&h=300&fit=crop',
+            'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=300&h=300&fit=crop',
+            'https://images.unsplash.com/photo-1477346611705-65d1883cee1e?w=300&h=300&fit=crop',
+            'https://images.unsplash.com/photo-1557682250-33bd709cbe85?w=300&h=300&fit=crop',
+            'https://images.unsplash.com/photo-1507400492013-162706c8c05e?w=300&h=300&fit=crop',
+            'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=300&h=300&fit=crop',
+            'https://images.unsplash.com/photo-1490750967868-88aa4f44baee?w=300&h=300&fit=crop',
+            'https://images.unsplash.com/photo-1522383225653-ed111181a951?w=300&h=300&fit=crop',
+            'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=300&h=300&fit=crop',
+            'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=300&h=300&fit=crop',
+        ];
+        // 照片管理多选状态
+        let photoManageMode = false;
+        const photoSelectedIndices = new Set();
+
+        // ========== 订阅/评价状态（仅订阅与取消订阅，订阅成功后可写评价） ==========
+        const subscribedProductIds = new Set();
+        const userReviewsByProduct = {};
+        let detailProductId = null;
+
+        // ========== 个人中心：游客 / 已登录（默认游客，与正式用户功能无区别） ==========
+        let profileUser = null;   // null = 游客；{ nickname, id, avatar } = 已登录
+
+        // 切换间隔：localStorage key，可选值 screen | 15 | 30 | 60（每次亮屏 | 15/30/60 分钟）
+        const PROFILE_INTERVAL_KEY = 'profile_interval';
+        const PROFILE_INTERVAL_LABELS = { screen: '每次亮屏', '15': '15 分钟', '30': '30 分钟', '60': '1 小时' };
+        function getProfileInterval() { return localStorage.getItem(PROFILE_INTERVAL_KEY) || 'screen'; }
+        function setProfileInterval(value) { localStorage.setItem(PROFILE_INTERVAL_KEY, value || 'screen'); }
+
+        const PROFILE_LOCK_AUTO_KEY = 'profile_lock_auto';
+        function getProfileLockAuto() { return localStorage.getItem(PROFILE_LOCK_AUTO_KEY) !== '0'; }
+        function setProfileLockAuto(on) { localStorage.setItem(PROFILE_LOCK_AUTO_KEY, on ? '1' : '0'); }
+        function updateProfileIntervalRowEnabled() {
+            const intervalRow = document.getElementById('profile-interval-row');
+            if (!intervalRow) return;
+            if (getProfileLockAuto()) intervalRow.classList.remove('profile-interval-row-disabled');
+            else intervalRow.classList.add('profile-interval-row-disabled');
+        }
+
+        // ========== 锁屏轮播图片 ==========
+        const LS_IMAGES = [
+            'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=320&h=692&fit=crop',
+            'https://images.unsplash.com/photo-1507400492013-162706c8c05e?w=320&h=692&fit=crop',
+            'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=320&h=692&fit=crop',
+            'https://images.unsplash.com/photo-1475924156734-496dfbfc7564?w=320&h=692&fit=crop',
+        ];
+
+        // ========== 页面初始化 ==========
+        const PRIVACY_CONSENT_KEY = 'privacy_consent';
+        window.addEventListener('DOMContentLoaded', () => {
+            const splash = document.getElementById('splash-screen');
+            const privacy = document.getElementById('privacy-consent');
+            const app = document.getElementById('app');
+
+            function enterApp() {
+                if (app) app.style.visibility = 'visible';
+                if (splash) { splash.classList.add('hide'); splash.style.display = 'none'; }
+                if (privacy) { privacy.classList.remove('show'); privacy.style.display = 'none'; }
+            }
+
+            if (!splash || !app) {
+                if (app) app.style.visibility = 'visible';
+            } else {
+                app.style.visibility = 'hidden';
+                const hasConsent = localStorage.getItem(PRIVACY_CONSENT_KEY) === '1';
+                if (privacy) {
+                    const acceptBtn = document.getElementById('privacy-btn-accept');
+                    const rejectBtn = document.getElementById('privacy-btn-reject');
+                    if (acceptBtn) acceptBtn.onclick = function() {
+                        localStorage.setItem(PRIVACY_CONSENT_KEY, '1');
+                        enterApp();
+                    };
+                    if (rejectBtn) rejectBtn.onclick = function() { enterApp(); };
+                }
+                setTimeout(function() {
+                    if (hasConsent) {
+                        splash.classList.add('hide');
+                        setTimeout(function() {
+                            splash.style.display = 'none';
+                            enterApp();
+                        }, 400);
+                    } else if (privacy) {
+                        privacy.classList.add('show');
+                    } else {
+                        enterApp();
+                    }
+                }, 1500);
+                setTimeout(function() {
+                    if (app && app.style.visibility === 'hidden') enterApp();
+                }, 8000);
+            }
+
+            updateDateLabel();
+            renderCatProducts('recommend');
+            updatePhotoView();
+        });
+
+        function updateDateLabel() {
+            const now = new Date();
+            const days = ['SUNDAY','MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY'];
+            const months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+            document.getElementById('date-label').textContent = `${days[now.getDay()]}, ${months[now.getMonth()]} ${now.getDate()}`;
+        }
+
+        // ========== Unsplash 预览图池 ==========
+        const PREVIEW_POOL_B = [
+            'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=200&h=360&fit=crop',
+            'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=200&h=360&fit=crop',
+            'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=200&h=360&fit=crop',
+            'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=200&h=360&fit=crop',
+            'https://images.unsplash.com/photo-1507400492013-162706c8c05e?w=200&h=360&fit=crop',
+            'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=200&h=360&fit=crop',
+            'https://images.unsplash.com/photo-1475924156734-496dfbfc7564?w=200&h=360&fit=crop',
+            'https://images.unsplash.com/photo-1490750967868-88aa4f44baee?w=200&h=360&fit=crop',
+            'https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=200&h=360&fit=crop',
+            'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=200&h=360&fit=crop',
+            'https://images.unsplash.com/photo-1483347756197-71ef80e95f73?w=200&h=360&fit=crop',
+            'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?w=200&h=360&fit=crop',
+            'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=200&h=360&fit=crop',
+            'https://images.unsplash.com/photo-1533105079780-92b9be482077?w=200&h=360&fit=crop',
+            'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=200&h=360&fit=crop',
+            'https://images.unsplash.com/photo-1557682250-33bd709cbe85?w=200&h=360&fit=crop',
+            'https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=200&h=360&fit=crop',
+            'https://images.unsplash.com/photo-1513002749550-c59d786b8e6c?w=200&h=360&fit=crop',
+            'https://images.unsplash.com/photo-1551244072-5d12893278ab?w=200&h=360&fit=crop',
+            'https://images.unsplash.com/photo-1515705576963-95cad62945b6?w=200&h=360&fit=crop',
+            'https://images.unsplash.com/photo-1522383225653-ed111181a951?w=200&h=360&fit=crop',
+            'https://images.unsplash.com/photo-1528360983277-13d401cdc186?w=200&h=360&fit=crop',
+            'https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=200&h=360&fit=crop',
+            'https://images.unsplash.com/photo-1495360010541-f48722b34f7d?w=200&h=360&fit=crop',
+        ];
+
+        // ========== 产品卡片渲染 ==========
+        function renderCatCard(p) {
+            const idx = (p.id * 3) % PREVIEW_POOL_B.length;
+            const img1 = p.previews ? p.previews[0] : PREVIEW_POOL_B[idx];
+            const img2 = p.previews ? p.previews[1] : PREVIEW_POOL_B[(idx + 1) % PREVIEW_POOL_B.length];
+            const img3 = p.previews ? p.previews[2] : PREVIEW_POOL_B[(idx + 2) % PREVIEW_POOL_B.length];
+            const subscribed = subscribedProductIds.has(p.id);
+            const btnText = subscribed ? '已订阅' : '订阅';
+            const btnOnClick = subscribed ? 'event.stopPropagation()' : `event.stopPropagation();toggleSubB(this, ${p.id})`;
+
+            return `
+                <div class="product-card-b" onclick="openDetail(${p.id})">
+                    <img class="card-bg" src="${p.cover}" alt="" loading="lazy">
+                    <div class="card-gradient"></div>
+                    <div class="card-inner">
+                        <div>
+                            <div class="flex items-center gap-2 mb-3">
+                                <span class="text-[10px] font-bold px-2.5 py-1 rounded-md bg-white/20 text-white border border-white/20 backdrop-blur-sm">${p.update}</span>
+                                <span class="text-[11px] text-white/80 font-medium">${p.subs}订阅</span>
+                            </div>
+                            <div class="mini-preview">
+                                <div class="mini-preview-img"><img src="${img1}" loading="lazy"></div>
+                                <div class="mini-preview-img"><img src="${img2}" loading="lazy"></div>
+                                <div class="mini-preview-img"><img src="${img3}" loading="lazy"></div>
+                            </div>
+                            <div class="flex items-end justify-between">
+                                <div class="flex-1 min-w-0 mr-4">
+                                    <h3 class="text-xl font-black text-white tracking-tight">${p.name}</h3>
+                                    <p class="text-xs text-white/70 mt-1 truncate">${p.subtitle}</p>
+                                </div>
+                                <button class="shrink-0 ${subscribed ? 'bg-white/20 text-white/90' : 'bg-white text-slate-900'} px-5 py-2.5 rounded-2xl text-xs font-black shadow-lg active:scale-95 transition-transform" onclick="${btnOnClick}">${btnText}</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderCatProducts(cat) {
+            const container = document.getElementById('catProductGrid');
+            const filtered = CAT_PRODUCTS.filter(p => p.cats.includes(cat));
+            container.innerHTML = filtered.length
+                ? filtered.map(renderCatCard).join('')
+                : '<div class="text-center py-20 text-slate-500 text-sm font-bold">暂无内容</div>';
+        }
+
+        // 分类标签点击
+        document.getElementById('catTabsB').addEventListener('click', e => {
+            const tab = e.target.closest('.cat-tab-b');
+            if (!tab) return;
+            document.querySelectorAll('.cat-tab-b').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            renderCatProducts(tab.dataset.cat);
+            showToast(`切换到「${tab.textContent}」`);
+        });
+
+        // ========== 照片模块：仅点击「添加照片/加号」时弹出权限；iOS/Android 系统样式 ==========
+        function getPhotoPermissionPlatform() {
+            const q = new URLSearchParams(location.search);
+            if (q.get('platform') === 'android') return 'android';
+            if (q.get('platform') === 'ios') return 'ios';
+            return /android/i.test(navigator.userAgent) ? 'android' : 'ios';
+        }
+
+        function updatePhotoView() {
+            const auth = photoModuleState.auth;
+            const photos = photoModuleState.photos;
+            const loadingBlock = document.getElementById('photo-loading-block');
+            const introBar = document.getElementById('photo-intro-bar');
+            const gridSection = document.getElementById('photo-grid-section');
+            const emptySection = document.getElementById('photo-empty-section');
+            const heroBtn = document.getElementById('photo-hero-upload-btn');
+            const heroText = document.getElementById('photo-hero-upload-text');
+            const hasAccess = auth === 'limited' || auth === 'granted';
+
+            loadingBlock.classList.add('hidden');
+            introBar.classList.remove('hidden');
+            gridSection.classList.toggle('hidden', photos.length === 0);
+            emptySection.classList.toggle('hidden', photos.length > 0);
+            const introSub = document.getElementById('photo-intro-bar-sub');
+            if (introSub) {
+                if (photos.length > 0) introSub.textContent = `你的 ${photos.length} 张照片将在锁屏自动轮播，每次亮屏都是回忆`;
+                else if (hasAccess) introSub.textContent = '添加照片后将在锁屏自动轮播，每次亮屏都是回忆';
+                else introSub.textContent = '开启相册权限并添加照片后，将在锁屏自动轮播';
+            }
+
+            heroText.textContent = photos.length > 0 ? '添加照片' : '选择照片';
+            heroBtn.onclick = requestAddPhoto;
+            if (hasAccess && photos.length > 0) renderPhotoGrid();
+        }
+
+        function showPhotoPermissionModal() {
+            const platform = getPhotoPermissionPlatform();
+            const modal = document.getElementById('photo-permission-modal');
+            document.getElementById('photo-permission-ios').style.display = platform === 'ios' ? 'block' : 'none';
+            document.getElementById('photo-permission-android').style.display = platform === 'android' ? 'block' : 'none';
+            modal.classList.add('show');
+        }
+
+        /** 统一入口：点击「上传照片 / 选择照片 / 加号」时调用，未授权则弹权限，已授权则打开选择器 */
+        let photoPickerMode = 'lockScreen'; // 'lockScreen' | 'avatar'
+        function requestAddPhoto() {
+            const auth = photoModuleState.auth;
+            if (auth === 'none' || auth === 'denied') showPhotoPermissionModal();
+            else openPhotoPicker();
+        }
+
+        function hidePhotoPermissionModal() {
+            document.getElementById('photo-permission-modal').classList.remove('show');
+        }
+
+        function onPhotoPermissionDeny() {
+            photoModuleState.auth = 'denied';
+            hidePhotoPermissionModal();
+            updatePhotoView();
+            showToast('已拒绝相册访问');
+        }
+
+        function onPhotoPermissionLimited() {
+            photoModuleState.auth = 'limited';
+            hidePhotoPermissionModal();
+            const loadingBlock = document.getElementById('photo-loading-block');
+            loadingBlock.classList.remove('hidden');
+            showToast('正在加载相册…');
+            setTimeout(() => {
+                loadingBlock.classList.add('hidden');
+                updatePhotoView();
+                openPhotoPicker();
+            }, 1000);
+        }
+
+        function onPhotoPermissionAllow() {
+            photoModuleState.auth = 'granted';
+            hidePhotoPermissionModal();
+            const loadingBlock = document.getElementById('photo-loading-block');
+            loadingBlock.classList.remove('hidden');
+            showToast('正在加载相册…');
+            setTimeout(() => {
+                loadingBlock.classList.add('hidden');
+                updatePhotoView();
+                openPhotoPicker();
+            }, 1000);
+        }
+
+        function openPhotoPicker(mode) {
+            photoPickerMode = mode || 'lockScreen';
+            const titleEl = document.getElementById('photo-picker-title');
+            if (titleEl) titleEl.textContent = photoPickerMode === 'avatar' ? '选择头像' : '选择照片';
+            if (photoPickerMode === 'avatar') {
+                photoPickerSelected = [];
+            } else {
+                photoPickerSelected = photoModuleState.photos.map(p => p.src);
+            }
+            const grid = document.getElementById('photoPickerGrid');
+            grid.innerHTML = ALBUM_PICKER_PHOTOS.map((src, i) => `
+                <div class="photo-picker-item ${photoPickerSelected.indexOf(src) >= 0 ? 'selected' : ''}" data-src="${src.replace(/"/g, '&quot;')}" data-i="${i}" onclick="togglePhotoPickerItem(this)">
+                    <img src="${src}" alt="">
+                    <span class="check"><i class="fa-solid fa-check"></i></span>
+                </div>
+            `).join('');
+            updatePhotoPickerCount();
+            document.getElementById('photo-picker-modal').classList.add('show');
+        }
+
+        function togglePhotoPickerItem(el) {
+            const src = el.dataset.src;
+            if (photoPickerMode === 'avatar') {
+                document.querySelectorAll('.photo-picker-item.selected').forEach(e => e.classList.remove('selected'));
+                photoPickerSelected = el.classList.contains('selected') ? [] : [src];
+                el.classList.toggle('selected', photoPickerSelected.length > 0);
+            } else {
+                const idx = photoPickerSelected.indexOf(src);
+                if (idx >= 0) photoPickerSelected.splice(idx, 1);
+                else photoPickerSelected.push(src);
+                el.classList.toggle('selected', photoPickerSelected.indexOf(src) >= 0);
+            }
+            updatePhotoPickerCount();
+        }
+
+        function updatePhotoPickerCount() {
+            const n = photoPickerSelected.length;
+            const countEl = document.getElementById('photo-picker-count');
+            if (countEl) countEl.textContent = photoPickerMode === 'avatar' ? (n ? '已选 1 张' : '已选 0 张') : '已选 ' + n + ' 张';
+            document.getElementById('photo-picker-done-btn').disabled = n === 0;
+        }
+
+        function confirmPhotoPicker() {
+            if (photoPickerMode === 'avatar') {
+                if (photoPickerSelected.length === 0) return;
+                const url = photoPickerSelected[0];
+                if (!profileUser) profileUser = { nickname: '用户', id: 'HK' + Date.now().toString(36).toUpperCase().slice(-8), avatar: url };
+                else profileUser.avatar = url;
+                renderProfileHeader();
+                document.getElementById('photo-picker-modal').classList.remove('show');
+                showToast('头像已修改');
+                photoPickerMode = 'lockScreen';
+                return;
+            }
+            photoModuleState.photos = photoPickerSelected.map(src => ({ src, on: true }));
+            document.getElementById('photo-picker-modal').classList.remove('show');
+            updatePhotoView();
+            showToast('已添加 ' + photoPickerSelected.length + ' 张照片到锁屏轮播');
+            showLockScreenGuideModal('photo');
+        }
+
+        function closePhotoPicker() {
+            document.getElementById('photo-picker-modal').classList.remove('show');
+        }
+
+        // ========== 照片网格渲染（已授权且有照片时） ==========
+        function renderPhotoGrid() {
+            const grid = document.getElementById('photoGridB');
+            const photos = photoModuleState.photos;
+            const manageMode = photoManageMode;
+
+            grid.innerHTML = `
+                <div class="photo-add-b" onclick="requestAddPhoto()">
+                    <i class="fa-solid fa-plus text-xl"></i>
+                    <span class="text-[10px] font-bold">添加照片</span>
+                </div>
+                ${photos.map((p, i) => `
+                    <div class="photo-item ${manageMode ? 'manage-mode' : ''} ${photoSelectedIndices.has(i) ? 'selected' : ''}" data-index="${i}" onclick="${manageMode ? `togglePhotoSelection(${i})` : `event.stopPropagation();showImageViewerPhoto(${i})`}">
+                        <img src="${p.src}" alt="" loading="lazy">
+                        ${manageMode ? `<span class="photo-manage-check"><i class="fa-solid fa-check"></i></span>` : ''}
+                        ${!manageMode ? `<div class="photo-status-badge ${p.on ? 'on' : 'off'}">${p.on ? '轮播中' : '已暂停'}</div>` : ''}
+                    </div>
+                `).join('')}
+            `;
+            updatePhotoManageBar();
+        }
+
+        function togglePhotoManageMode() {
+            photoManageMode = !photoManageMode;
+            photoSelectedIndices.clear();
+            const trigger = document.getElementById('photoManageTrigger');
+            if (trigger) trigger.textContent = photoManageMode ? '取消' : '管理';
+            const bar = document.getElementById('photoManageBar');
+            if (bar) bar.classList.remove('show');
+            renderPhotoGrid();
+        }
+
+        function togglePhotoSelection(index) {
+            if (photoSelectedIndices.has(index)) photoSelectedIndices.delete(index);
+            else photoSelectedIndices.add(index);
+            const item = document.querySelector(`#photoGridB .photo-item[data-index="${index}"]`);
+            if (item) item.classList.toggle('selected', photoSelectedIndices.has(index));
+            updatePhotoManageBar();
+        }
+
+        function updatePhotoManageBar() {
+            const bar = document.getElementById('photoManageBar');
+            const countEl = document.getElementById('photoManageBarCount');
+            if (!bar || !countEl) return;
+            const n = photoSelectedIndices.size;
+            countEl.textContent = '已选 ' + n + ' 张';
+            bar.classList.toggle('show', photoManageMode && n > 0);
+        }
+
+        function deleteSelectedPhotos() {
+            if (photoSelectedIndices.size === 0) return;
+            const photos = photoModuleState.photos;
+            const toRemove = Array.from(photoSelectedIndices).sort((a, b) => b - a);
+            toRemove.forEach(i => photos.splice(i, 1));
+            photoSelectedIndices.clear();
+            photoManageMode = false;
+            document.getElementById('photoManageTrigger').textContent = '管理';
+            document.getElementById('photoManageBar').classList.remove('show');
+            updatePhotoView();
+            renderPhotoGrid();
+            showToast('已删除 ' + toRemove.length + ' 张照片');
+        }
+
+        // ========== 订阅切换（仅订阅/已订阅，取消订阅在详情页） ==========
+        function toggleSubB(btn, productId) {
+            const isSubscribing = btn.textContent.trim() === '订阅';
+            if (isSubscribing) {
+                if (productId != null) subscribedProductIds.add(productId);
+                btn.textContent = '已订阅';
+                btn.classList.remove('bg-white', 'text-slate-900');
+                btn.classList.add('bg-white/20', 'text-white/90');
+                btn.style.boxShadow = 'none';
+                btn.setAttribute('onclick', 'event.stopPropagation()');
+                showToast('订阅成功！');
+                showLockScreenGuideModal('subscribe');
+            }
+        }
+
+        // ========== 锁屏预览自动轮播 ==========
+        let lsIdx = 0;
+        setInterval(() => {
+            lsIdx = (lsIdx + 1) % LS_IMAGES.length;
+            const img = document.getElementById('lsImgB');
+            if (!img) return;
+            img.style.opacity = '0';
+            setTimeout(() => {
+                img.src = LS_IMAGES[lsIdx];
+                img.style.opacity = '1';
+            }, 400);
+        }, 5000);
+
+        // ========== Toast ==========
+        let toastTimer;
+        function showToast(msg) {
+            const el = document.getElementById('toastB');
+            el.textContent = msg;
+            el.classList.add('show');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => el.classList.remove('show'), 1800);
+        }
+
+        // ========== 详情页 ==========
+        function openDetail(id) {
+            const p = CAT_PRODUCTS.find(x => x.id === id);
+            if (!p) return;
+            detailProductId = p.id;
+
+            document.getElementById('detailCoverB').src = p.cover;
+            document.getElementById('detailTitleB').textContent = p.name;
+            document.getElementById('detailDescB').textContent = p.desc || p.subtitle;
+            document.getElementById('detailMetaB').innerHTML = `
+                <div class="flex items-center gap-3">
+                    <span class="text-[10px] font-bold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-lg">${p.update}</span>
+                    <span class="text-xs text-slate-500">${p.subs}人订阅</span>
+                </div>
+            `;
+
+            const previews = document.getElementById('detailPreviewsB');
+            if (p.previews && p.previews.length) {
+                previews.innerHTML = p.previews.map(src => `<img src="${src}" alt="" loading="lazy">`).join('');
+            } else {
+                const base = (p.id * 5) % PREVIEW_POOL_B.length;
+                previews.innerHTML = Array.from({length: 5}, (_, i) =>
+                    `<img src="${PREVIEW_POOL_B[(base + i) % PREVIEW_POOL_B.length]}" alt="" loading="lazy">`
+                ).join('');
+            }
+            previews.onclick = function(e) {
+                if (e.target.tagName === 'IMG') {
+                    e.stopPropagation();
+                    const imgs = previews.querySelectorAll('img');
+                    const srcList = Array.from(imgs).map(i => i.src);
+                    const idx = Array.from(imgs).indexOf(e.target);
+                    showLockScreenPreview(srcList, idx, { noOriginalMode: true });
+                }
+            };
+
+            renderDetailReviews(p.id);
+            updateDetailReviewEntry(p.id);
+            updateDetailBar(p.id);
+
+            document.getElementById('detail-modal').classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function renderDetailReviews(productId) {
+            const score = (4 + Math.random()).toFixed(1);
+            const reviewCount = Math.floor(Math.random() * 500) + 100;
+            const reviews = [
+                { name: '西瓜啵啵', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=64&h=64&fit=crop', content: '太好看了！每一张都想设为壁纸，画风超级治愈~', date: '2小时前', stars: 5 },
+                { name: 'Cloud', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=64&h=64&fit=crop', content: '更新速度很快，质量也很高，爱了爱了。', date: '昨天', stars: 5 },
+                { name: 'Momo', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=64&h=64&fit=crop', content: '希望能出更多这个系列的壁纸，真的很有感觉！', date: '3天前', stars: 4 }
+            ];
+            const myReview = userReviewsByProduct[productId];
+            if (myReview) {
+                reviews.unshift({ name: '我', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=64&h=64&fit=crop', content: myReview.content, date: myReview.date, stars: myReview.stars, isMe: true });
+            }
+            const totalCount = reviewCount + (myReview ? 1 : 0);
+            const avgScore = myReview ? ((parseFloat(score) * reviewCount + myReview.stars) / totalCount).toFixed(1) : score;
+
+            document.getElementById('detailReviewsB').innerHTML = `
+                <div class="flex items-center gap-4 p-4 bg-slate-100 rounded-2xl mb-5">
+                    <span class="text-4xl font-black text-slate-900">${avgScore}</span>
+                    <div>
+                        <div class="flex gap-0.5 text-amber-400 mb-1">
+                            ${'<i class="fa-solid fa-star text-xs"></i>'.repeat(5)}
+                        </div>
+                        <span class="text-[10px] text-slate-500 font-medium">${totalCount} 条评价</span>
+                    </div>
+                </div>
+                ${reviews.map(r => `
+                    <div class="pb-4 mb-4 border-b border-slate-200 last:border-0 last:mb-0 last:pb-0">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center gap-2">
+                                <img class="w-6 h-6 rounded-full object-cover" src="${r.avatar}" alt="">
+                                <span class="text-xs font-bold text-slate-500">${r.name}</span>
+                                ${r.isMe ? '<span class="text-[10px] text-indigo-500">(我的评价)</span>' : ''}
+                            </div>
+                            <span class="text-[10px] text-slate-500">${r.date}</span>
+                        </div>
+                        <p class="text-xs text-slate-600 leading-relaxed">${r.content}</p>
+                    </div>
+                `).join('')}
+            `;
+        }
+
+        function updateDetailReviewEntry(productId) {
+            const el = document.getElementById('detailReviewEntry');
+            const show = subscribedProductIds.has(productId) && !userReviewsByProduct[productId];
+            el.classList.toggle('hidden', !show);
+        }
+
+        function updateDetailBar(productId) {
+            const btn = document.getElementById('detailSubBarBtn');
+            const btn2 = document.getElementById('detailSubBarBtn2');
+            const reviewIconBtn = document.getElementById('detailReviewIconBtn');
+            const subscribed = subscribedProductIds.has(productId);
+
+            if (!subscribed) {
+                btn.textContent = '立即订阅';
+                btn.onclick = handleDetailSubscribe;
+                btn.className = 'flex-1 py-4 bg-slate-900 text-white rounded-2xl text-sm font-black shadow-xl shadow-slate-300 active:scale-[0.97] transition-transform';
+                btn.classList.remove('hidden');
+                btn2.classList.add('hidden');
+                reviewIconBtn.classList.add('hidden');
+            } else {
+                btn.classList.add('hidden');
+                btn2.classList.remove('hidden');
+                btn2.textContent = '取消订阅';
+                btn2.onclick = handleDetailUnsubscribe;
+                reviewIconBtn.classList.remove('hidden');
+            }
+        }
+
+        function handleDetailSubscribe() {
+            if (detailProductId != null) subscribedProductIds.add(detailProductId);
+            updateDetailBar(detailProductId);
+            updateDetailReviewEntry(detailProductId);
+            showToast('订阅成功！');
+            showLockScreenGuideModal('subscribe');
+        }
+
+        function handleDetailUnsubscribe() {
+            if (detailProductId != null) subscribedProductIds.delete(detailProductId);
+            updateDetailBar(detailProductId);
+            updateDetailReviewEntry(detailProductId);
+            showToast('已取消订阅');
+        }
+
+        let reviewStarsValue = 5;
+        const REVIEW_MAX_LENGTH = 200;
+
+        function updateReviewCount() {
+            const el = document.getElementById('reviewContent');
+            const count = document.getElementById('reviewCount');
+            if (!el || !count) return;
+            const n = (el.value || '').length;
+            count.textContent = n + '/' + REVIEW_MAX_LENGTH;
+            count.classList.toggle('text-amber-500', n >= REVIEW_MAX_LENGTH);
+        }
+
+        function openReviewModal() {
+            reviewStarsValue = userReviewsByProduct[detailProductId] ? userReviewsByProduct[detailProductId].stars : 5;
+            document.getElementById('reviewContent').value = userReviewsByProduct[detailProductId] ? userReviewsByProduct[detailProductId].content : '';
+            updateReviewCount();
+            document.querySelectorAll('#reviewStars .review-star').forEach((el, i) => {
+                const r = i + 1;
+                const filled = r <= reviewStarsValue;
+                el.querySelector('i').className = filled ? 'fa-solid fa-star' : 'fa-regular fa-star';
+                el.classList.toggle('border-amber-500', filled);
+                el.classList.toggle('border-slate-200', !filled);
+            });
+            document.getElementById('review-modal').classList.add('show');
+        }
+
+        function closeReviewModal() {
+            document.getElementById('review-modal').classList.remove('show');
+        }
+
+        // ========== 锁屏壁纸引导弹窗（订阅成功/添加照片成功后，按平台条件引导） ==========
+        const LOCK_GUIDE_KEYS = { iosShortcuts: 'lockGuide_iosShortcutsInstalled', androidService: 'lockGuide_androidServiceEnabled' };
+        localStorage.removeItem(LOCK_GUIDE_KEYS.iosShortcuts);
+        localStorage.removeItem(LOCK_GUIDE_KEYS.androidService);
+
+        function showLockScreenGuideModal(type) {
+            const platform = getPhotoPermissionPlatform();
+
+            const iosDesc = document.getElementById('lockScreenGuideIosDesc');
+            const androidDesc = document.getElementById('lockScreenGuideAndroidDesc');
+            if (iosDesc) iosDesc.textContent = '完成下方一步，锁屏就能自动换上壁纸。添加完成后返回本页，点击下方按钮继续。';
+            if (androidDesc) androidDesc.textContent = '开启服务后即可自动更换壁纸。请点击「去设置」按提示操作。';
+
+            if (platform === 'ios') {
+                showLockScreenGuideStep('lockScreenGuideIosSetting');
+                document.getElementById('lock-screen-guide-modal').classList.add('show');
+                showToast('正在设置壁纸…');
+                setTimeout(() => {
+                    const installed = localStorage.getItem(LOCK_GUIDE_KEYS.iosShortcuts) === '1';
+                    if (installed) {
+                        showToast('设置成功');
+                        closeLockScreenGuideModal();
+                    } else {
+                        showLockScreenGuideStep('lockScreenGuideIosInstall');
+                    }
+                }, 2000);
+                return;
+            }
+
+            if (platform === 'android' && localStorage.getItem(LOCK_GUIDE_KEYS.androidService) === '1') {
+                showLockScreenGuideStep('lockScreenGuideAndroidSetting');
+                document.getElementById('lock-screen-guide-modal').classList.add('show');
+                showToast('正在设置壁纸…');
+                setTimeout(() => {
+                    showToast('设置成功');
+                    closeLockScreenGuideModal();
+                }, 2500);
+                return;
+            }
+
+            showLockScreenGuideStep('lockScreenGuideAndroidEnable');
+            document.getElementById('lock-screen-guide-modal').classList.add('show');
+        }
+
+        function showLockScreenGuideStep(step) {
+            const panelIds = ['lockScreenGuideIosInstall', 'lockScreenGuideIosSetting', 'lockScreenGuideAndroidEnable', 'lockScreenGuideAndroidSetting'];
+            panelIds.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.toggle('hidden', id !== step);
+            });
+        }
+
+        function closeLockScreenGuideModal() {
+            document.getElementById('lock-screen-guide-modal').classList.remove('show');
+        }
+
+        function onIosShortcutsInstalled() {
+            localStorage.setItem(LOCK_GUIDE_KEYS.iosShortcuts, '1');
+            runIosWallpaperSetting();
+        }
+
+        function runIosWallpaperSetting() {
+            showLockScreenGuideStep('lockScreenGuideIosSetting');
+            showToast('正在设置壁纸…');
+            setTimeout(() => {
+                showToast('设置成功');
+                closeLockScreenGuideModal();
+            }, 2000);
+        }
+
+        function openAndroidWallpaperSettings() {
+            showToast('正在打开系统设置…');
+            setTimeout(() => {
+                showLockScreenGuideStep('lockScreenGuideAndroidSetting');
+                showToast('正在设置壁纸…');
+                setTimeout(() => {
+                    localStorage.setItem(LOCK_GUIDE_KEYS.androidService, '1');
+                    showToast('设置成功');
+                    closeLockScreenGuideModal();
+                }, 2500);
+            }, 2500);
+        }
+
+        function onAndroidServiceEnabled() {
+            localStorage.setItem(LOCK_GUIDE_KEYS.androidService, '1');
+            showToast('壁纸已更换');
+            closeLockScreenGuideModal();
+        }
+
+        document.querySelectorAll('#reviewStars').forEach(container => {
+            if (!container || !container.querySelector('.review-star')) return;
+            container.querySelectorAll('.review-star').forEach(el => {
+                el.addEventListener('click', function() {
+                    reviewStarsValue = parseInt(this.dataset.r, 10);
+                    container.querySelectorAll('.review-star').forEach((star, i) => {
+                        const r = i + 1;
+                        const filled = r <= reviewStarsValue;
+                        star.querySelector('i').className = filled ? 'fa-solid fa-star' : 'fa-regular fa-star';
+                        star.classList.toggle('border-amber-500', filled);
+                        star.classList.toggle('border-slate-200', !filled);
+                    });
+                });
+            });
+        });
+
+        function submitReview() {
+            const raw = document.getElementById('reviewContent').value.trim();
+            const content = raw || '很好用！';
+            if (detailProductId == null) return;
+            userReviewsByProduct[detailProductId] = {
+                stars: reviewStarsValue,
+                content: content,
+                date: '刚刚'
+            };
+            renderDetailReviews(detailProductId);
+            updateDetailReviewEntry(detailProductId);
+            closeReviewModal();
+            showToast('感谢你的评价！');
+        }
+
+        function closeDetail() {
+            document.getElementById('detail-modal').classList.remove('show');
+            document.body.style.overflow = '';
+            const activeCat = document.querySelector('.cat-tab-b.active');
+            if (activeCat) renderCatProducts(activeCat.dataset.cat);
+        }
+
+        // ========== 大图查看（壁纸预览 / 我的照片 点击放大） ==========
+        function showImageViewer(src) {
+            const el = document.getElementById('image-viewer-img');
+            const overlay = document.getElementById('image-viewer-overlay');
+            if (!el || !overlay) return;
+            el.src = src;
+            overlay.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeImageViewer() {
+            const overlay = document.getElementById('image-viewer-overlay');
+            if (overlay) overlay.classList.remove('show');
+            document.body.style.overflow = document.getElementById('detail-modal').classList.contains('show') ? 'hidden' : '';
+        }
+
+        function showImageViewerPhoto(index) {
+            const photos = photoModuleState.photos;
+            if (!photos[index]) return;
+            const srcList = photos.map(p => p.src);
+            showLockScreenPreview(srcList, index);
+        }
+
+        function showDetailLockScreen() {
+            const coverSrc = document.getElementById('detailCoverB').src;
+            showLockScreenPreview([coverSrc], 0, { noOriginalMode: true });
+        }
+
+        /** 锁屏全屏预览：支持多图跟手滑动；可选「查看原图」（noOriginalMode: true 时不显示） */
+        function showLockScreenPreview(imagesOrSrc, startIndex, opts) {
+            const options = opts && typeof opts === 'object' ? opts : {};
+            const noOriginalMode = !!options.noOriginalMode;
+
+            const images = Array.isArray(imagesOrSrc) ? imagesOrSrc : [imagesOrSrc];
+            let index = typeof startIndex === 'number' ? Math.max(0, Math.min(startIndex, images.length - 1)) : 0;
+            let isOriginalMode = false;
+
+            const now = new Date();
+            const h = String(now.getHours()).padStart(2, '0');
+            const m = String(now.getMinutes()).padStart(2, '0');
+            const month = now.getMonth() + 1;
+            const day = now.getDate();
+            const week = ['日','一','二','三','四','五','六'][now.getDay()];
+
+            const overlay = document.createElement('div');
+            overlay.className = 'ls-fullscreen';
+            overlay.style.backgroundImage = images.length > 0 ? `url(${images[index]})` : 'none';
+
+            const track = document.createElement('div');
+            track.className = 'ls-track';
+            images.forEach((src) => {
+                const slide = document.createElement('div');
+                slide.className = 'ls-slide';
+                slide.style.backgroundImage = `url(${src})`;
+                const img = document.createElement('img');
+                img.src = src;
+                img.alt = '';
+                slide.appendChild(img);
+                track.appendChild(slide);
+            });
+
+            const setTrackOffset = (px) => {
+                track.style.transition = 'none';
+                track.style.transform = `translateX(calc(-${index * 100}% + ${px}px))`;
+            };
+            const setTrackIndex = (i, animate) => {
+                index = Math.max(0, Math.min(i, images.length - 1));
+                track.style.transition = animate ? 'transform 0.25s ease-out' : 'none';
+                track.style.transform = `translateX(-${index * 100}%)`;
+                overlay.style.backgroundImage = `url(${images[index]})`;
+            };
+
+            const bottomHtml = noOriginalMode
+                ? `${images.length > 1 ? '<span class="ls-index"></span>' : ''}<span class="ls-hint">点击屏幕退出预览</span>`
+                : `${images.length > 1 ? '<span class="ls-index"></span>' : ''}<button type="button" class="ls-toggle-btn">查看原图</button><span class="ls-hint">点击屏幕退出预览</span>`;
+
+            overlay.appendChild(track);
+            overlay.insertAdjacentHTML('beforeend', `
+                <div class="ls-preview-content" style="text-align:center;">
+                    <div style="font-size:20px;font-weight:500;margin-bottom:8px;">${month}月${day}日 星期${week}</div>
+                    <div style="font-size:80px;font-weight:200;line-height:1;">${h}:${m}</div>
+                </div>
+                <div class="ls-bottom">${bottomHtml}</div>
+            `);
+
+            const indexEl = overlay.querySelector('.ls-index');
+            const toggleBtn = overlay.querySelector('.ls-toggle-btn');
+
+            const updateUI = () => {
+                if (indexEl) indexEl.textContent = images.length > 1 ? `${index + 1}/${images.length}` : '';
+                if (toggleBtn) toggleBtn.textContent = isOriginalMode ? '锁屏效果' : '查看原图';
+            };
+
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    isOriginalMode = !isOriginalMode;
+                    overlay.classList.toggle('ls-original-mode', isOriginalMode);
+                    updateUI();
+                });
+            }
+
+            overlay.addEventListener('click', (e) => {
+                if (toggleBtn && e.target.closest('.ls-toggle-btn')) return;
+                document.body.removeChild(overlay);
+            });
+
+            if (images.length > 1) {
+                let touchStartX = 0;
+                let startOffset = 0;
+
+                overlay.addEventListener('touchstart', (e) => {
+                    touchStartX = e.changedTouches[0].pageX;
+                    const match = track.style.transform.match(/translateX\(.*?(-?\d+(?:\.\d+)?)px\)/);
+                    startOffset = match ? parseFloat(match[1]) : 0;
+                }, { passive: true });
+
+                overlay.addEventListener('touchmove', (e) => {
+                    const dx = e.changedTouches[0].pageX - touchStartX;
+                    const maxW = overlay.offsetWidth;
+                    let px = startOffset + dx;
+                    const minPx = -index * maxW - 80;
+                    const maxPx = (images.length - 1 - index) * maxW + 80;
+                    px = Math.max(minPx, Math.min(maxPx, px));
+                    setTrackOffset(px);
+                }, { passive: true });
+
+                overlay.addEventListener('touchend', (e) => {
+                    const dx = e.changedTouches[0].pageX - touchStartX;
+                    const threshold = overlay.offsetWidth * 0.2;
+                    if (dx > threshold && index > 0) {
+                        setTrackIndex(index - 1, true);
+                    } else if (dx < -threshold && index < images.length - 1) {
+                        setTrackIndex(index + 1, true);
+                    } else {
+                        setTrackIndex(index, true);
+                    }
+                    updateUI();
+                }, { passive: true });
+            }
+
+            setTrackIndex(index, false);
+            updateUI();
+            document.body.appendChild(overlay);
+        }
+
+        // ========== 开关切换 ==========
+        function toggleSwitch(el) {
+            const dot = el.querySelector('div');
+            const isOn = el.classList.contains('bg-slate-900');
+            if (isOn) {
+                el.classList.replace('bg-slate-900', 'bg-slate-200');
+                dot.style.transform = 'translateX(0)';
+            } else {
+                el.classList.replace('bg-slate-200', 'bg-slate-900');
+                dot.style.transform = 'translateX(18px)';
+            }
+            if (el.closest('#profile-lock-switch-row')) {
+                setProfileLockAuto(!isOn);
+                updateProfileIntervalRowEnabled();
+            }
+        }
+
+        // ========== 教程弹窗 ==========
+        const TUTORIAL_CONTEXT = {
+            category: { title: '玩法中心', intro: '实现自动更换壁纸，按下列步骤完成设置即可。' },
+            photo: { title: '玩法中心', intro: '实现自动更换壁纸，按下列步骤完成设置即可。' }
+        };
+
+        function toggleHelp(show, context) {
+            const modal = document.getElementById('tutorial-modal');
+            if (show) {
+                const c = TUTORIAL_CONTEXT[context === 'photo' ? 'photo' : 'category'];
+                const titleEl = document.getElementById('tutorial-modal-title');
+                const introEl = document.getElementById('tutorial-modal-intro');
+                if (titleEl) titleEl.textContent = c.title;
+                if (introEl) introEl.textContent = c.intro;
+                const platform = getPhotoPermissionPlatform();
+                switchTutorial(platform);
+                modal.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            } else {
+                modal.classList.remove('show');
+                document.body.style.overflow = '';
+            }
+        }
+
+        function switchTutorial(platform) {
+            document.querySelectorAll('.tut-tab').forEach(t => t.classList.remove('active'));
+            document.querySelector(`.tut-tab[data-platform="${platform}"]`).classList.add('active');
+            document.getElementById('tut-ios').classList.toggle('hidden', platform !== 'ios');
+            document.getElementById('tut-android').classList.toggle('hidden', platform !== 'android');
+        }
+
+        // ========== 个人中心：游客 / 登录 / 退出 ==========
+        function renderProfileHeader() {
+            const guestEl = document.getElementById('profile-guest');
+            const userEl = document.getElementById('profile-user');
+            const logoutWrap = document.getElementById('profile-logout-wrap');
+            if (!guestEl || !userEl || !logoutWrap) return;
+            if (profileUser) {
+                guestEl.classList.add('hidden');
+                guestEl.classList.remove('flex');
+                userEl.classList.remove('hidden');
+                userEl.classList.add('flex');
+                const avatar = document.getElementById('profile-user-avatar');
+                const name = document.getElementById('profile-user-name');
+                const idEl = document.getElementById('profile-user-id');
+                if (avatar) avatar.src = profileUser.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120&h=120&fit=crop';
+                if (name) name.textContent = profileUser.nickname || '用户';
+                if (idEl) idEl.textContent = 'ID: ' + (profileUser.id || '');
+                logoutWrap.classList.remove('hidden');
+            } else {
+                guestEl.classList.remove('hidden');
+                guestEl.classList.add('flex');
+                userEl.classList.add('hidden');
+                userEl.classList.remove('flex');
+                logoutWrap.classList.add('hidden');
+            }
+        }
+
+        function openProfileLoginModal() {
+            document.getElementById('profile-login-modal').classList.add('show');
+            document.body.style.overflow = 'hidden';
+            loginMode = 'code';
+            const codeWrap = document.getElementById('profile-login-code-wrap');
+            const pwdWrap = document.getElementById('profile-login-pwd-wrap');
+            const switchBtn = document.getElementById('profile-login-switch-btn');
+            if (codeWrap) codeWrap.classList.remove('hidden');
+            if (pwdWrap) pwdWrap.classList.add('hidden');
+            if (switchBtn) switchBtn.textContent = '切换为密码登录';
+            const phoneEl = document.getElementById('profile-login-phone');
+            const codeEl = document.getElementById('profile-login-code');
+            const pwdEl = document.getElementById('profile-login-pwd');
+            if (phoneEl) { phoneEl.value = ''; phoneEl.focus(); }
+            if (codeEl) codeEl.value = '';
+            if (pwdEl) pwdEl.value = '';
+            const codeBtn = document.getElementById('profile-login-code-btn');
+            if (codeBtn) { codeBtn.textContent = '获取验证码'; codeBtn.disabled = false; }
+        }
+        function closeProfileLoginModal() {
+            document.getElementById('profile-login-modal').classList.remove('show');
+            document.body.style.overflow = '';
+        }
+        function openProfileNicknameModal() {
+            const current = (profileUser && profileUser.nickname) ? profileUser.nickname : '';
+            const body = document.getElementById('profile-nickname-modal-body');
+            if (body) {
+                body.innerHTML = `
+                    <div class="bg-white rounded-[2rem] p-5 shadow-sm border border-slate-200">
+                        <label class="block text-sm font-bold text-slate-700 mb-2">昵称</label>
+                        <input type="text" id="account-nickname-input" value="${current.replace(/"/g, '&quot;')}" placeholder="请输入昵称" maxlength="20" class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500" style="font-size: 16px;">
+                        <p class="text-xs text-slate-500 mt-2">2-20 个字符</p>
+                        <button type="button" onclick="saveAccountNickname()" class="mt-4 w-full py-3 bg-slate-900 text-white rounded-2xl text-sm font-black active:scale-98">保存</button>
+                    </div>
+                `;
+            }
+            document.getElementById('profile-nickname-modal').classList.add('show');
+            document.body.style.overflow = 'hidden';
+            setTimeout(function() { document.getElementById('account-nickname-input')?.focus(); }, 100);
+        }
+        function closeProfileNicknameModal() {
+            document.getElementById('profile-nickname-modal').classList.remove('show');
+            document.body.style.overflow = '';
+        }
+        function openProfileAvatarModal() {
+            openPhotoPicker('avatar');
+        }
+        function closeProfileAvatarModal() {
+            document.getElementById('profile-avatar-modal').classList.remove('show');
+            document.body.style.overflow = '';
+        }
+        let loginMode = 'code';   // 'code' | 'password'
+        function switchLoginMode() {
+            loginMode = loginMode === 'code' ? 'password' : 'code';
+            const codeWrap = document.getElementById('profile-login-code-wrap');
+            const pwdWrap = document.getElementById('profile-login-pwd-wrap');
+            const switchBtn = document.getElementById('profile-login-switch-btn');
+            if (loginMode === 'code') {
+                if (codeWrap) codeWrap.classList.remove('hidden');
+                if (pwdWrap) pwdWrap.classList.add('hidden');
+                if (switchBtn) switchBtn.textContent = '切换为密码登录';
+            } else {
+                if (codeWrap) codeWrap.classList.add('hidden');
+                if (pwdWrap) pwdWrap.classList.remove('hidden');
+                if (switchBtn) switchBtn.textContent = '切换为验证码登录';
+            }
+        }
+        let loginCodeCountdown = 0;
+        function sendLoginCode() {
+            const phone = (document.getElementById('profile-login-phone') || {}).value.trim();
+            if (!/^1\d{10}$/.test(phone)) { showToast('请输入正确的手机号'); return; }
+            if (loginCodeCountdown > 0) return;
+            const btn = document.getElementById('profile-login-code-btn');
+            loginCodeCountdown = 60;
+            btn.disabled = true;
+            const tick = () => {
+                loginCodeCountdown--;
+                btn.textContent = loginCodeCountdown > 0 ? loginCodeCountdown + 's 后重发' : '获取验证码';
+                if (loginCodeCountdown <= 0) btn.disabled = false;
+                else setTimeout(tick, 1000);
+            };
+            tick();
+            showToast('验证码已发送');
+        }
+        function submitProfileLogin() {
+            const phone = (document.getElementById('profile-login-phone') || {}).value.trim();
+            if (!phone) { showToast('请输入手机号'); return; }
+            if (!/^1\d{10}$/.test(phone)) { showToast('请输入正确的手机号'); return; }
+            if (loginMode === 'code') {
+                const code = (document.getElementById('profile-login-code') || {}).value.trim();
+                if (!code) { showToast('请输入验证码'); return; }
+            } else {
+                const pwd = (document.getElementById('profile-login-pwd') || {}).value;
+                if (!pwd || pwd.length < 6 || pwd.length > 20) { showToast('请输入6-20位密码'); return; }
+            }
+            profileUser = {
+                nickname: '用户' + phone.slice(-4),
+                id: 'HK' + Date.now().toString(36).toUpperCase().slice(-8),
+                avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120&h=120&fit=crop'
+            };
+            closeProfileLoginModal();
+            renderProfileHeader();
+            showToast('登录成功');
+        }
+        function doProfileLogout() {
+            profileUser = null;
+            renderProfileHeader();
+            showToast('已退出登录');
+        }
+
+        function openProfileAccountModal() {
+            openSecondaryPage('账号管理', getAccountManagementBodyHtml());
+            accountSubPage = 'account';
+        }
+        function openAboutPage() {
+            const bodyHtml = `
+                <p class="text-sm text-slate-600 leading-relaxed mb-4">好看云壁纸为你提供精选锁屏壁纸与自动换壁纸能力，支持订阅主题与自定义照片轮播，让每次亮屏都是惊喜。</p>
+                <p class="text-xs text-slate-500 mb-6">版本 v2.6.0</p>
+                <div class="space-y-2">
+                    <button type="button" onclick="closeSecondaryPage();showToast('即将打开官网')" class="w-full p-4 rounded-2xl border border-slate-200 text-sm font-bold text-slate-700 hover:bg-slate-50 transition-all">官网与帮助</button>
+                    <button type="button" onclick="closeSecondaryPage();showToast('即将打开客服')" class="w-full p-4 rounded-2xl border border-slate-200 text-sm font-bold text-slate-700 hover:bg-slate-50 transition-all">联系客服</button>
+                </div>
+            `;
+            openSecondaryPage('关于我们', bodyHtml);
+        }
+        function closeProfileAccountModal() {
+            document.getElementById('profile-account-modal').classList.remove('show');
+            document.body.style.overflow = '';
+        }
+        function openProfileCancelAccountModal() {
+            document.getElementById('profile-cancel-account-modal').classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeProfileCancelAccountModal() {
+            document.getElementById('profile-cancel-account-modal').classList.remove('show');
+            document.body.style.overflow = '';
+        }
+        function doProfileCancelAccount() {
+            profileUser = null;
+            closeProfileCancelAccountModal();
+            closeSecondaryPage();
+            renderProfileHeader();
+            showToast('账号已注销');
+        }
+
+        function openSecondaryPage(title, bodyHtml) {
+            const page = document.getElementById('secondary-page');
+            const titleEl = document.getElementById('secondary-page-title');
+            const bodyEl = document.getElementById('secondary-page-body');
+            if (!page || !titleEl || !bodyEl) return;
+            const isAndroid = getPhotoPermissionPlatform() === 'android';
+            page.classList.toggle('secondary-android', isAndroid);
+            page.classList.toggle('secondary-ios', !isAndroid);
+            titleEl.textContent = title;
+            bodyEl.innerHTML = bodyHtml;
+            accountSubPage = '';
+            page.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeSecondaryPage() {
+            const page = document.getElementById('secondary-page');
+            if (!page) return;
+            if (!page.classList.contains('show')) {
+                document.body.style.overflow = '';
+                return;
+            }
+            page.classList.remove('show');
+            page.classList.add('secondary-page-closing');
+            document.body.style.overflow = '';
+            accountSubPage = '';
+            page.ontransitionend = function() {
+                page.ontransitionend = null;
+                page.classList.remove('secondary-page-closing');
+            };
+        }
+        let accountSubPage = '';
+        function secondaryPageBack() {
+            if (accountSubPage === 'account' || !accountSubPage) closeSecondaryPage();
+            else showAccountSubPage('account');
+        }
+        function getAccountManagementBodyHtml() {
+            return `
+                <div class="space-y-6">
+                    <section>
+                        <h4 class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 px-1">账号信息</h4>
+                        <div class="bg-white rounded-[2rem] p-2 shadow-sm border border-slate-200 space-y-0.5">
+                            <button type="button" onclick="showAccountSubPage('phone')" class="w-full flex items-center justify-between p-4 hover:bg-slate-50 rounded-[1.5rem] transition-all active:scale-[0.99]">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-10 h-10 bg-cyan-50 text-cyan-500 rounded-xl flex items-center justify-center shrink-0"><i class="fa-solid fa-mobile-screen text-sm"></i></div>
+                                    <span class="text-sm font-bold text-slate-700">绑定手机</span>
+                                </div>
+                                <i class="fa-solid fa-chevron-right text-slate-400 text-xs"></i>
+                            </button>
+                            <button type="button" onclick="showAccountSubPage('password')" class="w-full flex items-center justify-between p-4 hover:bg-slate-50 rounded-[1.5rem] transition-all active:scale-[0.99]">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-10 h-10 bg-emerald-50 text-emerald-500 rounded-xl flex items-center justify-center shrink-0"><i class="fa-solid fa-lock text-sm"></i></div>
+                                    <span class="text-sm font-bold text-slate-700">修改密码</span>
+                                </div>
+                                <i class="fa-solid fa-chevron-right text-slate-400 text-xs"></i>
+                            </button>
+                        </div>
+                    </section>
+                    <section>
+                        <h4 class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 px-1">账号安全</h4>
+                        <div class="bg-white rounded-[2rem] p-2 shadow-sm border border-slate-200">
+                            <button type="button" onclick="closeSecondaryPage();openProfileCancelAccountModal()" class="w-full flex items-center justify-between p-4 hover:bg-rose-50 rounded-[1.5rem] transition-all active:scale-[0.99]">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-10 h-10 bg-rose-50 text-rose-500 rounded-xl flex items-center justify-center shrink-0"><i class="fa-solid fa-user-xmark text-sm"></i></div>
+                                    <span class="text-sm font-bold text-rose-600">账号注销</span>
+                                </div>
+                                <i class="fa-solid fa-chevron-right text-rose-400 text-xs"></i>
+                            </button>
+                        </div>
+                    </section>
+                </div>
+            `;
+        }
+        const AVATAR_OPTIONS = [
+            'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&h=200&fit=crop',
+            'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&h=200&fit=crop',
+            'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop',
+            'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&h=200&fit=crop'
+        ];
+        function showAccountSubPage(type) {
+            accountSubPage = type;
+            const titleEl = document.getElementById('secondary-page-title');
+            const bodyEl = document.getElementById('secondary-page-body');
+            if (!titleEl || !bodyEl) return;
+            if (type === 'account') {
+                titleEl.textContent = '账号管理';
+                bodyEl.innerHTML = getAccountManagementBodyHtml();
+                return;
+            }
+            if (type === 'phone') {
+                titleEl.textContent = '绑定手机';
+                const phone = (profileUser && profileUser.phone) ? profileUser.phone : '';
+                bodyEl.innerHTML = `
+                    <div class="bg-white rounded-[2rem] p-5 shadow-sm border border-slate-200 space-y-4">
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-2">手机号</label>
+                            <input type="tel" id="account-phone-input" value="${phone.replace(/"/g, '&quot;')}" placeholder="请输入手机号" maxlength="11" class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500" style="font-size: 16px;">
+                        </div>
+                        <div class="flex gap-2">
+                            <input type="text" id="account-code-input" placeholder="验证码" maxlength="6" class="flex-1 px-4 py-3 rounded-2xl border border-slate-200 text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500" style="font-size: 16px;">
+                            <button type="button" id="account-code-btn" onclick="sendAccountPhoneCode()" class="px-4 py-3 rounded-2xl bg-slate-100 text-slate-700 text-sm font-bold whitespace-nowrap">获取验证码</button>
+                        </div>
+                        <button type="button" onclick="saveAccountPhone()" class="w-full py-3 bg-slate-900 text-white rounded-2xl text-sm font-black active:scale-98">绑定</button>
+                    </div>
+                `;
+                return;
+            }
+            if (type === 'password') {
+                titleEl.textContent = '修改密码';
+                bodyEl.innerHTML = `
+                    <div class="bg-white rounded-[2rem] p-5 shadow-sm border border-slate-200 space-y-4">
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-2">原密码</label>
+                            <input type="password" id="account-old-pwd" placeholder="请输入原密码" class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500" style="font-size: 16px;">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-2">新密码</label>
+                            <input type="password" id="account-new-pwd" placeholder="6-20 位字母或数字" class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500" style="font-size: 16px;">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-2">确认新密码</label>
+                            <input type="password" id="account-confirm-pwd" placeholder="再次输入新密码" class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500" style="font-size: 16px;">
+                        </div>
+                        <button type="button" onclick="saveAccountPassword()" class="w-full py-3 bg-slate-900 text-white rounded-2xl text-sm font-black active:scale-98">保存</button>
+                    </div>
+                `;
+                return;
+            }
+        }
+        function saveAccountNickname() {
+            const input = document.getElementById('account-nickname-input');
+            const val = input ? input.value.trim() : '';
+            if (!val) { showToast('请输入昵称'); return; }
+            if (val.length < 2 || val.length > 20) { showToast('昵称为 2-20 个字符'); return; }
+            if (!profileUser) profileUser = { nickname: val, id: 'HK' + Date.now().toString(36).toUpperCase().slice(-8), avatar: AVATAR_OPTIONS[0] };
+            else profileUser.nickname = val;
+            renderProfileHeader();
+            closeProfileNicknameModal();
+            showToast('昵称已修改');
+        }
+        function selectAccountAvatar(btn) {
+            const url = btn.dataset.url || '';
+            window._selectedAvatarUrl = url;
+            document.querySelectorAll('.account-avatar-opt').forEach(el => { el.classList.remove('border-indigo-500'); el.classList.add('border-transparent'); });
+            btn.classList.add('border-indigo-500'); btn.classList.remove('border-transparent');
+            const previewWrap = document.getElementById('account-avatar-preview-wrap');
+            if (previewWrap) { previewWrap.classList.remove('border-indigo-500'); previewWrap.classList.add('border-transparent'); }
+        }
+        function saveAccountAvatar() {
+            const url = window._selectedAvatarUrl || AVATAR_OPTIONS[0];
+            if (!profileUser) profileUser = { nickname: '用户', id: 'HK' + Date.now().toString(36).toUpperCase().slice(-8), avatar: url };
+            else profileUser.avatar = url;
+            renderProfileHeader();
+            closeProfileAvatarModal();
+            showToast('头像已修改');
+        }
+        let accountCodeCountdown = 0;
+        function sendAccountPhoneCode() {
+            const phoneInput = document.getElementById('account-phone-input');
+            const phone = phoneInput ? phoneInput.value.trim() : '';
+            if (!/^1\d{10}$/.test(phone)) { showToast('请输入正确的手机号'); return; }
+            if (accountCodeCountdown > 0) return;
+            accountCodeCountdown = 60;
+            const btn = document.getElementById('account-code-btn');
+            if (btn) btn.disabled = true;
+            const tick = () => {
+                if (accountCodeCountdown > 0) {
+                    if (btn) btn.textContent = accountCodeCountdown + 's 后重发';
+                    accountCodeCountdown--;
+                    setTimeout(tick, 1000);
+                } else {
+                    if (btn) { btn.textContent = '获取验证码'; btn.disabled = false; }
+                }
+            };
+            tick();
+            showToast('验证码已发送');
+        }
+        function saveAccountPhone() {
+            const phoneInput = document.getElementById('account-phone-input');
+            const codeInput = document.getElementById('account-code-input');
+            const phone = phoneInput ? phoneInput.value.trim() : '';
+            const code = codeInput ? codeInput.value.trim() : '';
+            if (!/^1\d{10}$/.test(phone)) { showToast('请输入正确的手机号'); return; }
+            if (!code) { showToast('请输入验证码'); return; }
+            if (!profileUser) profileUser = { nickname: '用户' + phone.slice(-4), id: 'HK' + Date.now().toString(36).toUpperCase().slice(-8), avatar: AVATAR_OPTIONS[0], phone: phone };
+            else profileUser.phone = phone;
+            renderProfileHeader();
+            showAccountSubPage('account');
+            showToast('手机已绑定');
+        }
+        function saveAccountPassword() {
+            const oldPwd = document.getElementById('account-old-pwd');
+            const newPwd = document.getElementById('account-new-pwd');
+            const confirmPwd = document.getElementById('account-confirm-pwd');
+            const newVal = newPwd ? newPwd.value : '';
+            const confirmVal = confirmPwd ? confirmPwd.value : '';
+            if (!newVal) { showToast('请输入新密码'); return; }
+            if (newVal.length < 6 || newVal.length > 20) { showToast('新密码为 6-20 位'); return; }
+            if (newVal !== confirmVal) { showToast('两次输入的新密码不一致'); return; }
+            showAccountSubPage('account');
+            showToast('密码修改成功');
+        }
+
+        function openProfileIntervalModal() {
+            if (!getProfileLockAuto()) return;
+            const modal = document.getElementById('profile-interval-modal');
+            const current = getProfileInterval();
+            modal.querySelectorAll('.profile-interval-opt').forEach(btn => {
+                btn.classList.toggle('selected', btn.dataset.value === current);
+                btn.onclick = () => {
+                    const v = btn.dataset.value;
+                    setProfileInterval(v);
+                    const labelEl = document.getElementById('profile-interval-label');
+                    if (labelEl) labelEl.textContent = PROFILE_INTERVAL_LABELS[v] || '每次亮屏';
+                    modal.querySelectorAll('.profile-interval-opt').forEach(b => b.classList.remove('selected'));
+                    btn.classList.add('selected');
+                    closeProfileIntervalModal();
+                    showToast('已设置为 ' + (PROFILE_INTERVAL_LABELS[v] || v));
+                };
+            });
+            modal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeProfileIntervalModal() {
+            document.getElementById('profile-interval-modal').classList.remove('show');
+            document.body.style.overflow = '';
+        }
+
+        function openMySubscriptionsModal() {
+            const list = CAT_PRODUCTS.filter(p => subscribedProductIds.has(p.id));
+            let bodyHtml;
+            if (list.length === 0) {
+                bodyHtml = `
+                    <div class="text-center py-16 text-slate-500">
+                        <div class="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-4"><i class="fa-solid fa-bookmark text-2xl text-slate-400"></i></div>
+                        <p class="text-sm font-bold text-slate-600 mb-2">暂无订阅</p>
+                        <p class="text-xs text-slate-400 mb-4">去首页发现喜欢的壁纸并订阅吧</p>
+                        <button type="button" onclick="closeSecondaryPage();switchTab('category')" class="px-6 py-3 bg-slate-900 text-white rounded-2xl text-sm font-black active:scale-95">去首页看看</button>
+                    </div>
+                `;
+            } else {
+                bodyHtml = '<div class="space-y-6">' + list.map(renderCatCard).join('') + '</div>';
+            }
+            openSecondaryPage('我的订阅', bodyHtml);
+        }
+        function closeMySubscriptionsModal() {
+            closeSecondaryPage();
+        }
+
+        // ========== Tab 切换 ==========
+        function switchTab(id) {
+            closeSecondaryPage();
+            document.querySelectorAll('.view-content').forEach(v => v.classList.add('hidden'));
+            document.getElementById(id + '-view').classList.remove('hidden');
+
+            const labels = { category: '订阅壁纸', photo: '照片壁纸', profile: '我的' };
+            document.getElementById('view-title').textContent = labels[id];
+
+            // 首页壁纸、照片：显示日期 + 搜索；我的：仅标题（无搜索、无日期）
+            const dateLabel = document.getElementById('date-label');
+            const headerActions = document.getElementById('header-actions');
+            if (dateLabel) dateLabel.style.display = id === 'profile' ? 'none' : '';
+            if (headerActions) headerActions.style.display = id === 'profile' ? 'none' : 'flex';
+
+            document.querySelectorAll('.nav-btn').forEach(b => {
+                b.classList.remove('text-indigo-600');
+                b.classList.add('text-slate-500');
+            });
+            document.getElementById('btn-' + id).classList.add('text-indigo-600');
+            document.getElementById('btn-' + id).classList.remove('text-slate-500');
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            if (id === 'photo') updatePhotoView();
+            if (id === 'profile') {
+                renderProfileHeader();
+                const labelEl = document.getElementById('profile-interval-label');
+                if (labelEl) labelEl.textContent = PROFILE_INTERVAL_LABELS[getProfileInterval()] || '每次亮屏';
+                const isAndroid = getPhotoPermissionPlatform() === 'android';
+                const lockRow = document.getElementById('profile-lock-switch-row');
+                const intervalRow = document.getElementById('profile-interval-row');
+                if (lockRow) {
+                    lockRow.classList.toggle('profile-android-only', !isAndroid);
+                    const sw = lockRow.querySelector('.w-11');
+                    const dot = sw ? sw.querySelector('div') : null;
+                    const on = getProfileLockAuto();
+                    if (sw) { sw.classList.toggle('bg-slate-900', on); sw.classList.toggle('bg-slate-200', !on); }
+                    if (dot) dot.style.transform = on ? 'translateX(18px)' : 'translateX(0)';
+                }
+                if (intervalRow) intervalRow.classList.toggle('profile-android-only', !isAndroid);
+                updateProfileIntervalRowEnabled();
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 照片占位、分组切换器背景、骨架屏等 -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="#FFF3F4F6"/>
+    <corners android:radius="8dp"/>
+</shape>

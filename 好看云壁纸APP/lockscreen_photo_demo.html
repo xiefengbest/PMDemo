@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>锁屏照片展示 — 多尺寸最佳实践模拟</title>
+  <style>
+    :root {
+      --phone-w: min(100vw - 24px, 390px);
+      --phone-h: calc(var(--phone-w) * 2.05);
+      --radius: 44px;
+      --safe-top: 56px;
+      --safe-bottom: 28px;
+      --ui-fg: rgba(255, 255, 255, 0.95);
+      --ui-dim: rgba(255, 255, 255, 0.55);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "SF Pro Display", "PingFang SC", "Helvetica Neue", system-ui, sans-serif;
+      background: radial-gradient(120% 80% at 50% 20%, #1a1d2e 0%, #0b0c12 55%, #050508 100%);
+      color: #e8eaef;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 16px 32px;
+      gap: 20px;
+    }
+
+    h1 {
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin: 0;
+      letter-spacing: 0.02em;
+    }
+
+    .subtitle {
+      margin: 0;
+      font-size: 0.85rem;
+      color: #9aa3b5;
+      max-width: 520px;
+      text-align: center;
+      line-height: 1.55;
+    }
+
+    .panel {
+      width: 100%;
+      max-width: 560px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 16px 18px;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: #b4bcc8;
+    }
+
+    .panel strong {
+      color: #dce2ec;
+    }
+
+    .panel kbd {
+      display: inline-block;
+      padding: 2px 7px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      font-size: 0.75rem;
+      font-family: ui-monospace, monospace;
+    }
+
+    .stage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+
+    /* 手机外框 */
+    .phone {
+      width: var(--phone-w);
+      height: var(--phone-h);
+      border-radius: var(--radius);
+      padding: 10px;
+      background: linear-gradient(145deg, #2c3142 0%, #12141c 100%);
+      box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.06) inset,
+        0 24px 60px rgba(0, 0, 0, 0.55),
+        0 8px 20px rgba(0, 0, 0, 0.35);
+      position: relative;
+    }
+
+    .phone-notch {
+      position: absolute;
+      top: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 38%;
+      height: 26px;
+      background: #0a0b10;
+      border-radius: 16px;
+      z-index: 20;
+      pointer-events: none;
+    }
+
+    .screen {
+      width: 100%;
+      height: 100%;
+      border-radius: calc(var(--radius) - 8px);
+      overflow: hidden;
+      position: relative;
+      background: #000;
+    }
+
+    /* 照片层：模糊底 + 清晰层「宽始终 100%」，高等比；过高裁上下，过矮露边由模糊补 */
+    .photo-stack {
+      position: absolute;
+      inset: 0;
+    }
+
+    .blur-layer {
+      position: absolute;
+      inset: -12%;
+      background-position: center;
+      background-size: cover;
+      background-repeat: no-repeat;
+      filter: blur(42px) saturate(1.08) brightness(0.72);
+      transform: scale(1.08);
+      will-change: filter;
+    }
+
+    /* 勿在照片层留 padding：否则透明区会一直露出底层模糊，与阈值无关 */
+    .clear-layer {
+      position: absolute;
+      inset: 0;
+      box-sizing: border-box;
+      padding: 0;
+    }
+
+    .clear-layer-frame {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .clear-layer img {
+      width: 100%;
+      height: auto;
+      display: block;
+      flex-shrink: 0;
+      border-radius: 2px;
+      box-shadow: 0 8px 40px rgba(0, 0, 0, 0.35);
+    }
+
+    /* 宽铺满后高度仍差一截、但缺口在阈值内：用 cover 上下撑满（可能略裁左右） */
+    .clear-layer img.snap-cover {
+      width: 100%;
+      height: 100%;
+      max-width: none;
+      max-height: none;
+      object-fit: cover;
+      object-position: center;
+    }
+
+    /* 轻微暗角，让锁屏 UI 更易读 */
+    .vignette {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: radial-gradient(ellipse 90% 75% at 50% 45%, transparent 40%, rgba(0, 0, 0, 0.35) 100%);
+      z-index: 2;
+    }
+
+    .lock-ui {
+      position: absolute;
+      inset: 0;
+      z-index: 5;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: calc(var(--safe-top) + 8px);
+    }
+
+    .status-row {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      padding: 0 22px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ui-fg);
+      text-shadow: 0 1px 8px rgba(0, 0, 0, 0.45);
+    }
+
+    .clock {
+      margin-top: 28px;
+      font-size: 4.1rem;
+      font-weight: 300;
+      letter-spacing: -0.03em;
+      color: var(--ui-fg);
+      text-shadow: 0 2px 24px rgba(0, 0, 0, 0.4);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .date-line {
+      margin-top: 6px;
+      font-size: 1rem;
+      color: var(--ui-dim);
+      text-shadow: 0 1px 12px rgba(0, 0, 0, 0.4);
+    }
+
+    .hint-pill {
+      position: absolute;
+      bottom: 22px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 11px;
+      color: var(--ui-dim);
+      text-shadow: 0 1px 6px rgba(0, 0, 0, 0.5);
+      white-space: nowrap;
+    }
+
+    /* 灭屏遮罩：用 div，避免全局 button:hover 把背景盖成半透明白 */
+    .sleep-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 15;
+      margin: 0;
+      padding: 0;
+      border: none;
+      border-radius: inherit;
+      background: #000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.45s ease; /* 时长需与脚本中 OVERLAY_FADE_MS 一致 */
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .sleep-overlay.on {
+      opacity: 1;
+      background: #000;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      align-items: center;
+    }
+
+    button {
+      font: inherit;
+      cursor: pointer;
+      border: none;
+      border-radius: 999px;
+      padding: 10px 18px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      background: rgba(255, 255, 255, 0.12);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      transition: background 0.2s, transform 0.15s;
+    }
+
+    button:hover {
+      background: rgba(255, 255, 255, 0.18);
+    }
+
+    button:active {
+      transform: scale(0.97);
+    }
+
+    button.primary {
+      background: linear-gradient(135deg, #5b7cfa 0%, #3d52d6 100%);
+      border-color: transparent;
+    }
+
+    .meta {
+      font-size: 0.78rem;
+      color: #8b95a8;
+      text-align: center;
+      max-width: 360px;
+    }
+
+    .badge {
+      display: inline-block;
+      margin-top: 6px;
+      padding: 4px 10px;
+      border-radius: 8px;
+      background: rgba(91, 124, 250, 0.2);
+      color: #aab8ff;
+      font-size: 0.72rem;
+    }
+
+    .badge.vfill {
+      background: rgba(78, 205, 196, 0.2);
+      color: #9ee8e0;
+    }
+
+    .badge.letterbox {
+      background: rgba(255, 186, 120, 0.18);
+      color: #ffc8a0;
+    }
+  </style>
+</head>
+<body>
+  <h1>锁屏多尺寸照片 — 最佳实践模拟</h1>
+  <p class="subtitle">
+    <strong style="color:#dce2ec">左右始终撑满</strong>槽位宽度；高度按原比例随宽度放大。
+    超高则<strong>上下裁切</strong>；若按宽算出的高度略低于槽位（相对缺口 ≤ 约 <strong>24%</strong>），则改用 <code style="color:#c5cce0">cover</code> 把<strong>上下也撑满</strong>（可能少量裁左右）；缺口再大则留白 + 模糊底。
+  </p>
+
+  <div class="stage">
+    <div class="phone" aria-label="手机锁屏模拟">
+      <div class="phone-notch" aria-hidden="true"></div>
+      <div class="screen" id="screen">
+        <div class="photo-stack" id="photoStack">
+          <div class="blur-layer" id="blurLayer"></div>
+          <div class="clear-layer" id="clearLayer">
+            <div class="clear-layer-frame">
+              <img id="clearImg" alt="" crossorigin="anonymous" />
+            </div>
+          </div>
+          <div class="vignette" aria-hidden="true"></div>
+        </div>
+        <div class="lock-ui">
+          <div class="status-row">
+            <span id="fakeCarrier">中国移动</span>
+            <span id="fakeBattery">100%</span>
+          </div>
+          <div class="clock" id="clock">09:41</div>
+          <div class="date-line" id="dateLine">3月25日 星期三</div>
+          <div class="hint-pill">点击下方「电源键」模拟灭屏 / 亮屏</div>
+        </div>
+        <div class="sleep-overlay" id="sleepOverlay" aria-hidden="true"></div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button type="button" class="primary" id="powerBtn">电源键（点击模拟灭屏亮屏）</button>
+    </div>
+    <p class="meta" id="photoMeta"></p>
+  </div>
+
+  <div class="panel">
+    <strong>做法说明（与 Android 动态壁纸可对齐）</strong><br />
+    1. 壁纸绘制区应占<strong>整块屏幕</strong>；勿在照片层用 padding 留出「状态栏区」，否则透明处会一直露出模糊底，看起来像阈值失效。<br />
+    2. 换图时生成一次「模糊底」：可缩小后再模糊再放大，省算力。<br />
+    3. 前景：默认 <strong>宽 = 槽位宽</strong>，高等比。高 &gt; 槽位则裁上下。高 &lt; 槽位时若 <code>(槽位高 − 理论高) / 槽位高 ≤ 0.24</code> 则改 <strong>cover</strong> 铺满（略裁左右）；否则留白 + 模糊层。<br />
+    4. 灭屏时停动画；亮屏再绘制，省电。<br />
+    5. 交互：黑层淡入结束后在灭屏状态下换下一张（与 Android 在黑底下预载一致）；亮屏只揭遮罩，不再换图。仅通过下方电源键切换灭屏 / 亮屏。
+  </div>
+
+  <script>
+    (function () {
+      /**
+       * 多组像素尺寸 + 固定 seed（picsum 可复现）。
+       * 宽铺满 + 高缺口阈值：近全面屏竖图 cover 补满，过矮横图留白。
+       */
+      const SAMPLES = [
+        { label: "竖图 9:16", w: 1080, h: 1920, seed: 501 },
+        { label: "竖图 约 9:19.5", w: 1080, h: 2340, seed: 502 },
+        { label: "竖图 9:20", w: 1080, h: 2400, seed: 503 },
+        { label: "竖图 9:21", w: 1080, h: 2520, seed: 504 },
+        { label: "竖图 3:4", w: 1536, h: 2048, seed: 505 },
+        { label: "竖图 相机 4:3", w: 3024, h: 4032, seed: 506 },
+        { label: "竖图 2:3", w: 1360, h: 2040, seed: 507 },
+        { label: "竖图 10:16", w: 1000, h: 1600, seed: 508 },
+        { label: "竖图 720×1280", w: 720, h: 1280, seed: 509 },
+        { label: "竖图 1242×2688", w: 1242, h: 2688, seed: 510 },
+        { label: "竖图 828×1792", w: 828, h: 1792, seed: 511 },
+        { label: "竖图 1440×3120", w: 1440, h: 3120, seed: 512 },
+        { label: "横图 16:9", w: 1920, h: 1080, seed: 601 },
+        { label: "横图 4:3", w: 1600, h: 1200, seed: 602 },
+        { label: "横图 21:9", w: 2520, h: 1080, seed: 603 },
+        { label: "横图 约 2.5:1", w: 2500, h: 1000, seed: 604 },
+        { label: "横图 4032×3024", w: 4032, h: 3024, seed: 605 },
+        { label: "横图 1280×720", w: 1280, h: 720, seed: 606 },
+        { label: "横图 1792×828", w: 1792, h: 828, seed: 607 },
+        { label: "横图 超宽 32:9", w: 3200, h: 900, seed: 608 },
+        { label: "方图 1:1", w: 1440, h: 1440, seed: 701 },
+        { label: "略横 1.2:1", w: 1200, h: 1000, seed: 702 },
+        { label: "略竖 1:1.15", w: 1000, h: 1150, seed: 703 },
+        { label: "竖图 小众 11:20", w: 1188, h: 2160, seed: 704 },
+        { label: "横图 电影 2.39:1", w: 2390, h: 1000, seed: 705 },
+      ];
+
+      function urlFor(item) {
+        return "https://picsum.photos/seed/" + item.seed + "/" + item.w + "/" + item.h;
+      }
+
+      const blurLayer = document.getElementById("blurLayer");
+      const clearImg = document.getElementById("clearImg");
+      const clearLayer = document.getElementById("clearLayer");
+      const sleepOverlay = document.getElementById("sleepOverlay");
+      const powerBtn = document.getElementById("powerBtn");
+      const photoMeta = document.getElementById("photoMeta");
+      const clockEl = document.getElementById("clock");
+      const dateLineEl = document.getElementById("dateLine");
+
+      let index = 0;
+      let asleep = false;
+      /** 与 .sleep-overlay 的 opacity 过渡一致，遮罩全黑后再换图，避免闪屏 */
+      let sleepSwapTimer = null;
+      const OVERLAY_FADE_MS = 450;
+
+      /**
+       * 宽铺满后若理论高度仍低于槽位：相对缺口 = (槽高 − 理论高) / 槽高。
+       * ≤ 此值则改用 cover 消除上下细条（略裁左右）。0.24 比 0.17 更宽松，更多「略矮」竖图会 cover 撑满。
+       */
+      const HEIGHT_SHORTFALL_COVER_RATIO = 0.24;
+
+      /** 整屏壁纸绘制区（与 .clear-layer 可视区域一致，无 padding） */
+      function getSlotContentSize() {
+        var w = clearLayer.clientWidth;
+        var h = clearLayer.clientHeight;
+        return { w: Math.max(0, w), h: Math.max(0, h) };
+      }
+
+      /** 宽撑满槽位时，按原比例应有的显示高度 */
+      function scaledHeightAtFullWidth(item, slotW) {
+        if (item.w <= 0) {
+          return 0;
+        }
+        return (slotW * item.h) / item.w;
+      }
+
+      /**
+       * width-crop：按宽铺满后高度 ≥ 槽位，裁上下。
+       * snap-cover：按宽不够高但缺口小，用 cover 上下撑满。
+       * letterbox：缺口大，宽铺满 + 上下留白。
+       */
+      function computeLayoutMode(item, slot) {
+        var scaledH = scaledHeightAtFullWidth(item, slot.w);
+        if (scaledH >= slot.h - 0.5) {
+          return "width-crop";
+        }
+        var shortfall = slot.h > 0 ? (slot.h - scaledH) / slot.h : 1;
+        if (shortfall <= HEIGHT_SHORTFALL_COVER_RATIO) {
+          return "snap-cover";
+        }
+        return "letterbox";
+      }
+
+      function pad(n) {
+        return n < 10 ? "0" + n : String(n);
+      }
+
+      function tickClock() {
+        const d = new Date();
+        clockEl.textContent = pad(d.getHours()) + ":" + pad(d.getMinutes());
+        const weekdays = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"];
+        dateLineEl.textContent =
+          d.getMonth() + 1 + "月" + d.getDate() + "日 " + weekdays[d.getDay()];
+      }
+
+      function updatePhotoMeta(item) {
+        var slot = getSlotContentSize();
+        var photoAR = item.w / item.h;
+        var scaledH = scaledHeightAtFullWidth(item, slot.w);
+        var mode = computeLayoutMode(item, slot);
+        clearImg.classList.toggle("snap-cover", mode === "snap-cover");
+
+        var shortfallPct =
+          slot.h > 0 ? (((slot.h - scaledH) / slot.h) * 100).toFixed(1) : "—";
+        var verticalFill = mode !== "letterbox";
+        var badgeText;
+        if (mode === "width-crop") {
+          badgeText = "上下：宽优先裁切撑满（理论高 ≥ 槽位高）";
+        } else if (mode === "snap-cover") {
+          badgeText =
+            "上下：cover 撑满（高缺口 " +
+            shortfallPct +
+            "% ≤ " +
+            (HEIGHT_SHORTFALL_COVER_RATIO * 100).toFixed(0) +
+            "%，或略裁左右）";
+        } else {
+          badgeText =
+            "上下：留白 + 模糊底（高缺口 " +
+            shortfallPct +
+            "% &gt; " +
+            (HEIGHT_SHORTFALL_COVER_RATIO * 100).toFixed(0) +
+            "%）";
+        }
+        var badge =
+          "<span class=\"badge " +
+          (verticalFill ? "vfill" : "letterbox") +
+          "\">" +
+          badgeText +
+          "</span>";
+        photoMeta.innerHTML =
+          "当前：<strong>" +
+          item.label +
+          "</strong>（" +
+          item.w +
+          "×" +
+          item.h +
+          "）<br />" +
+          "槽位 ≈ <strong>" +
+          Math.round(slot.w) +
+          "×" +
+          Math.round(slot.h) +
+          "</strong> px；照片宽/高 = <strong>" +
+          photoAR.toFixed(4) +
+          "</strong><br />" +
+          "宽撑满时理论高 ≈ <strong>" +
+          scaledH.toFixed(1) +
+          "</strong> px；相对高缺口 <strong>" +
+          (slot.h > 0 && scaledH < slot.h
+            ? (((slot.h - scaledH) / slot.h) * 100).toFixed(1) + "%"
+            : "0%") +
+          "</strong><br />" +
+          badge;
+      }
+
+      function applyPhoto(i) {
+        const item = SAMPLES[i];
+        const u = urlFor(item);
+
+        clearImg.alt = item.label;
+        clearImg.src = u;
+        blurLayer.style.backgroundImage = "url(\"" + u + "\")";
+        updatePhotoMeta(item);
+      }
+
+      function refreshLayoutForCurrentPhoto() {
+        updatePhotoMeta(SAMPLES[index]);
+      }
+
+      function toggleSleepAndMaybeAdvance() {
+        if (!asleep) {
+          asleep = true;
+          sleepOverlay.classList.add("on");
+          if (sleepSwapTimer !== null) {
+            window.clearTimeout(sleepSwapTimer);
+          }
+          sleepSwapTimer = window.setTimeout(function () {
+            sleepSwapTimer = null;
+            index = (index + 1) % SAMPLES.length;
+            applyPhoto(index);
+          }, OVERLAY_FADE_MS);
+          return;
+        }
+        asleep = false;
+        sleepOverlay.classList.remove("on");
+        if (sleepSwapTimer !== null) {
+          window.clearTimeout(sleepSwapTimer);
+          sleepSwapTimer = null;
+        }
+      }
+
+      powerBtn.addEventListener("click", toggleSleepAndMaybeAdvance);
+
+      var ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(refreshLayoutForCurrentPhoto) : null;
+      if (ro) {
+        ro.observe(clearLayer);
+      }
+      window.addEventListener("resize", refreshLayoutForCurrentPhoto);
+
+      tickClock();
+      setInterval(tickClock, 30 * 1000);
+      applyPhoto(index);
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 删除/订阅卡片右上角按钮、时间气泡等。实际气泡需叠加 blur 10dp -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="#C7000000"/>
+    <corners android:radius="10dp"/>
+</shape>

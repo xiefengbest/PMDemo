@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>壁纸功能区原型 - 中文数据版</title>
+    <!-- 引入 Tailwind CSS 以进行布局控制 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 FontAwesome 图标库 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* 模拟手机屏幕容器 */
+        .phone-container {
+            width: 100%;
+            max-width: 412px;
+            height: 100vh;
+            max-height: 892px;
+            margin: 0 auto;
+            position: relative;
+            overflow: hidden;
+            background-image: url('https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?q=80&w=2144&auto=format&fit=crop'); 
+            background-size: cover;
+            background-position: center;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        /* 底部功能区总容器 */
+        .bottom-panel {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            /* 整体背景渐变 */
+            background: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.2) 20%, rgba(0,0,0,0.65) 100%);
+        }
+
+        /* 1. 资讯区块：最底部，背景色调浅 */
+        .news-footer {
+            background: rgba(0, 0, 0, 0.45); 
+            padding: 20px 24px;
+            width: 100%;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            /* 增加底部距离，适配全面屏底部的 Home Indicator */
+            padding-bottom: calc(env(safe-area-inset-bottom, 32px) + 16px);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .news-content {
+            flex: 1;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.5;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        /* 资讯右侧箭头 */
+        .news-arrow {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 12px;
+        }
+
+        /* 2. 合辑信息区块：左右布局 */
+        .album-section {
+            padding: 0 24px 24px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .album-title {
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            line-height: 1.2;
+        }
+
+        .album-count {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 13px;
+            margin-top: 3px;
+        }
+
+        /* 订阅按钮：圆角矩形，白色背景 */
+        .subscribe-btn {
+            background: #FFFFFF;
+            color: #000000;
+            border-radius: 12px;
+            height: 40px;
+            padding: 0 20px;
+            font-size: 14px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            transition: transform 0.1s;
+            white-space: nowrap;
+        }
+        
+        .subscribe-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* 3. 天气功能区：顶部入口 */
+        .weather-section {
+            padding: 0 24px 20px 24px;
+        }
+
+        .weather-card {
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: 12px;
+            padding: 10px 14px;
+            display: flex;
+            align-items: center;
+            width: fit-content;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: background 0.2s;
+        }
+
+        .weather-card:active {
+            background: rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+
+    <!-- 手机外壳容器 -->
+    <div class="phone-container shadow-2xl">
+        
+        <!-- 顶部状态栏模拟 -->
+        <div class="absolute top-0 w-full p-6 text-white text-opacity-80 flex justify-between text-xs z-10">
+            <span class="font-bold">09:41</span>
+            <div class="flex gap-1.5 items-center">
+                <i class="fas fa-signal"></i>
+                <i class="fas fa-wifi"></i>
+                <i class="fas fa-battery-full text-base"></i>
+            </div>
+        </div>
+
+        <!-- 底部整体功能面板 -->
+        <div class="bottom-panel">
+            
+            <!-- 天气功能入口 -->
+            <div class="weather-section">
+                <div class="weather-card cursor-pointer" onclick="console.log('打开天气')">
+                    <i class="fas fa-cloud-sun text-yellow-400 text-xl mr-3"></i>
+                    <div class="text-white">
+                        <span class="text-sm font-bold">26°C</span>
+                        <span class="text-[10px] opacity-60 ml-1 uppercase tracking-wider">晴朗 · 上海</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 合辑信息与订阅按钮 -->
+            <div class="album-section">
+                <div class="flex flex-col">
+                    <h2 class="album-title">赛博都市系列</h2>
+                    <p class="album-count">18 张精选壁纸</p>
+                </div>
+                
+                <button class="subscribe-btn cursor-pointer">
+                    免费订阅
+                </button>
+            </div>
+
+            <!-- 底部资讯区块 -->
+            <div class="news-footer cursor-pointer" onclick="console.log('打开资讯')">
+                <div class="news-content">
+                    今日要闻：人工智能模型在多模态理解领域再获突破，多家实验室联合发布最新基准测试报告，旨在进一步提升生活质量。
+                </div>
+                <div class="news-arrow">
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+</html>

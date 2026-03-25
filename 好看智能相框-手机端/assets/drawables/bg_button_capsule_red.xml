@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 危险胶囊：解绑、移除订阅等 -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="#FFFEF2F2"/>
+    <corners android:radius="9999dp"/>
+</shape>

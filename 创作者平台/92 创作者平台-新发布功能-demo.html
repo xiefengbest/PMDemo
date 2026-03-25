@@ -1,0 +1,1446 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>92 好看创作者中心 - 壁纸发布</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+        
+        body {
+            font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background-color: #ffffff;
+        }
+
+        .sidebar-item {
+            transition: all 0.2s;
+        }
+        
+        .sidebar-item:hover {
+            color: #1e293b;
+            background-color: #f8fafc;
+        }
+
+        .tab-active {
+            color: #3b82f6;
+            border-bottom: 2px solid #3b82f6;
+        }
+
+        .upload-area {
+            border: 1px dashed #e2e8f0;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-area:hover {
+            border-color: #3b82f6;
+            background-color: #f0f7ff;
+        }
+
+        .upload-area-filled {
+            padding: 0;
+            justify-content: stretch;
+            align-items: stretch;
+            cursor: default;
+        }
+
+        .upload-area-filled:hover {
+            background-color: #ffffff;
+        }
+
+        /* 上传完成后按媒体真实比例展示（不拉伸裁切）；静态空槽仍用下方 aspect-* */
+        .upload-area.upload-area-preview-natural {
+            aspect-ratio: auto;
+            height: auto;
+            min-height: 10rem;
+            overflow: visible;
+        }
+
+        /* 静态与动态空槽同列同宽时使用相同 aspect-ratio，保证灰框对齐 */
+        .pc-container {
+            display: flex;
+            gap: 1rem;
+            align-items: stretch;
+        }
+        .pc-slot {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+        }
+        .aspect-pc-static {
+            aspect-ratio: 16 / 9;
+            width: 100%;
+        }
+
+        .phone-container {
+            display: flex;
+            gap: 1rem;
+            align-items: stretch;
+        }
+        .phone-slot {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+        }
+        .aspect-phone-static {
+            aspect-ratio: 9 / 16;
+            width: 100%;
+        }
+
+        /* 动态槽位不参与布局占位，使内部 upload-area 与静态槽位同级对齐（同宽同比例） */
+        .dynamic-slot {
+            min-width: 0;
+            display: contents;
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        #static-crop-preview-grid {
+            scrollbar-width: thin;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.5rem;
+            align-content: start;
+        }
+
+        .static-crop-canvas-wrap canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .static-crop-preview-cell {
+            cursor: pointer;
+            border: 2px solid transparent;
+            border-radius: 0.5rem;
+            margin: 0;
+            padding: 0.2rem;
+            background: transparent;
+            font: inherit;
+            color: inherit;
+            width: 100%;
+            min-width: 0;
+        }
+
+        .static-crop-preview-cell:hover {
+            border-color: #cbd5e1;
+            background: rgba(248, 250, 252, 0.9);
+        }
+
+        .static-crop-preview-cell.is-active {
+            border-color: #2563eb;
+            background: #eff6ff;
+            box-shadow: 0 0 0 1px #2563eb;
+        }
+
+        #static-crop-main-wrap {
+            box-shadow: 0 4px 24px rgba(15, 23, 42, 0.12);
+            touch-action: none;
+            cursor: grab;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        #static-crop-main-wrap.is-dragging {
+            cursor: grabbing;
+        }
+
+        .static-crop-viewport-overlay {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            border: 1px solid rgba(255, 255, 255, 0.85);
+            border-radius: inherit;
+            box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.08);
+            background-image:
+                linear-gradient(to right, rgba(255, 255, 255, 0.22) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.22) 1px, transparent 1px);
+            background-size: 33.333% 100%, 100% 33.333%;
+        }
+
+    </style>
+</head>
+<body class="text-slate-700 bg-white">
+
+    <div class="min-h-screen flex flex-col">
+        <!-- Header -->
+        <header class="h-14 border-b flex items-center justify-between px-6 sticky top-0 z-50 bg-white">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+                    <span class="text-white font-bold text-lg">92</span>
+                </div>
+                <span class="font-bold text-lg">好看创作者</span>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-full bg-slate-200 overflow-hidden">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="avatar">
+                    </div>
+                    <span class="text-sm font-medium">北冰洋</span>
+                    <i class="fas fa-chevron-down text-[10px] text-slate-400"></i>
+                </div>
+            </div>
+        </header>
+
+        <div class="flex flex-1">
+            <!-- Sidebar -->
+            <aside class="w-56 border-r flex flex-col py-6 sticky top-14 h-[calc(100vh-3.5rem)]">
+                <div class="px-4 mb-6">
+                    <button type="button" class="w-full bg-[#004e7c] text-white py-2.5 rounded-md text-sm font-medium hover:bg-[#003d63]">上传壁纸</button>
+                </div>
+                <nav class="flex-1 px-2 space-y-1">
+                    <a href="#" class="sidebar-item flex items-center px-4 py-3 text-sm text-slate-600 rounded-md">作品数据</a>
+                    <a href="#" class="sidebar-item flex items-center px-4 py-3 text-sm text-slate-600 rounded-md font-semibold bg-slate-50">合辑管理</a>
+                    <a href="#" class="sidebar-item flex items-center px-4 py-3 text-sm text-slate-600 rounded-md border-t mt-4 pt-4">规则</a>
+                </nav>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="flex-1 p-8 flex gap-12 overflow-y-auto">
+                
+                <!-- Form Fields -->
+                <div class="w-[35%] space-y-8">
+                    <div>
+                        <h2 class="text-lg font-bold mb-4">壁纸详情</h2>
+                        <div class="flex gap-6 border-b mb-4">
+                            <button class="pb-2 text-sm font-medium tab-active">中文<span class="text-red-500 ml-1 text-xs">(未填写)</span></button>
+                            <button class="pb-2 text-sm font-medium text-slate-400">英文</button>
+                        </div>
+                        <textarea class="w-full h-32 p-4 border rounded-lg bg-white text-sm outline-none focus:border-blue-400 resize-none" placeholder="描述你的壁纸..."></textarea>
+                    </div>
+
+                    <div class="space-y-3">
+                        <p class="text-sm font-bold">*选择合辑</p>
+                        <div class="w-full p-2 border rounded-md flex items-center justify-between bg-white text-sm">
+                            <span class="bg-slate-100 px-2 py-0.5 rounded flex items-center gap-1">默认合辑 <i class="fas fa-times text-[10px]"></i></span>
+                            <i class="fas fa-chevron-down text-slate-300 text-[10px]"></i>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <p class="text-sm font-bold">*解锁方式</p>
+                        <div class="flex flex-wrap gap-4 items-center">
+                            <label class="flex items-center gap-2 cursor-pointer text-sm"><input type="radio" name="unlock" checked class="w-4 h-4"><span>宝石+抽奖</span></label>
+                            <label class="flex items-center gap-2 cursor-pointer text-sm"><input type="radio" name="unlock" class="w-4 h-4"><span>仅收集</span></label>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <p class="text-sm font-bold">*展示时间</p>
+                        <p class="text-xs text-slate-500 -mt-1">选择壁纸在用户端开始展示的时间</p>
+                        <div class="flex flex-col gap-3">
+                            <label class="flex items-center gap-2 cursor-pointer text-sm">
+                                <input type="radio" name="displaySchedule" value="immediate" checked class="w-4 h-4 accent-blue-600">
+                                <span>立即展示</span>
+                            </label>
+                            <div class="flex flex-col gap-2">
+                                <label class="flex items-center gap-2 cursor-pointer text-sm">
+                                    <input type="radio" name="displaySchedule" value="scheduled" id="display-schedule-scheduled" class="w-4 h-4 accent-blue-600">
+                                    <span>定时展示</span>
+                                </label>
+                                <div id="display-scheduled-fields" class="pl-6 space-y-1.5 hidden">
+                                    <label for="display-scheduled-at" class="sr-only">定时展示开始时间</label>
+                                    <input type="datetime-local" id="display-scheduled-at" name="displayScheduledAt" class="w-full max-w-xs border border-slate-200 rounded-md px-3 py-2 text-sm bg-white focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-400">
+                                    <p class="text-[11px] text-slate-500">到达所选时间后自动对用户可见（以服务端时区为准）</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-4 pt-4 border-t">
+                        <button type="button" id="finalSubmit" class="px-10 py-2 bg-blue-600 text-white rounded font-medium hover:bg-blue-700">上传壁纸</button>
+                        <button class="px-10 py-2 border rounded text-slate-600 hover:bg-slate-50">取消</button>
+                    </div>
+                </div>
+
+                <!-- Upload Area (Resource Groups) -->
+                <div class="flex-1 space-y-12">
+                    
+                    <!-- 1. PC 端 (横版 - 16:9) -->
+                    <div class="space-y-4">
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-desktop text-slate-700"></i>
+                            <span class="font-bold">PC 端资源 (横版屏幕)</span>
+                        </div>
+                        <div class="pc-container">
+                            <div class="pc-slot">
+                                <!-- 静态横版 16:9 -->
+                                <div class="upload-area aspect-pc-static rounded-xl bg-slate-50 border-2 border-slate-100"
+                                    data-upload-kind="image" data-upload-label="PC 横版静态" data-crop-axis="landscape" data-empty-tip="上传横版静态图（弹窗内裁剪比例）" data-tip-class="text-xs">
+                                    <input type="file" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer" onchange="handleFileChange(this)">
+                                    <i class="fas fa-image text-3xl text-slate-300 mb-1 pointer-events-none"></i>
+                                    <p class="text-xs text-slate-400 pointer-events-none">上传横版静态图（弹窗内裁剪）</p>
+                                </div>
+                            </div>
+                            <div class="pc-slot">
+                                <!-- 动态横版 16:9 -->
+                                <div id="pc-dynamic-slot" class="dynamic-slot w-full">
+                                    <div class="upload-area aspect-pc-static rounded-xl bg-indigo-50/30 border-2 border-indigo-100 border-dashed relative"
+                                        data-upload-kind="video" data-upload-label="PC 横版动态" data-dynamic-slot="pc-dynamic-slot" data-video-axis="landscape">
+                                        <span class="absolute top-2 left-2 z-[2] text-[9px] font-medium text-indigo-600/90 bg-white/90 px-1.5 py-0.5 rounded border border-indigo-100 pointer-events-none">选填</span>
+                                        <input type="file" accept="video/*" class="absolute inset-0 opacity-0 cursor-pointer z-[1] js-video-file-input" onchange="handleFileChange(this)">
+                                        <div class="flex flex-col items-center justify-center gap-1 pointer-events-none py-2">
+                                            <i class="fas fa-video text-indigo-300 text-2xl"></i>
+                                            <span class="text-[10px] text-indigo-500 text-center px-2">选填 · 点击上传动态视频</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. 手机端 (竖版 - 9:16) -->
+                    <div class="space-y-4">
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-mobile-screen-button text-slate-700"></i>
+                            <span class="font-bold">手机端资源 (竖版屏幕)</span>
+                        </div>
+                        <div class="phone-container">
+                            <div class="phone-slot">
+                                <!-- 静态竖版 9:16 -->
+                                <div class="upload-area aspect-phone-static rounded-2xl bg-slate-50 border-2 border-slate-100"
+                                    data-upload-kind="image" data-upload-label="手机竖版静态" data-crop-axis="portrait" data-empty-tip="上传竖版静态图（弹窗内裁剪比例）">
+                                    <input type="file" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer" onchange="handleFileChange(this)">
+                                    <i class="fas fa-image text-2xl text-slate-300 mb-1 pointer-events-none"></i>
+                                    <p class="text-[10px] text-slate-400 pointer-events-none">上传竖版静态图（弹窗内裁剪）</p>
+                                </div>
+                            </div>
+                            <div class="phone-slot">
+                                <!-- 动态竖版 9:16 -->
+                                <div id="phone-dynamic-slot" class="dynamic-slot w-full">
+                                    <div class="upload-area aspect-phone-static rounded-2xl bg-indigo-50/30 border-2 border-indigo-100 border-dashed relative"
+                                        data-upload-kind="video" data-upload-label="手机竖版动态" data-dynamic-slot="phone-dynamic-slot" data-video-axis="portrait">
+                                        <span class="absolute top-2 left-2 z-[2] text-[9px] font-medium text-indigo-600/90 bg-white/90 px-1.5 py-0.5 rounded border border-indigo-100 pointer-events-none">选填</span>
+                                        <input type="file" accept="video/*" class="absolute inset-0 opacity-0 cursor-pointer z-[1] js-video-file-input" onchange="handleFileChange(this)">
+                                        <div class="flex flex-col items-center justify-center gap-1 pointer-events-none py-2">
+                                            <i class="fas fa-video text-indigo-300 text-xl"></i>
+                                            <span class="text-[10px] text-indigo-500 text-center px-2">选填 · 点击上传动态视频</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- 静态图裁剪 -->
+    <div id="static-crop-modal" class="fixed inset-0 z-[200] hidden" aria-modal="true" role="dialog" aria-labelledby="static-crop-title">
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-[1px]" id="static-crop-backdrop"></div>
+        <div class="relative flex min-h-full items-center justify-center p-4 pointer-events-none">
+            <div class="pointer-events-auto bg-white rounded-xl shadow-xl max-w-6xl w-full max-h-[92vh] flex flex-col border border-slate-200">
+                <div class="px-4 py-3 border-b border-slate-200 flex items-center justify-between gap-2 shrink-0">
+                    <h3 id="static-crop-title" class="font-semibold text-slate-800 text-sm sm:text-base">裁剪静态素材</h3>
+                    <button type="button" id="static-crop-dismiss" class="p-1.5 rounded-md text-slate-400 hover:bg-slate-100 hover:text-slate-600" aria-label="关闭">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="px-4 py-2 border-b border-slate-100 bg-slate-50/90 shrink-0">
+                    <p class="text-xs text-slate-600 leading-relaxed"><strong class="text-slate-800">左侧</strong>双列展示全部比例缩略图（实时同步）；<strong class="text-slate-800">点击</strong>切换当前比例。<strong class="text-slate-800">右侧</strong>为固定裁剪框，<strong class="text-slate-800">拖动画⾯</strong>调整取景；下方滑块调节缩放。</p>
+                </div>
+                <div class="flex-1 min-h-0 flex flex-col md:flex-row overflow-hidden">
+                    <!-- 左：预览列表 -->
+                    <aside class="w-full md:w-80 lg:w-[22rem] shrink-0 border-b md:border-b-0 md:border-r border-slate-200 bg-slate-50 flex flex-col min-h-0 max-h-[38vh] md:max-h-none">
+                        <div class="px-3 py-2 border-b border-slate-200 shrink-0 flex items-center justify-between gap-2">
+                            <span class="text-xs font-semibold text-slate-700">比例预览</span>
+                            <span class="text-[10px] text-slate-400">双列 · 点击选择</span>
+                        </div>
+                        <div id="static-crop-preview-grid" class="flex-1 min-h-0 overflow-y-auto overscroll-contain p-2.5" role="listbox" aria-label="全部比例预览"></div>
+                    </aside>
+                    <!-- 右：主操作区 -->
+                    <div class="flex-1 flex flex-col min-w-0 min-h-0 bg-white">
+                        <div class="px-4 py-2.5 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2 shrink-0 text-xs text-slate-600">
+                            <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+                                <span>当前比例：<strong id="static-crop-active-label" class="text-slate-900">—</strong></span>
+                                <span class="text-slate-400 hidden sm:inline">|</span>
+                                <span id="static-crop-dim-hint" class="text-slate-500">—</span>
+                            </div>
+                        </div>
+                        <div id="static-crop-editor-stage" class="flex-1 min-h-[min(52vh,420px)] md:min-h-[min(56vh,520px)] flex items-center justify-center p-4 bg-gradient-to-b from-slate-100 to-slate-200/80">
+                            <div id="static-crop-main-wrap" class="relative static-crop-canvas-wrap rounded-lg border-2 border-white overflow-hidden bg-slate-900/5 max-w-full max-h-full">
+                                <canvas id="static-crop-main-canvas" aria-label="当前比例裁剪预览，可拖动画⾯调整位置"></canvas>
+                                <div class="static-crop-viewport-overlay" aria-hidden="true"></div>
+                            </div>
+                        </div>
+                        <div class="px-4 py-3 border-t border-slate-200 space-y-2 shrink-0 bg-white">
+                            <p class="text-[10px] text-slate-500 text-center sm:text-left">在右侧裁剪框内按住拖移画面；双指缩放请使用下方缩放条。</p>
+                            <div class="grid grid-cols-1 gap-3 max-w-md mx-auto sm:mx-0 w-full">
+                                <label class="sr-only">
+                                    <span>水平位置 <span id="static-crop-pan-x-val">50%</span></span>
+                                    <input type="range" id="static-crop-pan-x" min="0" max="100" value="50" class="w-full accent-blue-600" tabindex="-1" aria-hidden="true">
+                                </label>
+                                <label class="sr-only">
+                                    <span>垂直位置 <span id="static-crop-pan-y-val">50%</span></span>
+                                    <input type="range" id="static-crop-pan-y" min="0" max="100" value="50" class="w-full accent-blue-600" tabindex="-1" aria-hidden="true">
+                                </label>
+                                <label class="flex flex-col gap-1 text-[11px] text-slate-600">
+                                    <span class="flex justify-between font-medium text-slate-700"><span>缩放（取景）</span><span id="static-crop-zoom-val">1.0×</span></span>
+                                    <input type="range" id="static-crop-zoom" min="100" max="280" value="100" class="w-full accent-blue-600">
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <img id="static-crop-source-img" alt="" class="hidden" crossorigin="anonymous">
+                <div class="px-4 py-3 border-t border-slate-200 flex flex-wrap items-center justify-between gap-2 shrink-0 bg-slate-50/50">
+                    <p class="text-[10px] text-slate-500 max-w-[14rem] sm:max-w-md">「保存」写入<strong>当前选中比例</strong>；「一键导出」按当前拖移与缩放导出<strong>全部</strong>比例。</p>
+                    <div class="flex flex-wrap justify-end gap-2 w-full sm:w-auto">
+                        <button type="button" id="static-crop-cancel" class="px-4 py-2 border border-slate-200 rounded-lg text-sm text-slate-600 hover:bg-slate-50 bg-white">取消</button>
+                        <button type="button" id="static-crop-confirm-all" class="px-3 py-2 rounded-lg text-sm font-medium border border-blue-200 text-blue-700 bg-white hover:bg-blue-50">一键导出全部比例</button>
+                        <button type="button" id="static-crop-confirm" class="px-5 py-2 rounded-lg text-sm font-medium bg-blue-600 text-white hover:bg-blue-700">保存</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function escapeHtml(str) {
+            if (!str) return '';
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        function escapeAttr(str) {
+            return String(str).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+        }
+
+        /** 静态图裁剪：横版预设（宽:高 → 导出宽高比 = 宽/高） */
+        const STATIC_CROP_PRESETS_LANDSCAPE = [
+            { label: '1 : 1', r: 1 },
+            { label: '22 : 9', r: 22 / 9 },
+            { label: '21 : 9', r: 21 / 9 },
+            { label: '19 : 9', r: 19 / 9 },
+            { label: '18 : 9（2 : 1）', r: 18 / 9 },
+            { label: '17 : 9', r: 17 / 9 },
+            { label: '16 : 9', r: 16 / 9 },
+            { label: '15 : 9', r: 15 / 9 },
+            { label: '14 : 9', r: 14 / 9 },
+            { label: '12 : 9（4 : 3）', r: 12 / 9 },
+            { label: '11 : 9', r: 11 / 9 },
+            { label: '10 : 9', r: 10 / 9 },
+        ];
+
+        /** 静态图裁剪：竖版预设（9 : H → 导出宽高比 = 9/H） */
+        const STATIC_CROP_PRESETS_PORTRAIT = [
+            { label: '1 : 1', r: 1 },
+            { label: '9 : 23', r: 9 / 23 },
+            { label: '9 : 22', r: 9 / 22 },
+            { label: '9 : 21', r: 9 / 21 },
+            { label: '9 : 20', r: 9 / 20 },
+            { label: '9 : 19.5', r: 9 / 19.5 },
+            { label: '9 : 19', r: 9 / 19 },
+            { label: '9 : 18', r: 9 / 18 },
+            { label: '9 : 17', r: 9 / 17 },
+            { label: '9 : 16', r: 9 / 16 },
+            { label: '9 : 15', r: 9 / 15 },
+            { label: '9 : 14.4（10 : 16）', r: 9 / 14.4 },
+            { label: '9 : 14', r: 9 / 14 },
+            { label: '9 : 13.7', r: 9 / 13.7 },
+            { label: '9 : 12.9', r: 9 / 12.9 },
+            { label: '9 : 12', r: 9 / 12 },
+            { label: '9 : 11', r: 9 / 11 },
+            { label: '9 : 10', r: 9 / 10 },
+        ];
+
+        const staticCropState = {
+            blobUrl: null,
+            uploadArea: null,
+            originalName: '',
+            label: '',
+            presets: null,
+            activePresetIndex: 0,
+            panX: 0.5,
+            panY: 0.5,
+            zoom: 1,
+            previewRedrawScheduled: false,
+            previewResizeObserver: null,
+            cropDrag: null,
+        };
+
+        function readStaticCropPanZoom() {
+            const rx = document.getElementById('static-crop-pan-x');
+            const ry = document.getElementById('static-crop-pan-y');
+            const rz = document.getElementById('static-crop-zoom');
+            const x = rx ? parseInt(rx.value, 10) / 100 : 0.5;
+            const y = ry ? parseInt(ry.value, 10) / 100 : 0.5;
+            const z = rz ? parseInt(rz.value, 10) / 100 : 1;
+            return {
+                panX: Math.max(0, Math.min(1, x)),
+                panY: Math.max(0, Math.min(1, y)),
+                zoom: Math.max(1, Math.min(2.8, z)),
+            };
+        }
+
+        function updateStaticCropSliderLabels() {
+            const { panX, panY, zoom } = readStaticCropPanZoom();
+            const lx = document.getElementById('static-crop-pan-x-val');
+            const ly = document.getElementById('static-crop-pan-y-val');
+            const lz = document.getElementById('static-crop-zoom-val');
+            if (lx) lx.textContent = `${Math.round(panX * 100)}%`;
+            if (ly) ly.textContent = `${Math.round(panY * 100)}%`;
+            if (lz) lz.textContent = `${zoom.toFixed(1)}×`;
+        }
+
+        /** 当前缩放与比例下，源图上的裁剪窗口尺寸与可平移范围（与 computeCropSourceRect 一致） */
+        function getStaticCropWindowSize(nw, nh, outAspect, zoom) {
+            const z = Math.max(1, Math.min(zoom, 4));
+            let sw;
+            let sh;
+            const ir = nw / nh;
+            if (ir >= outAspect) {
+                sh = nh;
+                sw = sh * outAspect;
+            } else {
+                sw = nw;
+                sh = sw / outAspect;
+            }
+            sw /= z;
+            sh /= z;
+            sw = Math.min(sw, nw);
+            sh = Math.min(sh, nh);
+            const maxSx = Math.max(0, nw - sw);
+            const maxSy = Math.max(0, nh - sh);
+            return { sw, sh, maxSx, maxSy };
+        }
+
+        /**
+         * 在原图中取宽高比为 outAspect（宽/高）的轴对齐裁剪框；zoom>1 缩小取景；pan 0~1 在可移动范围内插值。
+         */
+        function computeCropSourceRect(nw, nh, outAspect, panX, panY, zoom) {
+            const { sw, sh, maxSx, maxSy } = getStaticCropWindowSize(nw, nh, outAspect, zoom);
+            const sx = maxSx * panX;
+            const sy = maxSy * panY;
+            return { sx, sy, sw, sh };
+        }
+
+        function drawStaticCropOnCanvas(canvas, img, aspectR, panX, panY, zoom) {
+            const nw = img.naturalWidth;
+            const nh = img.naturalHeight;
+            if (!nw || !nh || !canvas) return;
+            const wrap = canvas.parentElement;
+            const cw = Math.max(1, Math.floor(wrap.clientWidth));
+            const ch = Math.max(1, Math.floor(wrap.clientHeight));
+            const dpr = Math.min(2, window.devicePixelRatio || 1);
+            canvas.width = Math.floor(cw * dpr);
+            canvas.height = Math.floor(ch * dpr);
+            const ctx = canvas.getContext('2d');
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.scale(dpr, dpr);
+            const rect = computeCropSourceRect(nw, nh, aspectR, panX, panY, zoom);
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+            ctx.drawImage(img, rect.sx, rect.sy, rect.sw, rect.sh, 0, 0, cw, ch);
+        }
+
+        function scheduleRedrawAllStaticCropPreviews() {
+            if (staticCropState.previewRedrawScheduled) return;
+            staticCropState.previewRedrawScheduled = true;
+            requestAnimationFrame(() => {
+                staticCropState.previewRedrawScheduled = false;
+                redrawAllStaticCropPreviews();
+            });
+        }
+
+        function updateStaticCropHeaderMeta() {
+            const img = document.getElementById('static-crop-source-img');
+            const labelEl = document.getElementById('static-crop-active-label');
+            const dimEl = document.getElementById('static-crop-dim-hint');
+            if (!staticCropState.presets || !img || !img.naturalWidth) return;
+            const preset = staticCropState.presets[staticCropState.activePresetIndex];
+            if (!preset) return;
+            if (labelEl) labelEl.textContent = preset.label;
+            const { panX, panY, zoom } = readStaticCropPanZoom();
+            const rect = computeCropSourceRect(img.naturalWidth, img.naturalHeight, preset.r, panX, panY, zoom);
+            if (dimEl) dimEl.textContent = `导出约 ${Math.round(rect.sw)} × ${Math.round(rect.sh)} px`;
+        }
+
+        function redrawMainEditorCanvas() {
+            const img = document.getElementById('static-crop-source-img');
+            const canvas = document.getElementById('static-crop-main-canvas');
+            const stage = document.getElementById('static-crop-editor-stage');
+            const wrap = document.getElementById('static-crop-main-wrap');
+            if (!img || !img.naturalWidth || !canvas || !stage || !wrap || !staticCropState.presets) return;
+            const preset = staticCropState.presets[staticCropState.activePresetIndex];
+            if (!preset) return;
+            const r = preset.r;
+            const pad = 8;
+            const maxW = Math.max(160, stage.clientWidth - pad * 2);
+            const maxH = Math.max(160, stage.clientHeight - pad * 2);
+            let cw;
+            let ch;
+            if (r >= maxW / maxH) {
+                cw = maxW;
+                ch = cw / r;
+            } else {
+                ch = maxH;
+                cw = ch * r;
+            }
+            cw = Math.max(80, Math.floor(cw));
+            ch = Math.max(80, Math.floor(ch));
+            wrap.style.width = `${cw}px`;
+            wrap.style.height = `${ch}px`;
+            const { panX, panY, zoom } = readStaticCropPanZoom();
+            drawStaticCropOnCanvas(canvas, img, r, panX, panY, zoom);
+            updateStaticCropHeaderMeta();
+        }
+
+        function syncActivePreviewCells() {
+            const grid = document.getElementById('static-crop-preview-grid');
+            if (!grid) return;
+            grid.querySelectorAll('.static-crop-preview-cell').forEach((el) => {
+                const idx = parseInt(el.getAttribute('data-crop-index'), 10);
+                const on = idx === staticCropState.activePresetIndex;
+                el.classList.toggle('is-active', on);
+                el.setAttribute('aria-selected', on ? 'true' : 'false');
+            });
+        }
+
+        function onStaticCropViewportPointerDown(e) {
+            if (e.button !== 0) return;
+            const modal = document.getElementById('static-crop-modal');
+            if (!modal || modal.classList.contains('hidden')) return;
+            const img = document.getElementById('static-crop-source-img');
+            if (!img || !img.naturalWidth || !staticCropState.presets) return;
+            const preset = staticCropState.presets[staticCropState.activePresetIndex];
+            if (!preset) return;
+            const wrap = document.getElementById('static-crop-main-wrap');
+            if (!wrap) return;
+            const { panX, panY, zoom } = readStaticCropPanZoom();
+            staticCropState.cropDrag = {
+                pointerId: e.pointerId,
+                startX: e.clientX,
+                startY: e.clientY,
+                startPanX: panX,
+                startPanY: panY,
+                zoom,
+                aspectR: preset.r,
+            };
+            wrap.classList.add('is-dragging');
+            try {
+                wrap.setPointerCapture(e.pointerId);
+            } catch (err) { /* ignore */ }
+            e.preventDefault();
+        }
+
+        function onStaticCropViewportPointerMove(e) {
+            const d = staticCropState.cropDrag;
+            if (!d || e.pointerId !== d.pointerId) return;
+            const wrap = document.getElementById('static-crop-main-wrap');
+            const img = document.getElementById('static-crop-source-img');
+            if (!wrap || !img || !img.naturalWidth) return;
+            const Vw = wrap.clientWidth;
+            const Vh = wrap.clientHeight;
+            if (Vw < 1 || Vh < 1) return;
+            const nw = img.naturalWidth;
+            const nh = img.naturalHeight;
+            const { sw, sh, maxSx, maxSy } = getStaticCropWindowSize(nw, nh, d.aspectR, d.zoom);
+            const dx = e.clientX - d.startX;
+            const dy = e.clientY - d.startY;
+            let sx = maxSx * d.startPanX - (dx * sw) / Vw;
+            let sy = maxSy * d.startPanY - (dy * sh) / Vh;
+            sx = Math.max(0, Math.min(maxSx, sx));
+            sy = Math.max(0, Math.min(maxSy, sy));
+            const panX = maxSx > 1e-9 ? sx / maxSx : d.startPanX;
+            const panY = maxSy > 1e-9 ? sy / maxSy : d.startPanY;
+            const px = document.getElementById('static-crop-pan-x');
+            const py = document.getElementById('static-crop-pan-y');
+            if (px) px.value = String(Math.round(panX * 100));
+            if (py) py.value = String(Math.round(panY * 100));
+            updateStaticCropSliderLabels();
+            scheduleRedrawAllStaticCropPreviews();
+            e.preventDefault();
+        }
+
+        function onStaticCropViewportPointerUp(e) {
+            const d = staticCropState.cropDrag;
+            if (!d || e.pointerId !== d.pointerId) return;
+            const wrap = document.getElementById('static-crop-main-wrap');
+            if (wrap) {
+                wrap.classList.remove('is-dragging');
+                try {
+                    wrap.releasePointerCapture(e.pointerId);
+                } catch (err) { /* ignore */ }
+            }
+            staticCropState.cropDrag = null;
+        }
+
+        function onStaticCropViewportLostCapture() {
+            staticCropState.cropDrag = null;
+            const wrap = document.getElementById('static-crop-main-wrap');
+            if (wrap) wrap.classList.remove('is-dragging');
+        }
+
+        function redrawAllStaticCropPreviews() {
+            const img = document.getElementById('static-crop-source-img');
+            if (!img || !img.naturalWidth || !staticCropState.presets) return;
+            const { panX, panY, zoom } = readStaticCropPanZoom();
+            staticCropState.panX = panX;
+            staticCropState.panY = panY;
+            staticCropState.zoom = zoom;
+            const grid = document.getElementById('static-crop-preview-grid');
+            if (!grid) return;
+            const canvases = grid.querySelectorAll('canvas[data-crop-preview]');
+            staticCropState.presets.forEach((p, i) => {
+                const c = canvases[i];
+                if (c) drawStaticCropOnCanvas(c, img, p.r, panX, panY, zoom);
+            });
+            redrawMainEditorCanvas();
+            syncActivePreviewCells();
+        }
+
+        function exportStaticCropToBlob(img, aspectR, panX, panY, zoom, maxEdge, quality) {
+            const nw = img.naturalWidth;
+            const nh = img.naturalHeight;
+            if (!nw || !nh) return Promise.resolve(null);
+            const rect = computeCropSourceRect(nw, nh, aspectR, panX, panY, zoom);
+            let outW = rect.sw;
+            let outH = rect.sh;
+            const m = Math.max(outW, outH);
+            if (m > maxEdge) {
+                const s = maxEdge / m;
+                outW *= s;
+                outH *= s;
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = Math.max(1, Math.round(outW));
+            canvas.height = Math.max(1, Math.round(outH));
+            const ctx = canvas.getContext('2d');
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+            ctx.drawImage(img, rect.sx, rect.sy, rect.sw, rect.sh, 0, 0, canvas.width, canvas.height);
+            return new Promise((resolve) => {
+                canvas.toBlob((blob) => resolve(blob), 'image/jpeg', quality);
+            });
+        }
+
+        function renderStaticCropPreviewGrid(presets) {
+            const grid = document.getElementById('static-crop-preview-grid');
+            if (!grid) return;
+            const maxW = 58;
+            grid.innerHTML = presets.map((p, i) => {
+                const r = p.r;
+                let w;
+                let h;
+                if (r >= 1) {
+                    w = maxW;
+                    h = Math.round(maxW / r);
+                } else {
+                    h = maxW;
+                    w = Math.round(maxW * r);
+                }
+                h = Math.max(40, h);
+                w = Math.max(40, w);
+                return `
+                    <button type="button" role="option" class="static-crop-preview-cell flex flex-col gap-1.5 items-center text-left${i === 0 ? ' is-active' : ''}"
+                        data-crop-index="${i}" title="${escapeAttr(p.label)}" aria-selected="${i === 0 ? 'true' : 'false'}">
+                        <div class="static-crop-canvas-wrap rounded-md border border-slate-200 overflow-hidden bg-slate-200 shadow-sm shrink-0" style="width:${w}px;height:${h}px;">
+                            <canvas data-crop-preview="1" aria-hidden="true"></canvas>
+                        </div>
+                        <span class="text-[10px] text-slate-600 text-center leading-tight px-0.5 w-full break-words">${escapeHtml(p.label)}</span>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function teardownStaticCropModal() {
+            staticCropState.cropDrag = null;
+            const mainWrapClear = document.getElementById('static-crop-main-wrap');
+            if (mainWrapClear) mainWrapClear.classList.remove('is-dragging');
+            if (staticCropState.previewResizeObserver) {
+                staticCropState.previewResizeObserver.disconnect();
+                staticCropState.previewResizeObserver = null;
+            }
+            if (staticCropState.blobUrl) {
+                URL.revokeObjectURL(staticCropState.blobUrl);
+                staticCropState.blobUrl = null;
+            }
+            const img = document.getElementById('static-crop-source-img');
+            if (img) img.removeAttribute('src');
+            const grid = document.getElementById('static-crop-preview-grid');
+            if (grid) grid.innerHTML = '';
+            const modal = document.getElementById('static-crop-modal');
+            if (modal) modal.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+            staticCropState.uploadArea = null;
+            staticCropState.originalName = '';
+            staticCropState.label = '';
+            staticCropState.presets = null;
+            staticCropState.activePresetIndex = 0;
+        }
+
+        function openStaticCropModal(file, uploadArea) {
+            teardownStaticCropModal();
+            staticCropState.uploadArea = uploadArea;
+            staticCropState.originalName = file.name || 'image.jpg';
+            staticCropState.label = uploadArea.dataset.uploadLabel || '';
+
+            const axis = uploadArea.dataset.cropAxis === 'portrait' ? 'portrait' : 'landscape';
+            const presets = axis === 'portrait' ? STATIC_CROP_PRESETS_PORTRAIT : STATIC_CROP_PRESETS_LANDSCAPE;
+            staticCropState.presets = presets;
+            staticCropState.activePresetIndex = 0;
+
+            const titleEl = document.getElementById('static-crop-title');
+            if (titleEl) titleEl.textContent = axis === 'portrait' ? '上传竖图' : '上传横图';
+
+            const px = document.getElementById('static-crop-pan-x');
+            const py = document.getElementById('static-crop-pan-y');
+            const pz = document.getElementById('static-crop-zoom');
+            if (px) px.value = '50';
+            if (py) py.value = '50';
+            if (pz) pz.value = '100';
+            updateStaticCropSliderLabels();
+
+            renderStaticCropPreviewGrid(presets);
+
+            staticCropState.blobUrl = URL.createObjectURL(file);
+            const img = document.getElementById('static-crop-source-img');
+            img.src = staticCropState.blobUrl;
+
+            document.getElementById('static-crop-modal').classList.remove('hidden');
+            document.body.classList.add('overflow-hidden');
+
+            const stageEl = document.getElementById('static-crop-editor-stage');
+            if (stageEl && typeof ResizeObserver !== 'undefined') {
+                staticCropState.previewResizeObserver = new ResizeObserver(() => scheduleRedrawAllStaticCropPreviews());
+                staticCropState.previewResizeObserver.observe(stageEl);
+            }
+
+            const onReady = () => {
+                updateStaticCropSliderLabels();
+                redrawAllStaticCropPreviews();
+            };
+
+            if (img.complete && img.naturalWidth) {
+                requestAnimationFrame(onReady);
+            } else {
+                img.onload = () => {
+                    img.onload = null;
+                    requestAnimationFrame(onReady);
+                };
+            }
+        }
+
+        function cancelStaticCropModal() {
+            teardownStaticCropModal();
+        }
+
+        async function confirmStaticCropModalAllRatios() {
+            const img = document.getElementById('static-crop-source-img');
+            if (!img || !img.naturalWidth || !staticCropState.presets || !staticCropState.presets.length) return;
+            const presets = staticCropState.presets;
+            const n = presets.length;
+            if (!window.confirm(`将按当前拖移与缩放取景，导出本组全部 ${n} 个比例的 JPG（连续下载）。\n\n请在浏览器中允许下载多个文件。是否继续？`)) {
+                return;
+            }
+            const { panX, panY, zoom } = readStaticCropPanZoom();
+            const base = (staticCropState.originalName || 'wallpaper').replace(/\.[^.]+$/, '');
+
+            for (let i = 0; i < presets.length; i++) {
+                const p = presets[i];
+                const blob = await exportStaticCropToBlob(img, p.r, panX, panY, zoom, 4096, 0.92);
+                if (!blob) continue;
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${base}_${String(i + 1).padStart(2, '0')}.jpg`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(url);
+                await new Promise((r) => setTimeout(r, 400));
+            }
+        }
+
+        function confirmStaticCropModal() {
+            const img = document.getElementById('static-crop-source-img');
+            if (!img || !img.naturalWidth || !staticCropState.uploadArea || !staticCropState.presets) return;
+            const idx = staticCropState.activePresetIndex;
+            const preset = staticCropState.presets[idx];
+            if (!preset) return;
+            const { panX, panY, zoom } = readStaticCropPanZoom();
+            exportStaticCropToBlob(img, preset.r, panX, panY, zoom, 4096, 0.92).then((blob) => {
+                if (!blob) {
+                    window.alert('导出图片失败，请重试。');
+                    return;
+                }
+                const area = staticCropState.uploadArea;
+                const name = staticCropState.originalName;
+                const label = staticCropState.label;
+                teardownStaticCropModal();
+                applyStaticImageAfterCrop(area, blob, name, label);
+            });
+        }
+
+        function applyStaticImageAfterCrop(parent, blob, displayName, label) {
+            if (!parent || !blob) return;
+            revokeUploadPreview(parent);
+            const objectUrl = URL.createObjectURL(blob);
+            parent.dataset.objectUrl = objectUrl;
+            const base = (displayName || 'image').replace(/\.[^.]+$/, '');
+            const safeName = `${base}.jpg`;
+            const accept = 'image/*';
+
+            parent.classList.remove('aspect-pc-static', 'aspect-phone-static');
+            parent.innerHTML = `
+                <div class="flex flex-col w-full">
+                    <div class="w-full flex items-center justify-center bg-slate-100 p-2 min-h-[8rem] overflow-x-auto overflow-y-auto">
+                        <img src="${objectUrl}" alt="" class="max-w-full w-auto h-auto object-contain block max-h-[min(65vh,32rem)]">
+                    </div>
+                    <div class="relative z-10 flex items-center gap-2 px-2 py-2 bg-white border-t border-slate-200 text-[11px] shrink-0">
+                        <span class="flex-1 min-w-0 truncate text-slate-600" title="${escapeAttr(safeName)}">${escapeHtml(safeName)}</span>
+                        <span class="text-slate-300">|</span>
+                        <label class="text-blue-600 hover:text-blue-700 cursor-pointer whitespace-nowrap shrink-0 font-medium">重传
+                            <input type="file" accept="${accept}" class="sr-only" onchange="handleFileChange(this)">
+                        </label>
+                        <span class="text-slate-300">|</span>
+                        <button type="button" class="text-red-500 hover:text-red-600 whitespace-nowrap shrink-0 font-medium" onclick="event.stopPropagation(); clearUploadArea(this.closest('.upload-area'))">删除</button>
+                    </div>
+                    <p class="sr-only">${escapeHtml(label)} 已裁剪</p>
+                </div>
+            `;
+            parent.classList.add('upload-area-filled', 'upload-area-preview-natural', 'bg-white', 'border-solid', 'border-slate-200');
+            parent.classList.remove('bg-slate-50', 'bg-indigo-50/30', 'border-dashed', 'border-slate-100', 'border-indigo-100');
+        }
+
+        /** 相对误差阈值：实际宽高比与目标比在 ±5% 内视为通过 */
+        const ASPECT_RATIO_TOLERANCE = 0.05;
+
+        function gcdInt(a, b) {
+            a = Math.abs(Math.round(a));
+            b = Math.abs(Math.round(b));
+            while (b) {
+                const t = b;
+                b = a % b;
+                a = t;
+            }
+            return a || 1;
+        }
+
+        function simplifyRatioLabel(width, height) {
+            const g = gcdInt(width, height);
+            return `${Math.round(width / g)}:${Math.round(height / g)}`;
+        }
+
+        function parseExpectedAspect(area) {
+            const raw = area && area.dataset.expectedAspect;
+            if (!raw || !String(raw).includes(':')) return null;
+            const parts = String(raw).split(':').map((x) => parseFloat(x.trim()));
+            const w = parts[0];
+            const h = parts[1];
+            if (!w || !h || w <= 0 || h <= 0 || !isFinite(w) || !isFinite(h)) return null;
+            return { label: String(raw).trim(), ratio: w / h };
+        }
+
+        function aspectRatioMatches(width, height, expected) {
+            if (!width || !height || !expected) return true;
+            const actual = width / height;
+            const rel = Math.abs(actual - expected.ratio) / expected.ratio;
+            return rel <= ASPECT_RATIO_TOLERANCE;
+        }
+
+        function getImageDimensions(file) {
+            return new Promise((resolve, reject) => {
+                const url = URL.createObjectURL(file);
+                const img = new Image();
+                img.onload = () => {
+                    URL.revokeObjectURL(url);
+                    resolve({ width: img.naturalWidth, height: img.naturalHeight });
+                };
+                img.onerror = () => {
+                    URL.revokeObjectURL(url);
+                    reject(new Error('image'));
+                };
+                img.src = url;
+            });
+        }
+
+        function getVideoDimensions(file) {
+            return new Promise((resolve, reject) => {
+                const url = URL.createObjectURL(file);
+                const video = document.createElement('video');
+                video.muted = true;
+                video.preload = 'metadata';
+                const cleanup = () => {
+                    try {
+                        video.removeAttribute('src');
+                        video.load();
+                    } catch (e) { /* ignore */ }
+                    URL.revokeObjectURL(url);
+                };
+                video.onloadedmetadata = () => {
+                    const w = video.videoWidth;
+                    const h = video.videoHeight;
+                    cleanup();
+                    resolve({ width: w, height: h });
+                };
+                video.onerror = () => {
+                    cleanup();
+                    reject(new Error('video'));
+                };
+                video.src = url;
+            });
+        }
+
+        /**
+         * 按槽位 data-expected-aspect 校验资源宽高比；不通过时弹窗确认是否仍要使用。
+         * @returns {Promise<boolean>}
+         */
+        async function validateResourceAspect(area, file) {
+            const expected = parseExpectedAspect(area);
+            if (!expected || !file) return true;
+
+            let dims;
+            try {
+                if (file.type.startsWith('video/')) {
+                    dims = await getVideoDimensions(file);
+                } else if (file.type.startsWith('image/')) {
+                    dims = await getImageDimensions(file);
+                } else {
+                    return true;
+                }
+            } catch (e) {
+                window.alert('无法读取该文件的宽高信息，请更换文件后重试。');
+                return false;
+            }
+
+            const w = dims.width;
+            const h = dims.height;
+            if (!w || !h) {
+                window.alert('无法读取该文件的宽高信息，请更换文件后重试。');
+                return false;
+            }
+
+            if (aspectRatioMatches(w, h, expected)) return true;
+
+            const actualLabel = simplifyRatioLabel(w, h);
+            const msg = `当前资源分辨率为 ${w}×${h}（约 ${actualLabel}），本槽位建议宽高比为 ${expected.label}。\n\n比例相差较大时，在客户端可能被裁切或出现留白。是否仍要继续使用？`;
+            return window.confirm(msg);
+        }
+
+        function revokeCoverOnly(area) {
+            if (!area) return;
+            const u = area.dataset.coverObjectUrl;
+            if (u) {
+                URL.revokeObjectURL(u);
+                delete area.dataset.coverObjectUrl;
+            }
+        }
+
+        function revokeUploadPreview(area) {
+            if (!area) return;
+            revokeCoverOnly(area);
+            const url = area.dataset.objectUrl;
+            if (url) {
+                URL.revokeObjectURL(url);
+                delete area.dataset.objectUrl;
+            }
+        }
+
+        /**
+         * 从视频截取一帧为 JPEG Blob URL（用于默认封面）
+         */
+        function extractVideoFirstFrame(videoSrc, callback) {
+            const video = document.createElement('video');
+            video.muted = true;
+            video.playsInline = true;
+            video.preload = 'metadata';
+            video.setAttribute('playsinline', '');
+            video.src = videoSrc;
+
+            function finish(blobUrl) {
+                try {
+                    video.removeAttribute('src');
+                    video.load();
+                } catch (e) { /* ignore */ }
+                video.remove();
+                callback(blobUrl);
+            }
+
+            video.onerror = () => finish(null);
+
+            video.onloadedmetadata = () => {
+                const dur = video.duration;
+                let t = 0.05;
+                if (dur && !isNaN(dur) && isFinite(dur) && dur > 0) {
+                    t = Math.min(0.25, Math.max(0.05, dur * 0.02));
+                }
+                const onSeeked = () => {
+                    try {
+                        const w = video.videoWidth;
+                        const h = video.videoHeight;
+                        if (!w || !h) {
+                            finish(null);
+                            return;
+                        }
+                        const canvas = document.createElement('canvas');
+                        canvas.width = w;
+                        canvas.height = h;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(video, 0, 0);
+                        canvas.toBlob((blob) => {
+                            if (blob) {
+                                finish(URL.createObjectURL(blob));
+                            } else {
+                                finish(null);
+                            }
+                        }, 'image/jpeg', 0.88);
+                    } catch (e) {
+                        finish(null);
+                    }
+                };
+                video.addEventListener('seeked', onSeeked, { once: true });
+                try {
+                    video.currentTime = t;
+                } catch (e) {
+                    finish(null);
+                }
+            };
+        }
+
+        function buildVideoFilledHtml(objectUrl, slotId, label, fileName, videoAccept, isPhoneLayout) {
+            const closeSlotBtn = slotId
+                ? `<button type="button" class="absolute top-2 right-2 text-white drop-shadow-md z-20 hover:opacity-90 pointer-events-auto" onclick="event.stopPropagation(); clearUploadArea(this.closest('.upload-area'))" aria-label="清空动态资源"><i class="fas fa-times-circle text-lg"></i></button>`
+                : '';
+
+            const thumbCore = `
+                <img src="" alt="" class="js-cover-preview absolute inset-0 w-full h-full object-contain hidden bg-slate-100">
+                <div class="js-cover-loading absolute inset-0 flex items-center justify-center text-[8px] text-slate-500 bg-slate-100 leading-tight px-0.5 text-center">封面生成中…</div>
+                <div class="js-cover-placeholder absolute inset-0 flex items-center justify-center text-[8px] text-slate-500 text-center p-0.5 hidden">请上传</div>
+            `;
+
+            const fileInputAccept = 'image/jpeg,image/png,image/webp,image/gif,.gif';
+
+            const bottomBar = `
+                <div class="relative z-10 flex items-center gap-2 px-2 py-2 bg-white border-t border-slate-200 text-[11px] shrink-0">
+                    <span class="flex-1 min-w-0 truncate text-slate-600" title="${escapeAttr(fileName)}">${escapeHtml(fileName)}</span>
+                    <span class="text-slate-300">|</span>
+                    <button type="button" class="text-blue-600 hover:text-blue-700 whitespace-nowrap shrink-0 font-medium bg-transparent border-0 p-0 cursor-pointer" onclick="event.stopPropagation(); (function(a){ const i=a.querySelector('.js-video-file-input'); if(i){ i.value=''; i.click(); } })(this.closest('.upload-area'));">重传视频</button>
+                    <span class="text-slate-300">|</span>
+                    <button type="button" class="text-red-500 hover:text-red-600 whitespace-nowrap shrink-0 font-medium" onclick="event.stopPropagation(); clearUploadArea(this.closest('.upload-area'))">删除</button>
+                </div>
+            `;
+
+            const fileInputHidden = `<input type="file" accept="${videoAccept}" class="sr-only js-video-file-input" onchange="handleFileChange(this)">`;
+
+            const coverThumbWrapClass = isPhoneLayout
+                ? 'relative w-full max-h-[5.5rem] aspect-[9/16] mx-auto rounded-md border border-slate-200 overflow-hidden bg-slate-100 shrink-0'
+                : 'relative w-full aspect-video max-h-[4rem] rounded-md border border-slate-200 overflow-hidden bg-slate-100 shrink-0';
+
+            return `
+                ${fileInputHidden}
+                <div class="flex flex-col w-full">
+                    <div class="flex flex-1 min-h-[10rem] flex-row min-w-0 w-full">
+                        <div class="relative flex-1 min-w-0 min-h-0 flex items-center justify-center bg-slate-900/5 p-2 overflow-x-auto overflow-y-auto">
+                            ${closeSlotBtn}
+                            <video src="${objectUrl}" class="js-main-video max-w-full max-h-[min(50vh,24rem)] w-auto h-auto object-contain" muted playsinline controls preload="metadata"></video>
+                        </div>
+                        <aside class="js-cover-sidebar shrink-0 w-[7.25rem] sm:w-[8.5rem] flex flex-col items-stretch gap-2 py-2 px-2 border-l border-slate-200 bg-slate-50" aria-label="封面设置">
+                            <span class="text-[9px] font-semibold text-slate-500 text-center">封面</span>
+                            <div class="${coverThumbWrapClass}">${thumbCore}</div>
+                            <label class="flex flex-col items-center gap-0.5 cursor-pointer text-center leading-snug px-0.5">
+                                <span class="text-[9px] text-blue-600 hover:text-blue-700 font-medium">更换封面</span>
+                                <span class="text-[8px] text-slate-500 leading-tight">支持 JPEG、PNG、WebP、GIF</span>
+                                <input type="file" accept="${fileInputAccept}" class="sr-only" onchange="handleCoverFileChange(this)">
+                            </label>
+                        </aside>
+                    </div>
+                    ${bottomBar}
+                    <p class="sr-only">${escapeHtml(label)} 已选择</p>
+                </div>
+            `;
+        }
+
+        function applyCoverToVideoArea(area, coverUrl) {
+            if (!area || !coverUrl) return;
+            const img = area.querySelector('.js-cover-preview');
+            const vid = area.querySelector('.js-main-video');
+            const loading = area.querySelector('.js-cover-loading');
+            const placeholder = area.querySelector('.js-cover-placeholder');
+            if (img) {
+                img.src = coverUrl;
+                img.classList.remove('hidden');
+            }
+            if (vid) vid.poster = coverUrl;
+            if (loading) loading.classList.add('hidden');
+            if (placeholder) placeholder.classList.add('hidden');
+        }
+
+        function showCoverPlaceholder(area) {
+            const img = area.querySelector('.js-cover-preview');
+            const vid = area.querySelector('.js-main-video');
+            const loading = area.querySelector('.js-cover-loading');
+            const placeholder = area.querySelector('.js-cover-placeholder');
+            if (img) {
+                img.removeAttribute('src');
+                img.classList.add('hidden');
+            }
+            if (vid) vid.removeAttribute('poster');
+            if (loading) loading.classList.add('hidden');
+            if (placeholder) placeholder.classList.remove('hidden');
+        }
+
+        async function handleCoverFileChange(input) {
+            const area = input.closest('.upload-area');
+            if (!area || !input.files || !input.files[0]) return;
+            const file = input.files[0];
+            if (!file.type.startsWith('image/')) {
+                input.value = '';
+                return;
+            }
+            const pass = await validateResourceAspect(area, file);
+            input.value = '';
+            if (!pass) return;
+
+            revokeCoverOnly(area);
+            const url = URL.createObjectURL(file);
+            area.dataset.coverObjectUrl = url;
+            applyCoverToVideoArea(area, url);
+        }
+
+        function buildEmptyUploadInner(parent) {
+            const kind = parent.dataset.uploadKind || 'image';
+            const tip = parent.dataset.emptyTip || '';
+            const slotId = parent.dataset.dynamicSlot;
+            const accept = kind === 'video' ? 'video/*' : 'image/*';
+            const tipClass = parent.dataset.tipClass || 'text-[10px]';
+            const input = `<input type="file" accept="${accept}" class="absolute inset-0 opacity-0 cursor-pointer z-[1]" onchange="handleFileChange(this)">`;
+
+            if (slotId) {
+                const axis = parent.dataset.videoAxis === 'portrait' ? 'portrait' : 'landscape';
+                const videoIconClass = axis === 'landscape' ? 'text-2xl' : 'text-xl';
+                return `
+                    <span class="absolute top-2 left-2 z-[2] text-[9px] font-medium text-indigo-600/90 bg-white/90 px-1.5 py-0.5 rounded border border-indigo-100 pointer-events-none">选填</span>
+                    <input type="file" accept="video/*" class="absolute inset-0 opacity-0 cursor-pointer z-[1] js-video-file-input" onchange="handleFileChange(this)">
+                    <div class="flex flex-col items-center justify-center gap-1 pointer-events-none py-2">
+                        <i class="fas fa-video text-indigo-300 ${videoIconClass}"></i>
+                        <span class="text-[10px] text-indigo-500 text-center px-2">选填 · 点击上传动态视频</span>
+                    </div>
+                `;
+            }
+
+            const iconClass = parent.classList.contains('aspect-pc-static') ? 'text-3xl' : 'text-2xl';
+            return `
+                ${input}
+                <i class="fas fa-image ${iconClass} text-slate-300 mb-1 pointer-events-none"></i>
+                <p class="${tipClass} text-slate-400 pointer-events-none">${escapeHtml(tip)}</p>
+            `;
+        }
+
+        function clearUploadArea(area) {
+            if (!area) return;
+            revokeUploadPreview(area);
+            area.style.aspectRatio = '';
+            area.classList.remove('upload-area-filled', 'upload-area-preview-natural', 'border-solid', 'bg-white', 'border-slate-200');
+            area.classList.remove('aspect-pc-static', 'aspect-phone-static');
+            area.innerHTML = buildEmptyUploadInner(area);
+            if (!area.dataset.dynamicSlot && area.dataset.uploadKind === 'image') {
+                area.classList.add(area.dataset.cropAxis === 'portrait' ? 'aspect-phone-static' : 'aspect-pc-static');
+            }
+            if (area.dataset.dynamicSlot) {
+                area.classList.add('border-dashed', 'bg-indigo-50/30', 'border-indigo-100');
+                area.classList.remove('bg-slate-50', 'border-slate-100');
+            } else {
+                area.classList.remove('border-dashed', 'bg-indigo-50/30', 'border-indigo-100');
+                area.classList.add('bg-slate-50', 'border-slate-100');
+            }
+        }
+
+        async function handleFileChange(input) {
+            const parent = input.closest('.upload-area');
+            if (!parent || !input.files || !input.files[0]) return;
+
+            const file = input.files[0];
+            const kind = parent.dataset.uploadKind || 'image';
+            const label = parent.dataset.uploadLabel || '';
+            const slotId = parent.dataset.dynamicSlot || '';
+            const accept = kind === 'video' ? 'video/*' : 'image/*';
+
+            const fileIsVideo = file.type.startsWith('video/');
+            const fileIsImage = file.type.startsWith('image/');
+            const isStaticImage = fileIsImage && kind === 'image' && !slotId;
+
+            if (isStaticImage) {
+                input.value = '';
+                openStaticCropModal(file, parent);
+                return;
+            }
+
+            const pass = await validateResourceAspect(parent, file);
+            input.value = '';
+            if (!pass) return;
+
+            revokeUploadPreview(parent);
+            const objectUrl = URL.createObjectURL(file);
+            parent.dataset.objectUrl = objectUrl;
+
+            if (fileIsVideo) {
+                parent.style.aspectRatio = '';
+                const isPhoneLayout = parent.dataset.videoAxis === 'portrait';
+                parent.innerHTML = buildVideoFilledHtml(objectUrl, slotId, label, file.name, accept, isPhoneLayout);
+                parent.classList.add('upload-area-filled', 'upload-area-preview-natural', 'bg-white', 'border-solid', 'border-slate-200');
+                parent.classList.remove('bg-slate-50', 'bg-indigo-50/30', 'border-dashed', 'border-slate-100', 'border-indigo-100');
+
+                const token = objectUrl;
+                extractVideoFirstFrame(objectUrl, (coverUrl) => {
+                    if (!parent.isConnected || parent.dataset.objectUrl !== token) {
+                        if (coverUrl) URL.revokeObjectURL(coverUrl);
+                        return;
+                    }
+                    revokeCoverOnly(parent);
+                    if (coverUrl) {
+                        parent.dataset.coverObjectUrl = coverUrl;
+                        applyCoverToVideoArea(parent, coverUrl);
+                    } else {
+                        showCoverPlaceholder(parent);
+                    }
+                });
+                return;
+            }
+
+            let mediaHtml;
+            if (fileIsImage) {
+                mediaHtml = `<img src="${objectUrl}" alt="" class="max-w-full w-auto h-auto object-contain block max-h-[min(65vh,32rem)]">`;
+            } else {
+                mediaHtml = `
+                    <div class="flex flex-col items-center justify-center p-3 bg-slate-100 w-full min-h-[6rem]">
+                        <i class="fas fa-file text-2xl text-slate-400 mb-1"></i>
+                        <p class="text-[9px] text-slate-500 text-center">${escapeHtml(label)}</p>
+                        <p class="text-[8px] text-slate-400 truncate max-w-full px-2">${escapeHtml(file.name)}</p>
+                    </div>`;
+            }
+
+            const closeSlotBtn = slotId
+                ? `<button type="button" class="absolute top-2 right-2 text-white drop-shadow-md z-20 hover:opacity-90 pointer-events-auto" onclick="event.stopPropagation(); clearUploadArea(this.closest('.upload-area'))" aria-label="清空动态资源"><i class="fas fa-times-circle text-lg"></i></button>`
+                : '';
+
+            if (fileIsImage && !slotId) {
+                parent.classList.remove('aspect-pc-static', 'aspect-phone-static');
+            }
+
+            parent.innerHTML = `
+                <div class="flex flex-col w-full">
+                    <div class="w-full flex items-center justify-center bg-slate-100 p-2 min-h-[8rem] min-w-0 overflow-x-auto overflow-y-auto relative">
+                        ${closeSlotBtn}
+                        ${mediaHtml}
+                    </div>
+                    <div class="relative z-10 flex items-center gap-2 px-2 py-2 bg-white border-t border-slate-200 text-[11px] shrink-0">
+                        <span class="flex-1 min-w-0 truncate text-slate-600" title="${escapeAttr(file.name)}">${escapeHtml(file.name)}</span>
+                        <span class="text-slate-300">|</span>
+                        <label class="text-blue-600 hover:text-blue-700 cursor-pointer whitespace-nowrap shrink-0 font-medium">重传
+                            <input type="file" accept="${accept}" class="sr-only" onchange="handleFileChange(this)">
+                        </label>
+                        <span class="text-slate-300">|</span>
+                        <button type="button" class="text-red-500 hover:text-red-600 whitespace-nowrap shrink-0 font-medium" onclick="event.stopPropagation(); clearUploadArea(this.closest('.upload-area'))">删除</button>
+                    </div>
+                    <p class="sr-only">${escapeHtml(label)} 已选择</p>
+                </div>
+            `;
+
+            parent.classList.add('upload-area-filled', 'bg-white', 'border-solid', 'border-slate-200');
+            if (fileIsImage && !slotId) {
+                parent.classList.add('upload-area-preview-natural');
+            }
+            parent.classList.remove('bg-slate-50', 'bg-indigo-50/30', 'border-dashed', 'border-slate-100', 'border-indigo-100');
+        }
+
+        (function initStaticCropModalUi() {
+            const modal = document.getElementById('static-crop-modal');
+            if (!modal) return;
+            document.getElementById('static-crop-cancel').addEventListener('click', cancelStaticCropModal);
+            document.getElementById('static-crop-confirm').addEventListener('click', confirmStaticCropModal);
+            document.getElementById('static-crop-confirm-all').addEventListener('click', () => {
+                confirmStaticCropModalAllRatios();
+            });
+            document.getElementById('static-crop-dismiss').addEventListener('click', cancelStaticCropModal);
+            document.getElementById('static-crop-backdrop').addEventListener('click', cancelStaticCropModal);
+
+            document.getElementById('static-crop-preview-grid').addEventListener('click', (e) => {
+                const cell = e.target.closest('.static-crop-preview-cell');
+                if (!cell) return;
+                const idx = parseInt(cell.getAttribute('data-crop-index'), 10);
+                if (isNaN(idx)) return;
+                staticCropState.activePresetIndex = idx;
+                syncActivePreviewCells();
+                redrawMainEditorCanvas();
+            });
+
+            const mainWrap = document.getElementById('static-crop-main-wrap');
+            if (mainWrap) {
+                mainWrap.addEventListener('pointerdown', onStaticCropViewportPointerDown);
+                mainWrap.addEventListener('pointermove', onStaticCropViewportPointerMove);
+                mainWrap.addEventListener('pointerup', onStaticCropViewportPointerUp);
+                mainWrap.addEventListener('pointercancel', onStaticCropViewportPointerUp);
+                mainWrap.addEventListener('lostpointercapture', onStaticCropViewportLostCapture);
+            }
+
+            ['static-crop-pan-x', 'static-crop-pan-y', 'static-crop-zoom'].forEach((id) => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.addEventListener('input', () => {
+                        updateStaticCropSliderLabels();
+                        scheduleRedrawAllStaticCropPreviews();
+                    });
+                }
+            });
+
+            window.addEventListener('resize', () => {
+                if (!modal.classList.contains('hidden')) {
+                    scheduleRedrawAllStaticCropPreviews();
+                }
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+                    cancelStaticCropModal();
+                }
+            });
+        })();
+
+        (function initDisplayScheduleUi() {
+            const fields = document.getElementById('display-scheduled-fields');
+            const dt = document.getElementById('display-scheduled-at');
+            const radios = document.querySelectorAll('input[name="displaySchedule"]');
+            if (!fields || !radios.length) return;
+
+            function localDatetimeLocalValue(d) {
+                const pad = (n) => String(n).padStart(2, '0');
+                return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+            }
+
+            if (dt) {
+                dt.min = localDatetimeLocalValue(new Date());
+                dt.disabled = true;
+            }
+
+            function sync() {
+                const scheduled = document.querySelector('input[name="displaySchedule"][value="scheduled"]');
+                const on = !!(scheduled && scheduled.checked);
+                fields.classList.toggle('hidden', !on);
+                if (dt) dt.disabled = !on;
+            }
+
+            radios.forEach((r) => r.addEventListener('change', sync));
+            sync();
+        })();
+    </script>
+</body>
+</html>

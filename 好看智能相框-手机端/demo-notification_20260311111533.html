@@ -1,0 +1,3389 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#ffffff">
+    <title>批量发送照片 - 后台通知Demo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&display=swap');
+        
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            overscroll-behavior-y: contain;
+            margin: 0;
+            padding: 0;
+            background: #f5f5f7;
+        }
+
+        .app-container {
+            max-width: 448px;
+            margin: 0 auto;
+            min-height: 100vh;
+            background: #fff;
+            position: relative;
+        }
+
+        /* ============ Android Status Bar ============ */
+        .android-status-bar {
+            height: 24px;
+            background: #1a1a1a;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            font-size: 12px;
+            color: #fff;
+        }
+
+        .status-icons {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* ============ Android Notification Drawer ============ */
+        .notification-drawer {
+            position: fixed;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 448px;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            z-index: 1000;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .notification-drawer.open {
+            max-height: 100vh;
+        }
+
+        .notification-drawer-header {
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .drawer-time {
+            font-size: 40px;
+            font-weight: 300;
+            color: #fff;
+            letter-spacing: -1px;
+        }
+
+        .drawer-date {
+            font-size: 14px;
+            color: rgba(255,255,255,0.7);
+            margin-top: 4px;
+        }
+
+        .drawer-close-hint {
+            text-align: center;
+            padding: 16px;
+            color: rgba(255,255,255,0.4);
+            font-size: 12px;
+        }
+
+        /* ============ Android Notification Card ============ */
+        .notification-card {
+            margin: 8px 12px;
+            background: rgba(40, 40, 44, 0.95);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+        }
+
+        .notification-card-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 16px 8px;
+        }
+
+        .notification-app-icon {
+            width: 18px;
+            height: 18px;
+            border-radius: 4px;
+            background: linear-gradient(135deg, #007AFF, #5AC8FA);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .notification-app-name {
+            font-size: 12px;
+            color: rgba(255,255,255,0.6);
+            flex: 1;
+        }
+
+        .notification-time {
+            font-size: 11px;
+            color: rgba(255,255,255,0.4);
+        }
+
+        .notification-card-body {
+            padding: 0 16px 12px;
+        }
+
+        .notification-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 2px;
+        }
+
+        .notification-text {
+            font-size: 13px;
+            color: rgba(255,255,255,0.7);
+            line-height: 1.4;
+        }
+
+        .notification-progress-container {
+            margin-top: 10px;
+        }
+
+        .notification-progress-bar {
+            height: 4px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .notification-progress-fill {
+            height: 100%;
+            background: #4CAF50;
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+
+        .notification-progress-fill.uploading {
+            background: linear-gradient(90deg, #2196F3, #42A5F5);
+        }
+
+        .notification-progress-fill.paused {
+            background: #FF9800;
+        }
+
+        .notification-progress-fill.failed {
+            background: #F44336;
+        }
+
+        .notification-progress-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 6px;
+            font-size: 11px;
+            color: rgba(255,255,255,0.5);
+        }
+
+        /* ============ Expanded Notification Details ============ */
+        .notification-expanded {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .notification-card.expanded .notification-expanded {
+            max-height: 300px;
+        }
+
+        .notification-photo-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 4px;
+            padding: 8px 16px;
+        }
+
+        .notification-photo-item {
+            aspect-ratio: 1;
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .notification-photo-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .notification-photo-status {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,0.4);
+        }
+
+        .notification-photo-status.success {
+            background: rgba(76, 175, 80, 0.7);
+        }
+
+        .notification-photo-status.failed {
+            background: rgba(244, 67, 54, 0.7);
+        }
+
+        .notification-photo-status.uploading {
+            background: rgba(33, 150, 243, 0.7);
+        }
+
+        /* ============ Foreground Service Notification (Persistent) ============ */
+        .persistent-notification {
+            position: fixed;
+            top: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 448px;
+            background: rgba(30, 30, 34, 0.97);
+            padding: 0 16px;
+            z-index: 500;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .persistent-notification.visible {
+            max-height: 80px;
+        }
+
+        .persistent-notification-inner {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .persistent-notification-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #007AFF, #5AC8FA);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .persistent-notification-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .persistent-notification-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .persistent-notification-text {
+            font-size: 12px;
+            color: rgba(255,255,255,0.6);
+            margin-top: 2px;
+        }
+
+        .persistent-notification-progress {
+            height: 2px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 1px;
+            overflow: hidden;
+            margin-top: 6px;
+        }
+
+        .persistent-notification-fill {
+            height: 100%;
+            background: #4CAF50;
+            transition: width 0.3s ease;
+        }
+
+        .persistent-notification-pct {
+            font-size: 13px;
+            font-weight: 600;
+            color: #4FC3F7;
+            flex-shrink: 0;
+        }
+
+        /* ============ Mini Floating Indicator ============ */
+        .mini-indicator {
+            position: fixed;
+            top: 32px;
+            right: max(8px, calc(50vw - 216px));
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(30, 30, 34, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .mini-indicator:active {
+            transform: scale(0.92);
+        }
+
+        .mini-indicator.visible {
+            display: flex;
+        }
+
+        .mini-indicator-ring {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .mini-indicator-ring svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            transform: rotate(-90deg);
+        }
+
+        .mini-indicator-ring circle {
+            fill: none;
+            stroke-width: 3;
+        }
+
+        .mini-indicator-ring .bg {
+            stroke: rgba(255,255,255,0.15);
+        }
+
+        .mini-indicator-ring .progress {
+            stroke: #4CAF50;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 0.3s ease;
+        }
+
+        .mini-indicator-center {
+            position: absolute;
+            inset: 6px;
+            border-radius: 50%;
+            background: rgba(30, 30, 34, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        /* ============ Permission Dialog (Android 13+) ============ */
+        .permission-dialog-backdrop {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 448px;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .permission-dialog-backdrop.active {
+            display: flex;
+        }
+
+        .permission-dialog {
+            width: 300px;
+            border-radius: 24px;
+            overflow: hidden;
+            animation: dialogIn 0.25s ease;
+        }
+
+        .permission-dialog.ios {
+            background: rgba(255,255,255,0.98);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+        }
+
+        .permission-dialog.android {
+            width: 320px;
+            background: #fff;
+            border-radius: 28px;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.25);
+        }
+
+        @keyframes dialogIn {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .permission-dialog-body {
+            padding: 24px 20px 20px;
+            text-align: center;
+        }
+
+        .permission-dialog-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #007AFF, #5AC8FA);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+        }
+
+        .permission-dialog-title {
+            font-size: 17px;
+            font-weight: 600;
+            color: #000;
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+
+        .permission-dialog-desc {
+            font-size: 13px;
+            color: rgba(0,0,0,0.5);
+            line-height: 1.5;
+        }
+
+        .permission-dialog-actions {
+            display: flex;
+            border-top: 0.5px solid rgba(0,0,0,0.12);
+        }
+
+        .permission-dialog-actions.ios {
+            flex-direction: row;
+        }
+
+        .permission-dialog-actions.ios .permission-dialog-btn {
+            flex: 1;
+        }
+
+        .permission-dialog-actions.ios .permission-dialog-btn + .permission-dialog-btn {
+            border-left: 0.5px solid rgba(0,0,0,0.12);
+        }
+
+        .permission-dialog-btn {
+            padding: 14px;
+            font-size: 17px;
+            font-weight: 400;
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .permission-dialog-btn:active {
+            background: rgba(0,0,0,0.05);
+        }
+
+        /* Android Dialog Styles */
+        .android-dialog-content {
+            padding: 24px 24px 20px;
+        }
+
+        .android-dialog-icon {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 16px;
+        }
+
+        .android-dialog-title {
+            font-size: 16px;
+            font-weight: 500;
+            color: #1f1f1f;
+            margin-bottom: 8px;
+            line-height: 1.4;
+            text-align: left;
+        }
+
+        .android-dialog-desc {
+            font-size: 14px;
+            color: #5f6368;
+            line-height: 1.5;
+            text-align: left;
+        }
+
+        .android-dialog-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            padding: 8px 16px 16px;
+        }
+
+        .android-dialog-btn {
+            padding: 10px 24px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #1a73e8;
+            background: none;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background 0.15s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .android-dialog-btn:hover {
+            background: rgba(26, 115, 232, 0.08);
+        }
+
+        .android-dialog-btn:active {
+            background: rgba(26, 115, 232, 0.15);
+        }
+
+        .android-dialog-btn.primary {
+            background: #1a73e8;
+            color: #fff;
+        }
+
+        .android-dialog-btn.primary:hover {
+            background: #1557b0;
+        }
+
+        .android-dialog-btn.primary:active {
+            background: #174ea6;
+        }
+
+        /* ============ App Main Content ============ */
+        .app-header {
+            padding: 16px 20px;
+            background: #fff;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .app-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1a1a1a;
+        }
+
+        .photo-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2px;
+            padding: 2px;
+        }
+
+        .photo-item {
+            aspect-ratio: 1;
+            position: relative;
+            cursor: pointer;
+            overflow: hidden;
+        }
+
+        .photo-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.2s;
+        }
+
+        .photo-item.selected img {
+            transform: scale(0.9);
+        }
+
+        .photo-item .check-circle {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.8);
+            background: rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .photo-item.selected .check-circle {
+            background: #007AFF;
+            border-color: #fff;
+        }
+
+        .photo-item .check-number {
+            color: #fff;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        /* ============ Bottom Action Bar ============ */
+        .bottom-bar {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 448px;
+            background: #fff;
+            padding: 16px 20px;
+            padding-bottom: calc(16px + env(safe-area-inset-bottom));
+            box-shadow: 0 -2px 20px rgba(0,0,0,0.08);
+            z-index: 100;
+        }
+
+        .send-btn {
+            width: 100%;
+            height: 50px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #007AFF, #0066CC);
+            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .send-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .send-btn:not(:disabled):active {
+            transform: scale(0.98);
+            opacity: 0.9;
+        }
+
+        /* ============ Completion Toast ============ */
+        .completion-toast {
+            position: fixed;
+            top: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 24px);
+            max-width: 400px;
+            z-index: 1500;
+            transition: top 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .completion-toast.visible {
+            top: 40px;
+        }
+
+        .completion-toast-inner {
+            background: rgba(30, 30, 34, 0.97);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border-radius: 16px;
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+
+        .completion-toast-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .completion-toast-icon.success {
+            background: linear-gradient(135deg, #34C759, #30D158);
+        }
+
+        .completion-toast-icon.partial {
+            background: linear-gradient(135deg, #FF9500, #FF9F0A);
+        }
+
+        .completion-toast-icon.failed {
+            background: linear-gradient(135deg, #FF3B30, #FF453A);
+        }
+
+        .completion-toast-content {
+            flex: 1;
+        }
+
+        .completion-toast-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .completion-toast-text {
+            font-size: 12px;
+            color: rgba(255,255,255,0.6);
+            margin-top: 2px;
+        }
+
+        /* ============ Settings Panel ============ */
+        .settings-panel {
+            padding: 16px;
+            background: #f8f8f8;
+            margin: 16px;
+            border-radius: 12px;
+        }
+
+        .settings-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 12px;
+        }
+
+        .settings-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .settings-row:last-child {
+            border-bottom: none;
+        }
+
+        .settings-label {
+            font-size: 14px;
+            color: #333;
+        }
+
+        .settings-value {
+            font-size: 14px;
+            color: #007AFF;
+            cursor: pointer;
+        }
+
+        /* ============ Toggle Switch ============ */
+        .toggle-switch {
+            width: 51px;
+            height: 31px;
+            background: #e0e0e0;
+            border-radius: 16px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .toggle-switch.active {
+            background: #34C759;
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 27px;
+            height: 27px;
+            background: #fff;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transition: transform 0.3s;
+        }
+
+        .toggle-switch.active::after {
+            transform: translateX(20px);
+        }
+
+        /* ============ Demo Controls ============ */
+        .demo-controls {
+            padding: 16px;
+            background: #fff3cd;
+            margin: 16px;
+            border-radius: 12px;
+            border: 1px solid #ffc107;
+        }
+
+        .demo-controls-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #856404;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .demo-btn {
+            padding: 10px 16px;
+            font-size: 13px;
+            font-weight: 500;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            margin: 4px;
+            transition: all 0.15s;
+        }
+
+        .demo-btn:active {
+            transform: scale(0.96);
+        }
+
+        .demo-btn.primary {
+            background: #007AFF;
+            color: #fff;
+        }
+
+        .demo-btn.secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .demo-btn.danger {
+            background: #FF3B30;
+            color: #fff;
+        }
+
+        /* ============ Info Tips ============ */
+        .info-tip {
+            padding: 12px 16px;
+            background: #e3f2fd;
+            border-radius: 8px;
+            margin: 16px;
+            font-size: 13px;
+            color: #1565c0;
+            line-height: 1.5;
+        }
+
+        .info-tip strong {
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        /* ============ Animations ============ */
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .uploading-pulse {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        /* ============ System Version Buttons ============ */
+        .system-btn {
+            padding: 8px 14px;
+            font-size: 13px;
+            font-weight: 500;
+            border-radius: 20px;
+            border: 1px solid #e0e0e0;
+            background: #fff;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .system-btn:hover {
+            border-color: #007AFF;
+            color: #007AFF;
+        }
+
+        .system-btn.active {
+            background: #007AFF;
+            border-color: #007AFF;
+            color: #fff;
+        }
+
+        .system-btn[data-version^="ios"] {
+            border-color: #e0e0e0;
+        }
+
+        .system-btn[data-version^="ios"].active {
+            background: #000;
+            border-color: #000;
+        }
+
+        .system-btn[data-version="ios26"].active {
+            background: linear-gradient(135deg, #a8c0ff, #d0b0ff);
+            border-color: transparent;
+            color: #1a1a2e;
+        }
+
+        /* ============ Liquid Glass Notification (iOS 26) ============ */
+        .liquid-glass-notif {
+            position: fixed;
+            top: -120px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 24px);
+            max-width: 400px;
+            z-index: 3100;
+            transition: top 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease, visibility 0.3s ease;
+            pointer-events: none;
+            visibility: hidden;
+            opacity: 0;
+        }
+
+        .liquid-glass-notif.visible {
+            top: 56px;
+            pointer-events: auto;
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .liquid-glass-notif-inner {
+            background: linear-gradient(135deg, 
+                rgba(255,255,255,0.35) 0%,
+                rgba(255,255,255,0.18) 40%,
+                rgba(255,255,255,0.25) 100%);
+            backdrop-filter: blur(40px) saturate(180%) brightness(1.1);
+            -webkit-backdrop-filter: blur(40px) saturate(180%) brightness(1.1);
+            border-radius: 24px;
+            padding: 16px 18px;
+            box-shadow: 
+                0 0 0 0.5px rgba(255,255,255,0.5),
+                0 0 0 1px rgba(255,255,255,0.1),
+                0 8px 32px rgba(0,0,0,0.08),
+                inset 0 1px 0 rgba(255,255,255,0.6);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .liquid-glass-notif-inner::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -50%;
+            width: 200%;
+            height: 100%;
+            background: linear-gradient(105deg,
+                transparent 30%,
+                rgba(255,255,255,0.3) 45%,
+                rgba(255,255,255,0.1) 50%,
+                transparent 55%);
+            pointer-events: none;
+        }
+
+        .liquid-glass-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .liquid-glass-app-icon {
+            width: 22px;
+            height: 22px;
+            border-radius: 6px;
+            background: linear-gradient(135deg, #007AFF, #5AC8FA);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .liquid-glass-app-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: rgba(0,0,0,0.55);
+        }
+
+        .liquid-glass-time {
+            margin-left: auto;
+            font-size: 12px;
+            color: rgba(0,0,0,0.35);
+        }
+
+        .liquid-glass-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: rgba(0,0,0,0.85);
+            margin-bottom: 4px;
+        }
+
+        .liquid-glass-text {
+            font-size: 13px;
+            color: rgba(0,0,0,0.55);
+        }
+
+        .liquid-glass-progress {
+            height: 4px;
+            background: rgba(0,0,0,0.08);
+            border-radius: 2px;
+            margin-top: 12px;
+            overflow: hidden;
+        }
+
+        .liquid-glass-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #007AFF, #5AC8FA);
+            border-radius: 2px;
+            transition: width 0.3s ease;
+            box-shadow: 0 0 8px rgba(0, 122, 255, 0.3);
+        }
+
+        .liquid-glass-pct {
+            font-size: 12px;
+            font-weight: 600;
+            color: rgba(0,0,0,0.45);
+            margin-top: 6px;
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* ============ Dynamic Island Notification (iOS 17) ============ */
+        .dynamic-island-notif {
+            position: fixed;
+            top: 10px;
+            left: 50%;
+            z-index: 3100;
+            background: #000;
+            overflow: hidden;
+            cursor: pointer;
+            /* Collapsed default - hidden */
+            width: 126px;
+            height: 36px;
+            border-radius: 22px;
+            margin-left: -63px;
+            opacity: 0;
+            transform: scale(0.8);
+            pointer-events: none;
+            visibility: hidden;
+            transition: width 0.45s cubic-bezier(0.32, 0.72, 0, 1),
+                        height 0.45s cubic-bezier(0.32, 0.72, 0, 1),
+                        margin-left 0.45s cubic-bezier(0.32, 0.72, 0, 1),
+                        border-radius 0.45s cubic-bezier(0.32, 0.72, 0, 1),
+                        opacity 0.2s ease,
+                        transform 0.3s ease;
+        }
+
+        .dynamic-island-notif.visible {
+            opacity: 1;
+            transform: scale(1);
+            pointer-events: auto;
+            visibility: visible;
+        }
+
+        .dynamic-island-notif.expanded {
+            width: min(calc(100vw - 32px), 400px);
+            margin-left: max(calc(-50vw + 16px), -200px);
+            height: 108px;
+            border-radius: 40px;
+        }
+
+        .dynamic-island-collapsed {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 14px;
+            opacity: 1;
+            transition: opacity 0.15s ease;
+        }
+
+        .dynamic-island-notif.expanded .dynamic-island-collapsed {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .dynamic-island-collapsed-icon {
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .dynamic-island-collapsed-ring {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            border: 2px solid rgba(10, 132, 255, 0.3);
+            border-top-color: #0A84FF;
+            animation: spin 1s linear infinite;
+        }
+
+        .dynamic-island-collapsed-pct {
+            font-size: 12px;
+            font-weight: 700;
+            color: #0A84FF;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .dynamic-island-expanded {
+            position: absolute;
+            inset: 0;
+            padding: 18px 22px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s 0.1s ease;
+        }
+
+        .dynamic-island-notif.expanded .dynamic-island-expanded {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .dynamic-island-expanded-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .dynamic-island-expanded-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #007AFF, #5AC8FA);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .dynamic-island-expanded-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .dynamic-island-expanded-text {
+            font-size: 12px;
+            color: rgba(255,255,255,0.55);
+            margin-top: 2px;
+        }
+
+        .dynamic-island-expanded-pct {
+            font-size: 16px;
+            font-weight: 700;
+            color: #0A84FF;
+            margin-left: auto;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .dynamic-island-progress {
+            height: 5px;
+            background: rgba(255,255,255,0.12);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .dynamic-island-progress-fill {
+            height: 100%;
+            background: #0A84FF;
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        /* Dark mode variant for desktop */
+        .desktop-overlay .liquid-glass-notif-inner {
+            background: linear-gradient(135deg,
+                rgba(255,255,255,0.12) 0%,
+                rgba(255,255,255,0.06) 40%,
+                rgba(255,255,255,0.09) 100%);
+            box-shadow:
+                0 0 0 0.5px rgba(255,255,255,0.2),
+                0 8px 32px rgba(0,0,0,0.3),
+                inset 0 1px 0 rgba(255,255,255,0.15);
+        }
+
+        .desktop-overlay .liquid-glass-app-name {
+            color: rgba(255,255,255,0.6);
+        }
+
+        .desktop-overlay .liquid-glass-time {
+            color: rgba(255,255,255,0.35);
+        }
+
+        .desktop-overlay .liquid-glass-title {
+            color: rgba(255,255,255,0.9);
+        }
+
+        .desktop-overlay .liquid-glass-text {
+            color: rgba(255,255,255,0.6);
+        }
+
+        .desktop-overlay .liquid-glass-progress {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .desktop-overlay .liquid-glass-pct {
+            color: rgba(255,255,255,0.5);
+        }
+
+        /* ============ App In-Progress Bar ============ */
+        .app-progress-bar {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 448px;
+            background: #fff;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.12);
+            z-index: 100;
+            display: none;
+        }
+
+        .app-progress-bar.visible {
+            display: block;
+        }
+
+        .app-progress-inner {
+            padding: 16px 20px;
+            padding-bottom: calc(16px + env(safe-area-inset-bottom));
+        }
+
+        .app-progress-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .app-progress-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .app-progress-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .app-progress-detail {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .app-progress-desktop-btn {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 8px 12px;
+            font-size: 12px;
+            font-weight: 500;
+            color: #007AFF;
+            background: rgba(0, 122, 255, 0.08);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .app-progress-desktop-btn:active {
+            background: rgba(0, 122, 255, 0.15);
+            transform: scale(0.96);
+        }
+
+        .app-progress-track {
+            height: 6px;
+            background: #e5e5e5;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+
+        .app-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #007AFF, #5AC8FA);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        .app-progress-fill.has-error {
+            background: linear-gradient(90deg, #FF9500, #FFCC00);
+        }
+
+        .app-progress-photos {
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+        }
+
+        .app-progress-photos::-webkit-scrollbar {
+            display: none;
+        }
+
+        .app-progress-photo {
+            width: 48px;
+            height: 48px;
+            border-radius: 8px;
+            overflow: hidden;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .app-progress-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .app-progress-photo-status {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,0.4);
+        }
+
+        .app-progress-photo-status.uploading {
+            background: rgba(0, 122, 255, 0.6);
+        }
+
+        .app-progress-photo-status.success {
+            background: rgba(52, 199, 89, 0.7);
+        }
+
+        .app-progress-photo-status.failed {
+            background: rgba(255, 59, 48, 0.7);
+        }
+
+        .app-progress-photo-status.pending {
+            display: none;
+        }
+
+        /* ============ System Desktop Overlay ============ */
+        .desktop-overlay {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 448px;
+            z-index: 3000;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .desktop-overlay.active {
+            display: flex;
+        }
+
+        .desktop-wallpaper {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            z-index: 0;
+        }
+
+        .desktop-wallpaper::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: url('https://picsum.photos/seed/wallpaper/800/1600') center/cover;
+            opacity: 0.3;
+        }
+
+        /* Desktop Status Bar */
+        .desktop-status-bar {
+            position: relative;
+            z-index: 10;
+            height: 24px;
+            background: rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            font-size: 12px;
+            color: #fff;
+        }
+
+        .desktop-status-icons {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .desktop-upload-indicator {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(33, 150, 243, 0.9);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        /* Desktop Notification Banner */
+        .desktop-notif-banner {
+            position: relative;
+            z-index: 10;
+            margin: 8px 12px;
+            background: rgba(40, 40, 44, 0.95);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border-radius: 20px;
+            padding: 12px 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+            transform: translateY(-120%);
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            cursor: pointer;
+        }
+
+        .desktop-notif-banner.visible {
+            transform: translateY(0);
+        }
+
+        .desktop-notif-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .desktop-notif-app-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 5px;
+            background: linear-gradient(135deg, #007AFF, #5AC8FA);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .desktop-notif-app-name {
+            font-size: 12px;
+            color: rgba(255,255,255,0.6);
+            flex: 1;
+        }
+
+        .desktop-notif-time {
+            font-size: 11px;
+            color: rgba(255,255,255,0.4);
+        }
+
+        .desktop-notif-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 2px;
+        }
+
+        .desktop-notif-text {
+            font-size: 13px;
+            color: rgba(255,255,255,0.7);
+        }
+
+        .desktop-notif-progress {
+            height: 3px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 2px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+
+        .desktop-notif-progress-fill {
+            height: 100%;
+            background: #4CAF50;
+            transition: width 0.3s ease;
+        }
+
+        .desktop-notif-progress-fill.uploading {
+            background: linear-gradient(90deg, #2196F3, #42A5F5);
+        }
+
+        /* Desktop App Grid */
+        .desktop-content {
+            position: relative;
+            z-index: 5;
+            flex: 1;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .desktop-app-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            padding: 20px 0;
+        }
+
+        .desktop-app-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: transform 0.15s;
+        }
+
+        .desktop-app-item:active {
+            transform: scale(0.9);
+        }
+
+        .desktop-app-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .desktop-app-name {
+            font-size: 11px;
+            color: #fff;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+        }
+
+        .desktop-app-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            min-width: 18px;
+            height: 18px;
+            background: #FF3B30;
+            border-radius: 9px;
+            font-size: 10px;
+            font-weight: 700;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 5px;
+        }
+
+        /* Desktop Dock */
+        .desktop-dock {
+            position: relative;
+            z-index: 10;
+            margin: 0 12px 12px;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border-radius: 28px;
+            display: flex;
+            justify-content: space-around;
+        }
+
+        .dock-app-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            cursor: pointer;
+            transition: transform 0.15s;
+            position: relative;
+        }
+
+        .dock-app-icon:active {
+            transform: scale(0.9);
+        }
+
+        /* Desktop Push Notification (Completion) */
+        .desktop-push-notif {
+            position: absolute;
+            top: 32px;
+            left: 12px;
+            right: 12px;
+            z-index: 20;
+            background: rgba(40, 40, 44, 0.97);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border-radius: 20px;
+            padding: 14px 16px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            transform: translateY(-150%);
+            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            cursor: pointer;
+        }
+
+        .desktop-push-notif.visible {
+            transform: translateY(0);
+        }
+
+        .desktop-push-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .desktop-push-icon.success {
+            background: linear-gradient(135deg, #34C759, #30D158);
+        }
+
+        .desktop-push-icon.partial {
+            background: linear-gradient(135deg, #FF9500, #FF9F0A);
+        }
+
+        .desktop-push-icon.failed {
+            background: linear-gradient(135deg, #FF3B30, #FF453A);
+        }
+
+        /* Desktop Navigation Hint */
+        .desktop-nav-hint {
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 134px;
+            height: 5px;
+            background: rgba(255,255,255,0.5);
+            border-radius: 3px;
+        }
+
+        /* Desktop Notification Drawer */
+        .desktop-drawer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            z-index: 100;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.35s ease;
+        }
+
+        .desktop-drawer.open {
+            max-height: 80vh;
+        }
+
+        .desktop-drawer-header {
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .desktop-drawer-time {
+            font-size: 56px;
+            font-weight: 200;
+            color: #fff;
+            line-height: 1;
+        }
+
+        .desktop-drawer-date {
+            font-size: 14px;
+            color: rgba(255,255,255,0.6);
+            margin-top: 4px;
+        }
+
+        .desktop-drawer-shortcuts {
+            display: flex;
+            gap: 12px;
+        }
+
+        .desktop-shortcut-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        .desktop-drawer-notifs {
+            padding: 0 12px 20px;
+        }
+
+        .desktop-drawer-section-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.5);
+            padding: 8px 8px 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .desktop-drawer-card {
+            background: rgba(50, 50, 54, 0.9);
+            border-radius: 16px;
+            margin-bottom: 8px;
+            overflow: hidden;
+        }
+
+        .desktop-drawer-card-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 14px 8px;
+        }
+
+        .desktop-drawer-card-body {
+            padding: 0 14px 12px;
+        }
+
+        .desktop-drawer-card-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .desktop-drawer-card-text {
+            font-size: 13px;
+            color: rgba(255,255,255,0.7);
+            margin-top: 2px;
+        }
+
+        .desktop-drawer-card-progress {
+            height: 3px;
+            background: rgba(255,255,255,0.12);
+            border-radius: 2px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+
+        .desktop-drawer-card-progress-fill {
+            height: 100%;
+            background: #2196F3;
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container" id="appContainer">
+        <!-- Android Status Bar -->
+        <div class="android-status-bar" onclick="toggleNotificationDrawer()">
+            <span id="statusTime">10:30</span>
+            <div class="status-icons">
+                <span id="uploadIndicator" style="display:none">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path d="M12 19V5M5 12l7-7 7 7"/>
+                    </svg>
+                </span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M5 12.55a11 11 0 0 1 14.08 0"/>
+                    <path d="M1.42 9a16 16 0 0 1 21.16 0"/>
+                    <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
+                    <circle cx="12" cy="20" r="1"/>
+                </svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="1" y="6" width="18" height="12" rx="2"/>
+                    <line x1="23" y1="10" x2="23" y2="14"/>
+                    <rect x="3" y="8" width="12" height="8" fill="currentColor"/>
+                </svg>
+            </div>
+        </div>
+
+        <!-- Persistent Notification (Foreground Service Style) -->
+        <div class="persistent-notification" id="persistentNotification">
+            <div class="persistent-notification-inner" onclick="toggleNotificationDrawer()">
+                <div class="persistent-notification-icon">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
+                        <path d="M12 19V5M5 12l7-7 7 7"/>
+                    </svg>
+                </div>
+                <div class="persistent-notification-content">
+                    <div class="persistent-notification-title">
+                        <span id="persistentTitle">正在发送照片</span>
+                        <span class="uploading-pulse" id="persistentPulse" style="font-size:10px;color:#4CAF50">●</span>
+                    </div>
+                    <div class="persistent-notification-text" id="persistentText">0/0 张照片</div>
+                    <div class="persistent-notification-progress">
+                        <div class="persistent-notification-fill" id="persistentFill" style="width:0%"></div>
+                    </div>
+                </div>
+                <span class="persistent-notification-pct" id="persistentPct">0%</span>
+            </div>
+        </div>
+
+        <!-- Mini Floating Indicator -->
+        <div class="mini-indicator" id="miniIndicator" onclick="toggleNotificationDrawer()">
+            <div class="mini-indicator-ring">
+                <svg width="36" height="36" viewBox="0 0 36 36">
+                    <circle class="bg" cx="18" cy="18" r="15"/>
+                    <circle class="progress" id="miniProgress" cx="18" cy="18" r="15" 
+                        stroke-dasharray="94.2" stroke-dashoffset="94.2"/>
+                </svg>
+                <div class="mini-indicator-center" id="miniPct">0%</div>
+            </div>
+        </div>
+
+        <!-- App Header -->
+        <div class="app-header">
+            <span class="app-title">选择照片发送</span>
+            <span id="selectCount" style="font-size:14px;color:#007AFF;font-weight:500">已选 0 张</span>
+        </div>
+
+        <!-- System Version Selector -->
+        <div class="info-tip" style="background:#fff;border:1px solid #e0e0e0;padding:16px">
+            <strong style="display:flex;align-items:center;gap:6px;margin-bottom:12px">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2">
+                    <rect x="5" y="2" width="14" height="20" rx="2"/>
+                    <path d="M12 18h.01"/>
+                </svg>
+                模拟系统版本
+            </strong>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px">
+                <button class="system-btn active" data-version="android13" onclick="setSystemVersion('android13')">
+                    Android 13+
+                </button>
+                <button class="system-btn" data-version="android12" onclick="setSystemVersion('android12')">
+                    Android 12
+                </button>
+                <button class="system-btn" data-version="android10" onclick="setSystemVersion('android10')">
+                    Android 10
+                </button>
+                <button class="system-btn" data-version="ios26" onclick="setSystemVersion('ios26')">
+                    iOS 26
+                </button>
+                <button class="system-btn" data-version="ios17" onclick="setSystemVersion('ios17')">
+                    iOS 17
+                </button>
+            </div>
+            <div id="systemInfo" style="font-size:13px;color:#666;padding:10px;background:#f5f5f5;border-radius:8px">
+                <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+                    <span style="font-weight:600" id="systemNameDisplay">Android 13 (API 33)</span>
+                    <span id="permissionBadge" style="font-size:11px;padding:2px 8px;border-radius:10px;background:#ff9800;color:#fff">需要申请权限</span>
+                </div>
+                <div id="systemDescDisplay">首次发送照片时会弹出通知权限申请对话框</div>
+                <div id="permissionStatus" style="margin-top:6px;font-size:12px;color:#4caf50;display:none">
+                    ✓ 已授权通知权限
+                </div>
+            </div>
+        </div>
+
+        <!-- Demo Controls -->
+        <div class="demo-controls">
+            <div class="demo-controls-title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M12 6v6l4 2"/>
+                </svg>
+                演示控制面板
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px">
+                <button class="demo-btn primary" onclick="startUploadDemo()">开始上传演示</button>
+                <button class="demo-btn secondary" onclick="goToDesktop()" style="background:#1a1a2e;color:#fff">
+                    <span style="display:flex;align-items:center;gap:4px">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                            <polyline points="9 22 9 12 15 12 15 22"/>
+                        </svg>
+                        回到桌面
+                    </span>
+                </button>
+                <button class="demo-btn secondary" onclick="resetAllPermissions()" style="color:#f44336;border-color:#f44336">
+                    重置所有权限
+                </button>
+            </div>
+            
+            <div style="background:#fff;border-radius:8px;padding:12px;border:1px solid #e0e0e0">
+                <div style="font-size:13px;font-weight:600;color:#333;margin-bottom:10px">📋 演示步骤</div>
+                <div style="font-size:12px;color:#666;line-height:1.8">
+                    <div style="display:flex;gap:8px;margin-bottom:6px">
+                        <span style="background:#007AFF;color:#fff;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0">1</span>
+                        <span>点击「开始上传演示」</span>
+                    </div>
+                    <div style="display:flex;gap:8px;margin-bottom:6px">
+                        <span style="background:#007AFF;color:#fff;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0">2</span>
+                        <span>点击「回到桌面」</span>
+                    </div>
+                    <div style="display:flex;gap:8px">
+                        <span style="background:#007AFF;color:#fff;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0">3</span>
+                        <span>观察通知栏进度</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Desktop Hint -->
+        <div class="info-tip" style="background:#e8f5e9;color:#2e7d32;border:1px solid #a5d6a7">
+            <strong>📱 系统桌面模拟</strong>
+            点击"回到桌面"按钮可模拟用户退出App回到系统桌面的场景。在桌面可以：
+            <ul style="margin:8px 0 0 16px;padding:0">
+                <li>查看状态栏上传进度指示器</li>
+                <li>下拉查看通知抽屉中的上传进度</li>
+                <li>上传完成后收到推送通知</li>
+                <li>点击通知或App图标返回应用</li>
+            </ul>
+        </div>
+
+        <!-- Settings Panel -->
+        <div class="settings-panel">
+            <div class="settings-title">通知设置</div>
+            <div class="settings-row">
+                <span class="settings-label">显示常驻通知栏</span>
+                <div class="toggle-switch active" id="togglePersistent" onclick="togglePersistentNotification()"></div>
+            </div>
+            <div class="settings-row">
+                <span class="settings-label">显示悬浮进度球</span>
+                <div class="toggle-switch" id="toggleMini" onclick="toggleMiniIndicator()"></div>
+            </div>
+            <div class="settings-row">
+                <span class="settings-label">通知样式</span>
+                <span class="settings-value" onclick="cycleNotificationStyle()">Material Design</span>
+            </div>
+        </div>
+
+        <!-- Photo Grid -->
+        <div class="photo-grid" id="photoGrid">
+            <!-- Photos will be generated by JavaScript -->
+        </div>
+
+        <!-- Bottom padding for bottom bar -->
+        <div style="height:100px"></div>
+
+        <!-- Bottom Action Bar -->
+        <div class="bottom-bar" id="bottomBar">
+            <button class="send-btn" id="sendBtn" onclick="startSend()" disabled>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="m22 2-7 20-4-9-9-4Z"/>
+                    <path d="M22 2 11 13"/>
+                </svg>
+                发送到相框
+            </button>
+        </div>
+
+        <!-- App In-Progress Bar (shown during upload) -->
+        <div class="app-progress-bar" id="appProgressBar">
+            <div class="app-progress-inner">
+                <div class="app-progress-header">
+                    <div class="app-progress-info">
+                        <span class="app-progress-title" id="appProgressTitle">正在发送照片</span>
+                        <span class="app-progress-detail" id="appProgressDetail">0/0 张 · 0%</span>
+                    </div>
+                    <button class="app-progress-desktop-btn" onclick="goToDesktop()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                            <polyline points="9 22 9 12 15 12 15 22"/>
+                        </svg>
+                        回到桌面
+                    </button>
+                </div>
+                <div class="app-progress-track">
+                    <div class="app-progress-fill" id="appProgressFill" style="width:0%"></div>
+                </div>
+                <div class="app-progress-photos" id="appProgressPhotos">
+                    <!-- Photo thumbnails -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Drawer -->
+    <div class="notification-drawer" id="notificationDrawer">
+        <div class="notification-drawer-header">
+            <div>
+                <div class="drawer-time" id="drawerTime">10:30</div>
+                <div class="drawer-date" id="drawerDate">3月11日 星期三</div>
+            </div>
+            <div style="display:flex;gap:8px">
+                <button style="padding:8px 16px;background:rgba(255,255,255,0.1);border:none;border-radius:20px;color:#fff;font-size:12px;cursor:pointer" onclick="clearAllNotifications()">清除全部</button>
+            </div>
+        </div>
+
+        <!-- Upload Progress Notification Card -->
+        <div class="notification-card" id="uploadNotificationCard" style="display:none" onclick="toggleNotificationExpand(this)">
+            <div class="notification-card-header">
+                <div class="notification-app-icon">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3">
+                        <rect x="2" y="3" width="20" height="14" rx="2"/>
+                        <path d="M8 21h8"/>
+                        <path d="M12 17v4"/>
+                    </svg>
+                </div>
+                <span class="notification-app-name">好看智能相框</span>
+                <span class="notification-time" id="notifTime">刚刚</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="2" style="margin-left:4px;transition:transform 0.2s" class="expand-arrow">
+                    <path d="M6 9l6 6 6-6"/>
+                </svg>
+            </div>
+            <div class="notification-card-body">
+                <div class="notification-title" id="notifTitle">正在发送照片</div>
+                <div class="notification-text" id="notifText">已发送 0/8 张照片到客厅相框</div>
+                <div class="notification-progress-container">
+                    <div class="notification-progress-bar">
+                        <div class="notification-progress-fill uploading" id="notifProgressFill" style="width:0%"></div>
+                    </div>
+                    <div class="notification-progress-stats">
+                        <span id="notifProgressText">0%</span>
+                        <span id="notifSpeedText">--</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Expanded Details -->
+            <div class="notification-expanded">
+                <div class="notification-photo-grid" id="notifPhotoGrid">
+                    <!-- Photo thumbnails with status -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Completed Notification Card -->
+        <div class="notification-card" id="completedNotificationCard" style="display:none">
+            <div class="notification-card-header">
+                <div class="notification-app-icon" style="background:linear-gradient(135deg,#34C759,#30D158)">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3">
+                        <path d="M20 6 9 17l-5-5"/>
+                    </svg>
+                </div>
+                <span class="notification-app-name">好看智能相框</span>
+                <span class="notification-time">刚刚</span>
+            </div>
+            <div class="notification-card-body">
+                <div class="notification-title" id="completedTitle">发送完成</div>
+                <div class="notification-text" id="completedText">已成功发送 8 张照片到客厅相框</div>
+            </div>
+        </div>
+
+        <div class="drawer-close-hint">向上滑动关闭通知栏</div>
+    </div>
+
+    <!-- Permission Dialog - iOS Style -->
+    <div class="permission-dialog-backdrop" id="permissionDialogIOS">
+        <div class="permission-dialog ios">
+            <div class="permission-dialog-body">
+                <div class="permission-dialog-icon" style="background:linear-gradient(135deg,#FF3B30,#FF453A)">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                    </svg>
+                </div>
+                <div class="permission-dialog-title" style="color:#000">"好看智能相框"想给您发送通知</div>
+                <div class="permission-dialog-desc" style="color:rgba(0,0,0,0.5)">
+                    通知可能包括提醒、声音和图标标记。您可以在"设置"中配置通知。
+                </div>
+            </div>
+            <div class="permission-dialog-actions ios">
+                <button class="permission-dialog-btn" style="color:#007AFF" onclick="denyNotificationPermission()">不允许</button>
+                <button class="permission-dialog-btn" style="color:#007AFF;font-weight:600" onclick="grantNotificationPermission()">允许</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Permission Dialog - Android Style -->
+    <div class="permission-dialog-backdrop" id="permissionDialogAndroid">
+        <div class="permission-dialog android">
+            <div class="android-dialog-content">
+                <div class="android-dialog-icon">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#1a73e8" stroke-width="1.5">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                    </svg>
+                </div>
+                <div class="android-dialog-title">允许"好看智能相框"向您发送通知？</div>
+                <div class="android-dialog-desc">
+                    开启后，您可以在离开App时实时查看照片发送进度和完成状态。
+                </div>
+            </div>
+            <div class="android-dialog-actions">
+                <button class="android-dialog-btn" onclick="denyNotificationPermission()">不允许</button>
+                <button class="android-dialog-btn primary" onclick="grantNotificationPermission()">允许</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dynamic Island Notification (iOS 17) -->
+    <div class="dynamic-island-notif" id="dynamicIslandNotif" onclick="toggleDynamicIsland()">
+        <!-- Collapsed State -->
+        <div class="dynamic-island-collapsed">
+            <div class="dynamic-island-collapsed-icon">
+                <div class="dynamic-island-collapsed-ring"></div>
+            </div>
+            <span class="dynamic-island-collapsed-pct" id="diCollapsedPct">0%</span>
+        </div>
+        <!-- Expanded State -->
+        <div class="dynamic-island-expanded">
+            <div class="dynamic-island-expanded-header">
+                <div class="dynamic-island-expanded-icon">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
+                        <rect x="2" y="3" width="20" height="14" rx="2"/>
+                        <path d="M8 21h8"/>
+                        <path d="M12 17v4"/>
+                    </svg>
+                </div>
+                <div style="flex:1;min-width:0">
+                    <div class="dynamic-island-expanded-title" id="diTitle">正在发送照片</div>
+                    <div class="dynamic-island-expanded-text" id="diText">0/8 张照片</div>
+                </div>
+                <span class="dynamic-island-expanded-pct" id="diExpandedPct">0%</span>
+            </div>
+            <div class="dynamic-island-progress">
+                <div class="dynamic-island-progress-fill" id="diFill" style="width:0%"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Liquid Glass Notification (iOS 26) -->
+    <div class="liquid-glass-notif" id="liquidGlassNotif">
+        <div class="liquid-glass-notif-inner">
+            <div class="liquid-glass-header">
+                <div class="liquid-glass-app-icon">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
+                        <rect x="2" y="3" width="20" height="14" rx="2"/>
+                        <path d="M8 21h8"/>
+                        <path d="M12 17v4"/>
+                    </svg>
+                </div>
+                <span class="liquid-glass-app-name">好看智能相框</span>
+                <span class="liquid-glass-time">刚刚</span>
+            </div>
+            <div class="liquid-glass-title" id="liquidGlassTitle">正在发送照片</div>
+            <div class="liquid-glass-text" id="liquidGlassText">已发送 0/8 张照片到客厅相框</div>
+            <div class="liquid-glass-progress">
+                <div class="liquid-glass-progress-fill" id="liquidGlassFill" style="width:0%"></div>
+            </div>
+            <div class="liquid-glass-pct" id="liquidGlassPct">0%</div>
+        </div>
+    </div>
+
+    <!-- Completion Toast -->
+        <div class="completion-toast-inner">
+            <div class="completion-toast-icon success" id="toastIcon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
+                    <path d="M20 6 9 17l-5-5"/>
+                </svg>
+            </div>
+            <div class="completion-toast-content">
+                <div class="completion-toast-title" id="toastTitle">发送完成</div>
+                <div class="completion-toast-text" id="toastText">已成功发送 8 张照片</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ System Desktop Overlay ============ -->
+    <div class="desktop-overlay" id="desktopOverlay">
+        <div class="desktop-wallpaper"></div>
+        
+        <!-- Desktop Status Bar -->
+        <div class="desktop-status-bar" onclick="toggleDesktopDrawer()">
+            <span id="desktopTime">10:30</span>
+            <div class="desktop-status-icons">
+                <div class="desktop-upload-indicator" id="desktopUploadIndicator" style="display:none">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                        <path d="M12 19V5M5 12l7-7 7 7"/>
+                    </svg>
+                    <span id="desktopUploadPct">0%</span>
+                </div>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M5 12.55a11 11 0 0 1 14.08 0"/>
+                    <path d="M1.42 9a16 16 0 0 1 21.16 0"/>
+                    <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
+                    <circle cx="12" cy="20" r="1"/>
+                </svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="1" y="6" width="18" height="12" rx="2"/>
+                    <line x1="23" y1="10" x2="23" y2="14"/>
+                    <rect x="3" y="8" width="12" height="8" fill="currentColor"/>
+                </svg>
+            </div>
+        </div>
+
+        <!-- Desktop Notification Drawer -->
+        <div class="desktop-drawer" id="desktopDrawer">
+            <div class="desktop-drawer-header">
+                <div>
+                    <div class="desktop-drawer-time" id="desktopDrawerTime">10:30</div>
+                    <div class="desktop-drawer-date" id="desktopDrawerDate">3月11日 星期三</div>
+                </div>
+                <div class="desktop-drawer-shortcuts">
+                    <button class="desktop-shortcut-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M5 12.55a11 11 0 0 1 14.08 0"/>
+                            <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
+                            <circle cx="12" cy="20" r="1"/>
+                        </svg>
+                    </button>
+                    <button class="desktop-shortcut-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="5" y="2" width="14" height="20" rx="2"/>
+                            <path d="M12 18h.01"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="desktop-drawer-notifs">
+                <div class="desktop-drawer-section-title">通知</div>
+                
+                <!-- Upload Progress Card in Drawer -->
+                <div class="desktop-drawer-card" id="desktopDrawerUploadCard" style="display:none" onclick="openAppFromDesktop()">
+                    <div class="desktop-drawer-card-header">
+                        <div style="width:18px;height:18px;border-radius:4px;background:linear-gradient(135deg,#007AFF,#5AC8FA);display:flex;align-items:center;justify-content:center">
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3">
+                                <rect x="2" y="3" width="20" height="14" rx="2"/>
+                            </svg>
+                        </div>
+                        <span style="font-size:12px;color:rgba(255,255,255,0.6);flex:1">好看智能相框</span>
+                        <span style="font-size:11px;color:rgba(255,255,255,0.4)">刚刚</span>
+                    </div>
+                    <div class="desktop-drawer-card-body">
+                        <div class="desktop-drawer-card-title" id="desktopDrawerTitle">正在发送照片</div>
+                        <div class="desktop-drawer-card-text" id="desktopDrawerText">已发送 0/8 张照片到客厅相框</div>
+                        <div class="desktop-drawer-card-progress">
+                            <div class="desktop-drawer-card-progress-fill" id="desktopDrawerFill" style="width:0%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Completed Card in Drawer -->
+                <div class="desktop-drawer-card" id="desktopDrawerCompletedCard" style="display:none" onclick="openAppFromDesktop()">
+                    <div class="desktop-drawer-card-header">
+                        <div id="desktopDrawerCompletedIcon" style="width:18px;height:18px;border-radius:4px;background:linear-gradient(135deg,#34C759,#30D158);display:flex;align-items:center;justify-content:center">
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3">
+                                <path d="M20 6 9 17l-5-5"/>
+                            </svg>
+                        </div>
+                        <span style="font-size:12px;color:rgba(255,255,255,0.6);flex:1">好看智能相框</span>
+                        <span style="font-size:11px;color:rgba(255,255,255,0.4)">刚刚</span>
+                    </div>
+                    <div class="desktop-drawer-card-body">
+                        <div class="desktop-drawer-card-title" id="desktopDrawerCompletedTitle">发送完成</div>
+                        <div class="desktop-drawer-card-text" id="desktopDrawerCompletedText">已成功发送 8 张照片到客厅相框</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Desktop Notification Banner (Progress) -->
+        <div class="desktop-notif-banner" id="desktopNotifBanner" onclick="openAppFromDesktop()">
+            <div class="desktop-notif-header">
+                <div class="desktop-notif-app-icon">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3">
+                        <rect x="2" y="3" width="20" height="14" rx="2"/>
+                        <path d="M8 21h8"/>
+                        <path d="M12 17v4"/>
+                    </svg>
+                </div>
+                <span class="desktop-notif-app-name">好看智能相框</span>
+                <span class="desktop-notif-time">刚刚</span>
+            </div>
+            <div class="desktop-notif-title" id="desktopNotifTitle">正在发送照片</div>
+            <div class="desktop-notif-text" id="desktopNotifText">已发送 0/8 张照片到客厅相框</div>
+            <div class="desktop-notif-progress">
+                <div class="desktop-notif-progress-fill uploading" id="desktopNotifFill" style="width:0%"></div>
+            </div>
+        </div>
+
+        <!-- Desktop Push Notification (Completion) -->
+        <div class="desktop-push-notif" id="desktopPushNotif" onclick="openAppFromDesktop()">
+            <div style="display:flex;align-items:center;gap:12px">
+                <div class="desktop-push-icon success" id="desktopPushIcon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
+                        <path d="M20 6 9 17l-5-5"/>
+                    </svg>
+                </div>
+                <div style="flex:1">
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px">
+                        <span style="font-size:13px;font-weight:600;color:#fff">好看智能相框</span>
+                        <span style="font-size:11px;color:rgba(255,255,255,0.4)">刚刚</span>
+                    </div>
+                    <div style="font-size:14px;font-weight:500;color:#fff" id="desktopPushTitle">发送完成</div>
+                    <div style="font-size:13px;color:rgba(255,255,255,0.7);margin-top:1px" id="desktopPushText">已成功发送 8 张照片到客厅相框</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Desktop App Grid -->
+        <div class="desktop-content">
+            <div class="desktop-app-grid">
+                <div class="desktop-app-item" onclick="openAppFromDesktop()">
+                    <div class="desktop-app-icon" style="background:linear-gradient(135deg,#007AFF,#5AC8FA);position:relative">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8">
+                            <rect x="2" y="3" width="20" height="14" rx="2"/>
+                            <path d="M8 21h8"/>
+                            <path d="M12 17v4"/>
+                        </svg>
+                        <div class="desktop-app-badge" id="appBadge" style="display:none">1</div>
+                    </div>
+                    <span class="desktop-app-name">好看智能相框</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Hint -->
+        <div class="desktop-nav-hint"></div>
+    </div>
+
+    <script>
+        // ==================== State Management ====================
+        const state = {
+            photos: [],
+            selectedIds: new Set(),
+            uploadState: 'idle', // idle, uploading, paused, completed, failed
+            uploadProgress: 0,
+            uploadTotal: 0,
+            uploadCurrent: 0,
+            uploadSuccessCount: 0,
+            uploadFailCount: 0,
+            uploadPhotoStatus: [], // 'pending', 'uploading', 'success', 'failed'
+            notificationPermission: false,
+            hasAskedPermission: false,
+            showPersistentNotification: true,
+            showMiniIndicator: false,
+            uploadTimer: null,
+            uploadStartTime: null,
+            // System simulation
+            systemType: 'android', // 'android' or 'ios'
+            systemVersion: 'android13', // 'android13', 'android12', 'ios17', 'ios15'
+        };
+        
+        // System version configurations
+        const systemConfigs = {
+            android13: {
+                name: 'Android 13 (API 33)',
+                type: 'android',
+                requiresPermission: true,
+                description: '需要申请 POST_NOTIFICATIONS 权限才能显示常驻进度通知'
+            },
+            android12: {
+                name: 'Android 12 (API 31)',
+                type: 'android',
+                requiresPermission: false,
+                description: '默认可显示通知，无需申请权限'
+            },
+            android10: {
+                name: 'Android 10 (API 29)',
+                type: 'android',
+                requiresPermission: false,
+                description: '默认可显示通知，无需申请权限'
+            },
+            ios26: {
+                name: 'iOS 26',
+                type: 'ios',
+                requiresPermission: false,
+                style: 'liquid-glass',
+                description: '通过实时活动/灵动岛显示进度，Liquid Glass 设计风格'
+            },
+            ios17: {
+                name: 'iOS 17',
+                type: 'ios',
+                requiresPermission: false,
+                style: 'default',
+                description: '通过实时活动/灵动岛显示进度，无需申请权限'
+            }
+        };
+
+        // ==================== Initialize ====================
+        function init() {
+            generatePhotos();
+            renderPhotos();
+            updateTime();
+            setInterval(updateTime, 1000);
+            
+            // Initialize system version (default Android 13)
+            setSystemVersion('android13');
+        }
+
+        function generatePhotos() {
+            const seeds = ['nature', 'city', 'people', 'food', 'travel', 'art', 'animals', 'tech', 
+                          'sunset', 'beach', 'mountain', 'forest', 'night', 'rain', 'snow', 'flower'];
+            state.photos = seeds.map((seed, i) => ({
+                id: i + 1,
+                url: `https://picsum.photos/seed/${seed}${i}/400/400`,
+                seed: seed
+            }));
+        }
+
+        function renderPhotos() {
+            const grid = document.getElementById('photoGrid');
+            grid.innerHTML = state.photos.map(photo => `
+                <div class="photo-item ${state.selectedIds.has(photo.id) ? 'selected' : ''}" 
+                     onclick="togglePhotoSelect(${photo.id})">
+                    <img src="${photo.url}" alt="Photo">
+                    <div class="check-circle">
+                        ${state.selectedIds.has(photo.id) ? 
+                            `<span class="check-number">${getSelectionOrder(photo.id)}</span>` : 
+                            ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function togglePhotoSelect(id) {
+            if (state.uploadState === 'uploading') return;
+            
+            if (state.selectedIds.has(id)) {
+                state.selectedIds.delete(id);
+            } else {
+                state.selectedIds.add(id);
+            }
+            renderPhotos();
+            updateSelectCount();
+        }
+
+        function getSelectionOrder(id) {
+            return Array.from(state.selectedIds).indexOf(id) + 1;
+        }
+
+        function updateSelectCount() {
+            const count = state.selectedIds.size;
+            document.getElementById('selectCount').textContent = `已选 ${count} 张`;
+            const btn = document.getElementById('sendBtn');
+            btn.disabled = count === 0;
+            btn.innerHTML = count > 0 ? 
+                `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="m22 2-7 20-4-9-9-4Z"/>
+                    <path d="M22 2 11 13"/>
+                </svg>
+                发送 ${count} 张到相框` :
+                `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="m22 2-7 20-4-9-9-4Z"/>
+                    <path d="M22 2 11 13"/>
+                </svg>
+                发送到相框`;
+        }
+
+        function updateTime() {
+            const now = new Date();
+            const hours = now.getHours().toString().padStart(2, '0');
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const timeStr = `${hours}:${minutes}`;
+            
+            document.getElementById('statusTime').textContent = timeStr;
+            document.getElementById('drawerTime').textContent = timeStr;
+            
+            const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+            const dateStr = `${now.getMonth() + 1}月${now.getDate()}日 ${weekdays[now.getDay()]}`;
+            document.getElementById('drawerDate').textContent = dateStr;
+        }
+
+        // ==================== System Version ====================
+        function setSystemVersion(version) {
+            state.systemVersion = version;
+            const config = systemConfigs[version];
+            state.systemType = config.type;
+            
+            // Update button states
+            document.querySelectorAll('.system-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.version === version);
+            });
+            
+            // Update display info
+            document.getElementById('systemNameDisplay').textContent = config.name;
+            
+            const badge = document.getElementById('permissionBadge');
+            const permStatus = document.getElementById('permissionStatus');
+            
+            // Reset permission state based on system
+            if (!config.requiresPermission) {
+                state.notificationPermission = true;
+                badge.textContent = '无需权限';
+                badge.style.background = '#4caf50';
+                document.getElementById('systemDescDisplay').textContent = config.description;
+                permStatus.style.display = 'none';
+            } else {
+                const savedPermission = localStorage.getItem('notificationPermission_' + version);
+                state.notificationPermission = savedPermission === 'true';
+                
+                if (state.notificationPermission) {
+                    badge.textContent = '已授权';
+                    badge.style.background = '#4caf50';
+                    document.getElementById('systemDescDisplay').textContent = '通知权限已授权';
+                    permStatus.style.display = '';
+                    permStatus.innerHTML = '✓ 已授权通知权限';
+                } else {
+                    badge.textContent = '需要申请权限';
+                    badge.style.background = '#ff9800';
+                    document.getElementById('systemDescDisplay').textContent = config.description;
+                    permStatus.style.display = 'none';
+                }
+            }
+            state.hasAskedPermission = false;
+            
+            // Hide iOS notifications on version switch
+            document.getElementById('liquidGlassNotif').classList.remove('visible');
+            document.getElementById('dynamicIslandNotif').classList.remove('visible', 'expanded');
+            diExpanded = false;
+        }
+        
+        function resetAllPermissions() {
+            // Reset permissions for all system versions
+            Object.keys(systemConfigs).forEach(version => {
+                localStorage.removeItem('notificationPermission_' + version);
+            });
+            
+            state.notificationPermission = false;
+            state.hasAskedPermission = false;
+            
+            // Update UI for current system version
+            const config = systemConfigs[state.systemVersion];
+            if (config.requiresPermission) {
+                const badge = document.getElementById('permissionBadge');
+                badge.textContent = '需要申请权限';
+                badge.style.background = '#ff9800';
+                document.getElementById('systemDescDisplay').textContent = '首次发送照片时会弹出通知权限申请对话框';
+                document.getElementById('permissionStatus').style.display = 'none';
+            }
+            
+            showToast('已重置', '所有系统版本的通知权限已重置', 'success');
+        }
+        
+        function isLiquidGlass() {
+            return systemConfigs[state.systemVersion]?.style === 'liquid-glass';
+        }
+        
+        function isIOSStyle() {
+            return state.systemType === 'ios';
+        }
+        
+        // Dynamic Island
+        let diExpanded = false;
+        
+        function toggleDynamicIsland() {
+            const el = document.getElementById('dynamicIslandNotif');
+            diExpanded = !diExpanded;
+            el.classList.toggle('expanded', diExpanded);
+        }
+        
+        function showDynamicIsland() {
+            const el = document.getElementById('dynamicIslandNotif');
+            // Show collapsed first
+            el.classList.add('visible');
+            // Then expand after a beat
+            setTimeout(() => {
+                diExpanded = true;
+                el.classList.add('expanded');
+            }, 300);
+        }
+        
+        function hideDynamicIsland() {
+            const el = document.getElementById('dynamicIslandNotif');
+            el.classList.remove('expanded');
+            diExpanded = false;
+            setTimeout(() => { el.classList.remove('visible'); }, 500);
+        }
+        
+        function updateDynamicIsland() {
+            const pct = state.uploadProgress;
+            const current = state.uploadCurrent;
+            const total = state.uploadTotal;
+            
+            document.getElementById('diCollapsedPct').textContent = pct + '%';
+            document.getElementById('diExpandedPct').textContent = pct + '%';
+            document.getElementById('diTitle').textContent = '正在发送照片';
+            document.getElementById('diText').textContent = `${current}/${total} 张照片`;
+            document.getElementById('diFill').style.width = pct + '%';
+        }
+        
+        function needsNotificationPermission() {
+            const config = systemConfigs[state.systemVersion];
+            return config.requiresPermission && !state.notificationPermission;
+        }
+
+        // ==================== Permission Handling ====================
+        function showPermissionDialog() {
+            if (state.systemType === 'ios') {
+                document.getElementById('permissionDialogIOS').classList.add('active');
+            } else {
+                document.getElementById('permissionDialogAndroid').classList.add('active');
+            }
+        }
+        
+        function hidePermissionDialog() {
+            document.getElementById('permissionDialogIOS').classList.remove('active');
+            document.getElementById('permissionDialogAndroid').classList.remove('active');
+        }
+
+        function grantNotificationPermission() {
+            state.notificationPermission = true;
+            localStorage.setItem('notificationPermission_' + state.systemVersion, 'true');
+            hidePermissionDialog();
+            
+            // Update system info UI
+            const badge = document.getElementById('permissionBadge');
+            badge.textContent = '已授权';
+            badge.style.background = '#4caf50';
+            document.getElementById('systemDescDisplay').textContent = '通知权限已授权，回到桌面可查看进度';
+            document.getElementById('permissionStatus').style.display = '';
+            
+            // If upload is in progress, prepare notification UI (will show when going to desktop)
+            if (state.uploadState === 'uploading' || state.uploadState === 'paused') {
+                document.getElementById('uploadNotificationCard').style.display = '';
+                renderNotificationPhotoGrid(Array.from(state.selectedIds));
+                updateAllProgressIndicators();
+            }
+        }
+
+        function denyNotificationPermission() {
+            state.notificationPermission = false;
+            localStorage.setItem('notificationPermission_' + state.systemVersion, 'false');
+            hidePermissionDialog();
+        }
+
+        // ==================== Upload Logic ====================
+        function startSend() {
+            if (state.selectedIds.size === 0) return;
+            startUpload(Array.from(state.selectedIds));
+        }
+
+        function startUploadDemo() {
+            // Select random photos for demo
+            state.selectedIds.clear();
+            const demoCount = Math.floor(Math.random() * 5) + 4; // 4-8 photos
+            for (let i = 0; i < demoCount && i < state.photos.length; i++) {
+                state.selectedIds.add(state.photos[i].id);
+            }
+            renderPhotos();
+            updateSelectCount();
+            startUpload(Array.from(state.selectedIds));
+        }
+
+        function startUpload(photoIds) {
+            state.uploadState = 'uploading';
+            state.uploadTotal = photoIds.length;
+            state.uploadCurrent = 0;
+            state.uploadProgress = 0;
+            state.uploadSuccessCount = 0;
+            state.uploadFailCount = 0;
+            state.uploadPhotoStatus = photoIds.map(() => 'pending');
+            state.uploadStartTime = Date.now();
+            
+            // Show status bar upload indicator
+            document.getElementById('uploadIndicator').style.display = '';
+            
+            // 1. Show App in-progress bar immediately
+            showAppProgressBar(photoIds);
+            
+            // 2. Hide send button, show progress bar
+            document.getElementById('bottomBar').querySelector('.send-btn').style.display = 'none';
+            
+            // 3. Prepare notification card data (iOS always, Android if permitted)
+            if (!needsNotificationPermission()) {
+                document.getElementById('uploadNotificationCard').style.display = '';
+                document.getElementById('completedNotificationCard').style.display = 'none';
+                renderNotificationPhotoGrid(photoIds);
+            }
+            
+            // 4. Start upload immediately
+            simulateUpload();
+            
+            // 5. Request notification permission (non-blocking) only for Android 13+
+            if (needsNotificationPermission() && !state.hasAskedPermission) {
+                state.hasAskedPermission = true;
+                setTimeout(() => showPermissionDialog(), 800);
+            }
+        }
+        
+        function showAppProgressBar(photoIds) {
+            const bar = document.getElementById('appProgressBar');
+            bar.classList.add('visible');
+            
+            // Render photo thumbnails
+            const photosContainer = document.getElementById('appProgressPhotos');
+            photosContainer.innerHTML = photoIds.map((id, idx) => {
+                const photo = state.photos.find(p => p.id === id);
+                return `
+                    <div class="app-progress-photo" data-idx="${idx}">
+                        <img src="${photo.url}" alt="">
+                        <div class="app-progress-photo-status pending"></div>
+                    </div>
+                `;
+            }).join('');
+            
+            updateAppProgressBar();
+        }
+        
+        function updateAppProgressBar() {
+            const pct = state.uploadProgress;
+            const current = state.uploadCurrent;
+            const total = state.uploadTotal;
+            
+            // Update text
+            document.getElementById('appProgressTitle').textContent = 
+                state.uploadState === 'paused' ? '已暂停' : '正在发送照片';
+            document.getElementById('appProgressDetail').textContent = 
+                `${current}/${total} 张 · ${pct}%`;
+            
+            // Update progress bar
+            const fill = document.getElementById('appProgressFill');
+            fill.style.width = pct + '%';
+            fill.classList.toggle('has-error', state.uploadFailCount > 0);
+            
+            // Update photo statuses
+            const photos = document.querySelectorAll('#appProgressPhotos .app-progress-photo');
+            photos.forEach((photo, idx) => {
+                const status = state.uploadPhotoStatus[idx];
+                const statusEl = photo.querySelector('.app-progress-photo-status');
+                
+                statusEl.className = 'app-progress-photo-status ' + status;
+                
+                if (status === 'uploading') {
+                    statusEl.innerHTML = `<div style="width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.8s linear infinite"></div>`;
+                } else if (status === 'success') {
+                    statusEl.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>`;
+                } else if (status === 'failed') {
+                    statusEl.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>`;
+                } else {
+                    statusEl.innerHTML = '';
+                }
+            });
+        }
+        
+        function hideAppProgressBar() {
+            document.getElementById('appProgressBar').classList.remove('visible');
+            document.getElementById('bottomBar').querySelector('.send-btn').style.display = '';
+        }
+
+        function simulateUpload() {
+            if (state.uploadState !== 'uploading') return;
+            if (state.uploadCurrent >= state.uploadTotal) {
+                completeUpload();
+                return;
+            }
+            
+            // Mark current photo as uploading
+            state.uploadPhotoStatus[state.uploadCurrent] = 'uploading';
+            updateNotificationPhotoStatus();
+            
+            // Simulate upload delay (500-1500ms per photo)
+            const delay = 500 + Math.random() * 1000;
+            state.uploadTimer = setTimeout(() => {
+                // 90% success rate by default
+                const success = Math.random() > 0.1;
+                state.uploadPhotoStatus[state.uploadCurrent] = success ? 'success' : 'failed';
+                
+                if (success) {
+                    state.uploadSuccessCount++;
+                } else {
+                    state.uploadFailCount++;
+                }
+                
+                state.uploadCurrent++;
+                state.uploadProgress = Math.round((state.uploadCurrent / state.uploadTotal) * 100);
+                
+                updateAllProgressIndicators();
+                simulateUpload();
+            }, delay);
+        }
+
+        function pauseUpload() {
+            if (state.uploadState !== 'uploading') return;
+            state.uploadState = 'paused';
+            clearTimeout(state.uploadTimer);
+            
+            document.getElementById('persistentPulse').style.display = 'none';
+            document.getElementById('persistentTitle').textContent = '已暂停';
+            document.getElementById('notifProgressFill').classList.remove('uploading');
+            document.getElementById('notifProgressFill').classList.add('paused');
+        }
+
+        function resumeUpload() {
+            if (state.uploadState !== 'paused') return;
+            state.uploadState = 'uploading';
+            
+            document.getElementById('persistentPulse').style.display = '';
+            document.getElementById('persistentTitle').textContent = '正在发送照片';
+            document.getElementById('notifProgressFill').classList.remove('paused');
+            document.getElementById('notifProgressFill').classList.add('uploading');
+            
+            simulateUpload();
+        }
+
+        function cancelUpload() {
+            clearTimeout(state.uploadTimer);
+            state.uploadState = 'idle';
+            state.uploadProgress = 0;
+            
+            document.getElementById('uploadIndicator').style.display = 'none';
+            hideAppProgressBar();
+            hidePersistentNotification();
+            hideMiniIndicator();
+            document.getElementById('uploadNotificationCard').style.display = 'none';
+            
+            showToast('已取消上传', `${state.uploadSuccessCount} 张照片已发送`, 'partial');
+        }
+
+        function completeUpload() {
+            state.uploadState = 'completed';
+            document.getElementById('uploadIndicator').style.display = 'none';
+            
+            // Determine result type
+            let resultType = 'success';
+            if (state.uploadFailCount === state.uploadTotal) {
+                resultType = 'failed';
+            } else if (state.uploadFailCount > 0) {
+                resultType = 'partial';
+            }
+            
+            // Update App progress bar to show completion
+            updateAppProgressBar();
+            
+            // Update notifications
+            setTimeout(() => {
+                // Hide App progress bar
+                hideAppProgressBar();
+                
+                // Clear selection
+                state.selectedIds.clear();
+                renderPhotos();
+                updateSelectCount();
+                
+                const canShowNotification = !needsNotificationPermission();
+                
+                if (canShowNotification) {
+                    hidePersistentNotification();
+                    hideMiniIndicator();
+                    
+                    // Show completed notification
+                    document.getElementById('uploadNotificationCard').style.display = 'none';
+                    showCompletedNotification(resultType);
+                }
+                
+                // If on desktop and can show notifications, show desktop completion notification
+                if (isOnDesktop && canShowNotification) {
+                    showDesktopCompletedNotification();
+                } else if (!isOnDesktop) {
+                    // Show toast in app
+                    if (resultType === 'success') {
+                        showToast('发送完成', `已成功发送 ${state.uploadTotal} 张照片`, 'success');
+                    } else if (resultType === 'partial') {
+                        showToast('部分发送成功', `成功 ${state.uploadSuccessCount} 张，失败 ${state.uploadFailCount} 张`, 'partial');
+                    } else {
+                        showToast('发送失败', `${state.uploadTotal} 张照片发送失败`, 'failed');
+                    }
+                }
+            }, 800);
+        }
+
+        function simulatePartialFail() {
+            if (state.uploadState !== 'uploading') {
+                startUploadDemo();
+                return;
+            }
+            // Force next 2 photos to fail
+            const originalRandom = Math.random;
+            let failCount = 0;
+            Math.random = function() {
+                if (failCount < 2) {
+                    failCount++;
+                    return 0.05; // Will cause failure
+                }
+                return originalRandom();
+            };
+            setTimeout(() => { Math.random = originalRandom; }, 3000);
+        }
+
+        function simulateAllFail() {
+            clearTimeout(state.uploadTimer);
+            // Mark all remaining as failed
+            for (let i = state.uploadCurrent; i < state.uploadTotal; i++) {
+                state.uploadPhotoStatus[i] = 'failed';
+                state.uploadFailCount++;
+            }
+            state.uploadCurrent = state.uploadTotal;
+            state.uploadProgress = 100;
+            updateAllProgressIndicators();
+            completeUpload();
+        }
+
+        // ==================== Progress Indicators ====================
+        function updateAllProgressIndicators() {
+            const pct = state.uploadProgress;
+            const current = state.uploadCurrent;
+            const total = state.uploadTotal;
+            
+            // 1. Always update App in-progress bar
+            updateAppProgressBar();
+            
+            // 2. Update iOS notifications
+            if (isLiquidGlass()) {
+                document.getElementById('liquidGlassTitle').textContent = '正在发送照片';
+                document.getElementById('liquidGlassText').textContent = `已发送 ${current}/${total} 张照片到客厅相框`;
+                document.getElementById('liquidGlassFill').style.width = `${pct}%`;
+                document.getElementById('liquidGlassPct').textContent = `${pct}%`;
+            } else if (isIOSStyle()) {
+                updateDynamicIsland();
+            }
+            
+            // 3. Update standard notification indicators only if permission granted
+            const canShowNotification = !needsNotificationPermission();
+            
+            if (canShowNotification && !isLiquidGlass()) {
+                // Persistent notification
+                document.getElementById('persistentText').textContent = `${current}/${total} 张照片`;
+                document.getElementById('persistentPct').textContent = `${pct}%`;
+                document.getElementById('persistentFill').style.width = `${pct}%`;
+                
+                // Mini indicator
+                const circumference = 2 * Math.PI * 15; // r=15
+                const offset = circumference - (pct / 100) * circumference;
+                document.getElementById('miniProgress').style.strokeDashoffset = offset;
+                document.getElementById('miniPct').textContent = `${pct}%`;
+                
+                // Notification card
+                document.getElementById('notifText').textContent = `已发送 ${current}/${total} 张照片到客厅相框`;
+                document.getElementById('notifProgressFill').style.width = `${pct}%`;
+                document.getElementById('notifProgressText').textContent = `${pct}%`;
+                
+                // Calculate speed
+                if (state.uploadStartTime && current > 0) {
+                    const elapsed = (Date.now() - state.uploadStartTime) / 1000;
+                    const speed = (current / elapsed).toFixed(1);
+                    document.getElementById('notifSpeedText').textContent = `${speed} 张/秒`;
+                }
+                
+                updateNotificationPhotoStatus();
+            }
+            
+            // 4. Update desktop progress if on desktop
+            if (isOnDesktop) {
+                updateDesktopProgress();
+            }
+        }
+
+        function renderNotificationPhotoGrid(photoIds) {
+            const grid = document.getElementById('notifPhotoGrid');
+            grid.innerHTML = photoIds.slice(0, 8).map((id, idx) => {
+                const photo = state.photos.find(p => p.id === id);
+                return `
+                    <div class="notification-photo-item" data-idx="${idx}">
+                        <img src="${photo.url}" alt="">
+                        <div class="notification-photo-status" data-status="pending" style="display:none"></div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateNotificationPhotoStatus() {
+            const items = document.querySelectorAll('#notifPhotoGrid .notification-photo-item');
+            items.forEach((item, idx) => {
+                const status = state.uploadPhotoStatus[idx];
+                const statusEl = item.querySelector('.notification-photo-status');
+                
+                if (status === 'pending') {
+                    statusEl.style.display = 'none';
+                } else {
+                    statusEl.style.display = 'flex';
+                    statusEl.className = `notification-photo-status ${status}`;
+                    
+                    if (status === 'uploading') {
+                        statusEl.innerHTML = `
+                            <div style="width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.8s linear infinite"></div>
+                        `;
+                    } else if (status === 'success') {
+                        statusEl.innerHTML = `
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3">
+                                <path d="M20 6 9 17l-5-5"/>
+                            </svg>
+                        `;
+                    } else if (status === 'failed') {
+                        statusEl.innerHTML = `
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3">
+                                <path d="M18 6 6 18"/>
+                                <path d="m6 6 12 12"/>
+                            </svg>
+                        `;
+                    }
+                }
+            });
+        }
+
+        // ==================== Notification UI ====================
+        function showPersistentNotification() {
+            document.getElementById('persistentNotification').classList.add('visible');
+        }
+
+        function hidePersistentNotification() {
+            document.getElementById('persistentNotification').classList.remove('visible');
+        }
+
+        function showMiniIndicator() {
+            document.getElementById('miniIndicator').classList.add('visible');
+        }
+
+        function hideMiniIndicator() {
+            document.getElementById('miniIndicator').classList.remove('visible');
+        }
+
+        function toggleNotificationDrawer() {
+            const drawer = document.getElementById('notificationDrawer');
+            drawer.classList.toggle('open');
+        }
+
+        function closeNotificationDrawer() {
+            document.getElementById('notificationDrawer').classList.remove('open');
+        }
+
+        function toggleNotificationExpand(card) {
+            card.classList.toggle('expanded');
+            const arrow = card.querySelector('.expand-arrow');
+            if (card.classList.contains('expanded')) {
+                arrow.style.transform = 'rotate(180deg)';
+            } else {
+                arrow.style.transform = 'rotate(0)';
+            }
+        }
+
+        function showCompletedNotification(resultType) {
+            const card = document.getElementById('completedNotificationCard');
+            const iconContainer = card.querySelector('.notification-app-icon');
+            const title = document.getElementById('completedTitle');
+            const text = document.getElementById('completedText');
+            
+            card.style.display = '';
+            
+            if (resultType === 'success') {
+                iconContainer.style.background = 'linear-gradient(135deg,#34C759,#30D158)';
+                iconContainer.innerHTML = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>`;
+                title.textContent = '发送完成';
+                text.textContent = `已成功发送 ${state.uploadTotal} 张照片到客厅相框`;
+            } else if (resultType === 'partial') {
+                iconContainer.style.background = 'linear-gradient(135deg,#FF9500,#FF9F0A)';
+                iconContainer.innerHTML = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><path d="M12 9v4"/><circle cx="12" cy="16" r="0.5" fill="white"/></svg>`;
+                title.textContent = '部分发送成功';
+                text.textContent = `成功 ${state.uploadSuccessCount} 张，失败 ${state.uploadFailCount} 张`;
+            } else {
+                iconContainer.style.background = 'linear-gradient(135deg,#FF3B30,#FF453A)';
+                iconContainer.innerHTML = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>`;
+                title.textContent = '发送失败';
+                text.textContent = `${state.uploadTotal} 张照片发送失败，请检查网络后重试`;
+            }
+        }
+
+        function clearAllNotifications() {
+            document.getElementById('uploadNotificationCard').style.display = 'none';
+            document.getElementById('completedNotificationCard').style.display = 'none';
+        }
+
+        // ==================== Toast ====================
+        function showToast(title, text, type = 'success') {
+            const toast = document.getElementById('completionToast');
+            const icon = document.getElementById('toastIcon');
+            
+            document.getElementById('toastTitle').textContent = title;
+            document.getElementById('toastText').textContent = text;
+            
+            icon.className = `completion-toast-icon ${type}`;
+            
+            if (type === 'success') {
+                icon.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>`;
+            } else if (type === 'partial') {
+                icon.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M12 9v4"/><circle cx="12" cy="16" r="0.5" fill="white"/></svg>`;
+            } else {
+                icon.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>`;
+            }
+            
+            toast.classList.add('visible');
+            setTimeout(() => toast.classList.remove('visible'), 4000);
+        }
+
+        // ==================== Settings ====================
+        function togglePersistentNotification() {
+            const toggle = document.getElementById('togglePersistent');
+            state.showPersistentNotification = !state.showPersistentNotification;
+            toggle.classList.toggle('active', state.showPersistentNotification);
+            
+            const canShowNotification = !needsNotificationPermission();
+            if (state.uploadState === 'uploading' && canShowNotification) {
+                if (state.showPersistentNotification) {
+                    showPersistentNotification();
+                } else {
+                    hidePersistentNotification();
+                }
+            }
+        }
+
+        function toggleMiniIndicator() {
+            const toggle = document.getElementById('toggleMini');
+            state.showMiniIndicator = !state.showMiniIndicator;
+            toggle.classList.toggle('active', state.showMiniIndicator);
+            
+            const canShowNotification = !needsNotificationPermission();
+            if (state.uploadState === 'uploading' && canShowNotification) {
+                if (state.showMiniIndicator) {
+                    showMiniIndicator();
+                } else {
+                    hideMiniIndicator();
+                }
+            }
+        }
+
+        let notificationStyleIndex = 0;
+        const notificationStyles = ['Material Design', 'iOS Style', 'Minimal'];
+        
+        function cycleNotificationStyle() {
+            notificationStyleIndex = (notificationStyleIndex + 1) % notificationStyles.length;
+            document.querySelector('.settings-value').textContent = notificationStyles[notificationStyleIndex];
+        }
+
+        // ==================== Desktop Simulation ====================
+        let isOnDesktop = false;
+        let desktopNotifShown = false;
+
+        function goToDesktop() {
+            isOnDesktop = true;
+            desktopNotifShown = false;
+            document.getElementById('desktopOverlay').classList.add('active');
+            
+            // Update desktop time
+            updateDesktopTime();
+            
+            const isUploading = state.uploadState === 'uploading' || state.uploadState === 'paused';
+            
+            if (isUploading && isIOSStyle()) {
+                if (isLiquidGlass()) {
+                    // iOS 26: Liquid Glass notification
+                    document.getElementById('liquidGlassNotif').classList.add('visible');
+                } else {
+                    // iOS 17: Dynamic Island
+                    showDynamicIsland();
+                    updateDynamicIsland();
+                }
+                document.getElementById('desktopUploadIndicator').style.display = 'none';
+                return;
+            }
+            
+            // Android: check notification permission
+            const canShowNotification = !needsNotificationPermission();
+            
+            if (canShowNotification) {
+                if (isUploading) {
+                    showDesktopUploadNotification();
+                }
+            } else {
+                if (isUploading) {
+                    document.getElementById('desktopUploadIndicator').style.display = '';
+                    document.getElementById('desktopUploadPct').textContent = state.uploadProgress + '%';
+                }
+            }
+        }
+
+        function openAppFromDesktop() {
+            isOnDesktop = false;
+            document.getElementById('desktopOverlay').classList.remove('active');
+            document.getElementById('desktopDrawer').classList.remove('open');
+            document.getElementById('liquidGlassNotif').classList.remove('visible');
+            hideDynamicIsland();
+            
+            // Hide desktop notifications
+            document.getElementById('desktopNotifBanner').classList.remove('visible');
+            document.getElementById('desktopPushNotif').classList.remove('visible');
+            document.getElementById('appBadge').style.display = 'none';
+        }
+
+        function toggleDesktopDrawer() {
+            document.getElementById('desktopDrawer').classList.toggle('open');
+        }
+
+        function updateDesktopTime() {
+            const now = new Date();
+            const hours = now.getHours().toString().padStart(2, '0');
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const timeStr = `${hours}:${minutes}`;
+            
+            document.getElementById('desktopTime').textContent = timeStr;
+            document.getElementById('desktopDrawerTime').textContent = timeStr;
+            
+            const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+            const dateStr = `${now.getMonth() + 1}月${now.getDate()}日 ${weekdays[now.getDay()]}`;
+            document.getElementById('desktopDrawerDate').textContent = dateStr;
+        }
+
+        function showDesktopUploadNotification() {
+            // Show status bar indicator
+            document.getElementById('desktopUploadIndicator').style.display = '';
+            document.getElementById('desktopUploadPct').textContent = state.uploadProgress + '%';
+            
+            // Show notification banner
+            document.getElementById('desktopNotifBanner').classList.add('visible');
+            updateDesktopProgress();
+            
+            // Show drawer card
+            document.getElementById('desktopDrawerUploadCard').style.display = '';
+            document.getElementById('desktopDrawerCompletedCard').style.display = 'none';
+        }
+
+        function updateDesktopProgress() {
+            if (!isOnDesktop) return;
+            
+            const pct = state.uploadProgress;
+            const current = state.uploadCurrent;
+            const total = state.uploadTotal;
+            
+            // Status bar indicator
+            document.getElementById('desktopUploadPct').textContent = pct + '%';
+            
+            // Notification banner
+            document.getElementById('desktopNotifTitle').textContent = 
+                state.uploadState === 'paused' ? '已暂停' : '正在发送照片';
+            document.getElementById('desktopNotifText').textContent = 
+                `已发送 ${current}/${total} 张照片到客厅相框`;
+            document.getElementById('desktopNotifFill').style.width = pct + '%';
+            
+            // Drawer card
+            document.getElementById('desktopDrawerTitle').textContent = 
+                state.uploadState === 'paused' ? '已暂停' : '正在发送照片';
+            document.getElementById('desktopDrawerText').textContent = 
+                `已发送 ${current}/${total} 张照片到客厅相框`;
+            document.getElementById('desktopDrawerFill').style.width = pct + '%';
+        }
+
+        function showDesktopCompletedNotification() {
+            // Hide progress indicators
+            document.getElementById('desktopUploadIndicator').style.display = 'none';
+            document.getElementById('desktopNotifBanner').classList.remove('visible');
+            document.getElementById('desktopDrawerUploadCard').style.display = 'none';
+            
+            // Determine result type
+            let resultType = 'success';
+            let title = '发送完成';
+            let text = `已成功发送 ${state.uploadTotal} 张照片到客厅相框`;
+            
+            if (state.uploadFailCount === state.uploadTotal) {
+                resultType = 'failed';
+                title = '发送失败';
+                text = `${state.uploadTotal} 张照片发送失败，请检查网络`;
+            } else if (state.uploadFailCount > 0) {
+                resultType = 'partial';
+                title = '部分发送成功';
+                text = `成功 ${state.uploadSuccessCount} 张，失败 ${state.uploadFailCount} 张`;
+            }
+            
+            // Update push notification
+            const pushIcon = document.getElementById('desktopPushIcon');
+            pushIcon.className = 'desktop-push-icon ' + resultType;
+            
+            if (resultType === 'success') {
+                pushIcon.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>';
+            } else if (resultType === 'partial') {
+                pushIcon.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M12 9v4"/><circle cx="12" cy="16" r="0.5" fill="white"/></svg>';
+            } else {
+                pushIcon.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>';
+            }
+            
+            document.getElementById('desktopPushTitle').textContent = title;
+            document.getElementById('desktopPushText').textContent = text;
+            
+            // Update drawer completed card
+            const drawerIcon = document.getElementById('desktopDrawerCompletedIcon');
+            if (resultType === 'success') {
+                drawerIcon.style.background = 'linear-gradient(135deg,#34C759,#30D158)';
+                drawerIcon.innerHTML = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>';
+            } else if (resultType === 'partial') {
+                drawerIcon.style.background = 'linear-gradient(135deg,#FF9500,#FF9F0A)';
+                drawerIcon.innerHTML = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><path d="M12 9v4"/><circle cx="12" cy="16" r="0.5" fill="white"/></svg>';
+            } else {
+                drawerIcon.style.background = 'linear-gradient(135deg,#FF3B30,#FF453A)';
+                drawerIcon.innerHTML = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>';
+            }
+            document.getElementById('desktopDrawerCompletedTitle').textContent = title;
+            document.getElementById('desktopDrawerCompletedText').textContent = text;
+            document.getElementById('desktopDrawerCompletedCard').style.display = '';
+            
+            // Show push notification and app badge
+            if (!desktopNotifShown) {
+                desktopNotifShown = true;
+                setTimeout(() => {
+                    document.getElementById('desktopPushNotif').classList.add('visible');
+                    document.getElementById('appBadge').style.display = '';
+                    
+                    // Auto hide after 5 seconds
+                    setTimeout(() => {
+                        document.getElementById('desktopPushNotif').classList.remove('visible');
+                    }, 5000);
+                }, 600);
+            }
+        }
+
+        // ==================== Initialize on Load ====================
+        document.addEventListener('DOMContentLoaded', init);
+
+        // Swipe down to open notification drawer
+        let touchStartY = 0;
+        document.querySelector('.android-status-bar').addEventListener('touchstart', (e) => {
+            touchStartY = e.touches[0].clientY;
+        });
+        document.querySelector('.android-status-bar').addEventListener('touchmove', (e) => {
+            const deltaY = e.touches[0].clientY - touchStartY;
+            if (deltaY > 30) {
+                document.getElementById('notificationDrawer').classList.add('open');
+            }
+        });
+
+        // Swipe up to close notification drawer
+        document.getElementById('notificationDrawer').addEventListener('touchstart', (e) => {
+            touchStartY = e.touches[0].clientY;
+        });
+        document.getElementById('notificationDrawer').addEventListener('touchmove', (e) => {
+            const deltaY = touchStartY - e.touches[0].clientY;
+            if (deltaY > 50) {
+                document.getElementById('notificationDrawer').classList.remove('open');
+            }
+        });
+
+        // Desktop status bar swipe down
+        document.querySelector('.desktop-status-bar').addEventListener('touchstart', (e) => {
+            touchStartY = e.touches[0].clientY;
+        });
+        document.querySelector('.desktop-status-bar').addEventListener('touchmove', (e) => {
+            const deltaY = e.touches[0].clientY - touchStartY;
+            if (deltaY > 30) {
+                document.getElementById('desktopDrawer').classList.add('open');
+            }
+        });
+
+        // Desktop drawer swipe up to close
+        document.getElementById('desktopDrawer').addEventListener('touchstart', (e) => {
+            touchStartY = e.touches[0].clientY;
+        });
+        document.getElementById('desktopDrawer').addEventListener('touchmove', (e) => {
+            const deltaY = touchStartY - e.touches[0].clientY;
+            if (deltaY > 50) {
+                document.getElementById('desktopDrawer').classList.remove('open');
+            }
+        });
+
+        // Desktop swipe up from bottom to return to app (gesture navigation)
+        let desktopTouchStartY = 0;
+        document.querySelector('.desktop-nav-hint').addEventListener('touchstart', (e) => {
+            desktopTouchStartY = e.touches[0].clientY;
+        });
+        document.querySelector('.desktop-nav-hint').addEventListener('touchmove', (e) => {
+            const deltaY = desktopTouchStartY - e.touches[0].clientY;
+            if (deltaY > 100) {
+                openAppFromDesktop();
+            }
+        });
+
+        // Update desktop time every second if on desktop
+        setInterval(() => {
+            if (isOnDesktop) {
+                updateDesktopTime();
+            }
+        }, 1000);
+    </script>
+</body>
+</html>
