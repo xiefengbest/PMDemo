@@ -61,7 +61,8 @@
         /* 分类页面布局样式 */
         .category-hero {
             position: relative;
-            height: 180px;
+            width: 100%;
+            aspect-ratio: 2 / 1;
             border-radius: 2.5rem;
             overflow: hidden;
             margin-bottom: 1.5rem;
@@ -69,7 +70,8 @@
         }
         .category-small {
             position: relative;
-            height: 240px;
+            width: 100%;
+            aspect-ratio: 3 / 4;
             border-radius: 2.5rem;
             overflow: hidden;
         }
@@ -183,7 +185,8 @@
             position: relative;
             border-radius: 2.5rem;
             overflow: hidden;
-            height: 420px;
+            width: 100%;
+            aspect-ratio: 3 / 4;
             box-shadow: 0 20px 40px -15px rgba(0,0,0,0.12);
             cursor: pointer;
             transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
@@ -219,7 +222,7 @@
         }
         .mini-preview-img {
             width: 48px;
-            height: 86px;
+            aspect-ratio: 9 / 16;
             border-radius: 8px;
             overflow: hidden;
             border: 1.5px solid rgba(255,255,255,0.3);
@@ -362,7 +365,7 @@
         #detail-modal.show { transform: translate(-50%, 0); }
         .detail-cover-b {
             width: 100%;
-            aspect-ratio: 1.5;
+            aspect-ratio: 4 / 3;
             object-fit: cover;
         }
         .detail-body {
@@ -380,7 +383,7 @@
         }
         .detail-previews-b img {
             width: 100px;
-            height: 178px;
+            aspect-ratio: 9 / 16;
             border-radius: 1rem;
             object-fit: cover;
             flex-shrink: 0;
@@ -402,7 +405,7 @@
         }
         .detail-history-b .h-item img {
             width: 90px;
-            height: 160px;
+            aspect-ratio: 9 / 16;
             border-radius: 12px;
             object-fit: cover;
             background: #f8fafc;
@@ -2038,18 +2041,18 @@
         </div>
 
         <!-- 底部导航栏 -->
-        <div class="fixed bottom-0 left-0 right-0 z-50 px-8 pb-10 pointer-events-none">
-            <nav class="nav-blur h-20 max-w-sm mx-auto rounded-[2.5rem] flex items-center justify-between px-3 shadow-[0_20px_50px_rgba(0,0,0,0.15)] pointer-events-auto">
+        <div class="fixed bottom-0 left-0 right-0 z-50 px-8 pointer-events-none" style="padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));">
+            <nav class="nav-blur h-16 max-w-sm mx-auto rounded-[2rem] flex items-center justify-between px-2 shadow-[0_12px_40px_rgba(0,0,0,0.12)] pointer-events-auto">
                 <button onclick="switchTab('category')" class="nav-btn flex-1 flex flex-col items-center justify-center h-full text-indigo-600" id="btn-category">
-                    <i class="fa-solid fa-compass text-xl mb-1"></i>
-                    <span class="text-[9px] font-black uppercase tracking-tighter">壁纸</span>
+                    <i class="fa-solid fa-compass text-lg mb-1"></i>
+                    <span class="text-[10px] font-black uppercase tracking-tighter">壁纸</span>
                 </button>
                 <button onclick="switchTab('photo')" class="nav-btn flex-1 flex flex-col items-center justify-center h-full text-slate-500" id="btn-photo">
-                    <i class="fa-solid fa-image text-xl mb-1"></i>
-                    <span class="text-[9px] font-black uppercase tracking-tighter">相册</span>
+                    <i class="fa-solid fa-image text-lg mb-1"></i>
+                    <span class="text-[10px] font-black uppercase tracking-tighter">相册</span>
                 </button>
                 <button onclick="switchTab('profile')" class="nav-btn flex-1 flex flex-col items-center justify-center h-full text-slate-500" id="btn-profile">
-                    <i class="fa-solid fa-user-circle text-xl mb-1"></i>
+                    <i class="fa-solid fa-user-circle text-lg mb-1"></i>
                     <span class="text-[9px] font-black uppercase tracking-tighter">我的</span>
                 </button>
             </nav>
