@@ -30,7 +30,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap');
-        
+
         :root {
             --accent: #6366f1;
             --bg: #fdfdfe;
@@ -56,31 +56,6 @@
         }
         .premium-card:active {
             transform: scale(0.96);
-        }
-
-        /* 分类页面布局样式 */
-        .category-hero {
-            position: relative;
-            width: 100%;
-            aspect-ratio: 2 / 1;
-            border-radius: 2.5rem;
-            overflow: hidden;
-            margin-bottom: 1.5rem;
-            box-shadow: 0 20px 40px -15px rgba(0,0,0,0.1);
-        }
-        .category-small {
-            position: relative;
-            width: 100%;
-            aspect-ratio: 3 / 4;
-            border-radius: 2.5rem;
-            overflow: hidden;
-        }
-        .cat-overlay {
-            background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 60%);
-        }
-        .vertical-text {
-            writing-mode: vertical-rl;
-            text-orientation: mixed;
         }
 
         /* 相册瀑布流（Pinterest风格）布局 */
@@ -1303,7 +1278,7 @@
     </div>
 
     <div id="app" class="max-w-md mx-auto min-h-screen flex flex-col bg-[#fdfdfe] w-full overflow-x-hidden">
-        
+
         <!-- 顶部标题区（随页面一起滚动） -->
         <header id="main-header" class="px-8 pt-16 pb-6 z-40 bg-[#fdfdfe] border-b border-slate-200/60" style="padding-top: max(1rem, env(safe-area-inset-top));">
             <div class="flex justify-between items-end">
@@ -1321,7 +1296,7 @@
 
         <!-- 主内容区域 -->
         <main class="flex-1 pt-5 pb-40">
-            
+
             <!-- 壁纸订阅视图 -->
             <section id="category-view" class="view-content">
                 <!-- 教程入口 -->
@@ -3415,7 +3390,7 @@
             btn.textContent = sec + 's';
             btn.classList.add('text-slate-400');
             btn.classList.remove('text-indigo-600');
-            
+
             const timer = setInterval(() => {
                 sec--;
                 if (sec <= 0) {
@@ -3446,10 +3421,10 @@
         function submitChangePassword() {
             const code = document.getElementById('change-pwd-code').value.trim();
             const newPwd = document.getElementById('change-pwd-new').value.trim();
-            
+
             if (!code) { showToast('请输入验证码'); return; }
             if (!newPwd || newPwd.length < 6 || newPwd.length > 20) { showToast('请输入6-20位新密码'); return; }
-            
+
             showToast('密码修改成功，请重新登录');
             closeProfileChangePasswordModal();
             doProfileLogout();
@@ -3458,10 +3433,10 @@
         function saveAccountPassword() {
             const code = document.getElementById('account-pwd-code').value.trim();
             const newPwd = document.getElementById('account-new-pwd').value.trim();
-            
+
             if (!code) { showToast('请输入验证码'); return; }
             if (!newPwd || newPwd.length < 6 || newPwd.length > 20) { showToast('请输入6-20位新密码'); return; }
-            
+
             showAccountSubPage('account');
             showToast('密码修改成功');
         }
