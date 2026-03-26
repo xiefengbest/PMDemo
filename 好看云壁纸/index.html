@@ -3164,8 +3164,12 @@
                 <p class="text-xs text-slate-500 mb-6">版本 v2.6.0</p>
                 <div class="space-y-2">
                     <button type="button" onclick="closeSecondaryPage();showToast('即将打开官网')" class="w-full p-4 rounded-2xl border border-slate-200 text-sm font-bold text-slate-700 hover:bg-slate-50 transition-all">官网与帮助</button>
-                    <button type="button" onclick="closeSecondaryPage();showToast('即将打开客服')" class="w-full p-4 rounded-2xl border border-slate-200 text-sm font-bold text-slate-700 hover:bg-slate-50 transition-all">联系客服</button>
+                    <a href="mailto:haokan@levect.com" class="w-full p-4 rounded-2xl border border-slate-200 text-sm font-bold text-slate-700 hover:bg-slate-50 transition-all flex items-center justify-between">
+                        <span>联系我们</span>
+                        <span class="text-slate-500 font-normal">haokan@levect.com</span>
+                    </a>
                 </div>
+                <p class="text-xs text-slate-400 text-center mt-8">©️2025 无限向量（北京）科技有限公司</p>
             `;
             openSecondaryPage('关于我们', bodyHtml);
         }
