@@ -84,11 +84,4 @@ Always follow these principles when writing code (recall them in your thinking b
 - 符合行业规范、符合代码设计原则
 - 合法合规、注重用户隐私
 
----
-
-## 7. 语言
-
-- Always respond in Chinese-simplified
-
-
 
