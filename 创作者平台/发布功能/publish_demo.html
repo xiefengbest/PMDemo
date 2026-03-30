@@ -171,6 +171,69 @@
             background-size: 33.333% 100%, 100% 33.333%;
         }
 
+        .nav-creator-item.nav-active {
+            color: #1e40af;
+            background-color: #eff6ff;
+            font-weight: 600;
+        }
+
+        .stat-bar-track {
+            display: flex;
+            align-items: stretch;
+            gap: 4px;
+            height: 64px;
+        }
+        .stat-bar-column {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+        .stat-bar-fill {
+            width: 100%;
+            border-radius: 4px 4px 0 0;
+            background: linear-gradient(to top, #3b82f6, #93c5fd);
+            min-height: 4px;
+            transition: opacity 0.15s;
+        }
+        .stat-bar-column:hover .stat-bar-fill { opacity: 0.88; }
+
+        .creator-brand-logo {
+            width: 2.25rem;
+            height: 2.25rem;
+            flex-shrink: 0;
+            border-radius: 0.65rem;
+            background: linear-gradient(145deg, #faf5ff 0%, #fce7f3 55%, #fdf2f8 100%);
+            border: 1px solid rgba(244, 114, 182, 0.25);
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .creator-brand-logo svg {
+            width: 1.65rem;
+            height: 1.65rem;
+            display: block;
+        }
+
+        .works-sort-btn {
+            align-items: center;
+            gap: 0.25rem;
+            font: inherit;
+            font-weight: 600;
+            color: inherit;
+            background: transparent;
+            border: 0;
+            padding: 0;
+            cursor: pointer;
+            border-radius: 0.25rem;
+        }
+        .works-sort-btn:hover { color: #1e293b; }
+        .works-sort-btn.is-active { color: #1d4ed8; }
+        .works-sort-btn .sort-icon { opacity: 0.45; }
+        .works-sort-btn.is-active .sort-icon { opacity: 1; }
+
     </style>
 </head>
 <body class="text-slate-700 bg-white">
@@ -178,11 +241,40 @@
     <div class="min-h-screen flex flex-col">
         <!-- Header -->
         <header class="h-14 border-b flex items-center justify-between px-6 sticky top-0 z-50 bg-white">
-            <div class="flex items-center gap-2">
-                <div class="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
-                    <span class="text-white font-bold text-lg">92</span>
+            <div class="flex items-center gap-2.5">
+                <div class="creator-brand-logo" role="img" aria-label="好看创作者 Q版小马标识">
+                    <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <defs>
+                            <linearGradient id="creator-pony-mane" x1="0" y1="0" x2="1" y2="1">
+                                <stop offset="0%" stop-color="#c084fc"/>
+                                <stop offset="55%" stop-color="#e879f9"/>
+                                <stop offset="100%" stop-color="#f472b6"/>
+                            </linearGradient>
+                        </defs>
+                        <!-- 鬃毛 -->
+                        <path d="M7 20 Q5 10 14 7 Q20 5 26 9 Q32 12 33 19 Q33.5 24 30 28 Q26 32 20 31 Q11 29 7 20" fill="url(#creator-pony-mane)"/>
+                        <!-- 左耳 -->
+                        <path d="M11 11 L7 4 L14 9 Z" fill="#fbcfe8" stroke="#f9a8d4" stroke-width="0.75" stroke-linejoin="round"/>
+                        <!-- 右耳 -->
+                        <path d="M29 11 L33 4 L26 9 Z" fill="#fbcfe8" stroke="#f9a8d4" stroke-width="0.75" stroke-linejoin="round"/>
+                        <!-- 脸 -->
+                        <ellipse cx="20" cy="22" rx="11.5" ry="10.5" fill="#fff1f2" stroke="#fecdd3" stroke-width="0.9"/>
+                        <!-- 吻部 -->
+                        <ellipse cx="20" cy="26.5" rx="5" ry="3.2" fill="#ffe4e6"/>
+                        <!-- 眼睛 -->
+                        <circle cx="14.5" cy="20" r="2.1" fill="#1e293b"/>
+                        <circle cx="25.5" cy="20" r="2.1" fill="#1e293b"/>
+                        <circle cx="15.2" cy="19.3" r="0.65" fill="#fff"/>
+                        <circle cx="26.2" cy="19.3" r="0.65" fill="#fff"/>
+                        <!-- 腮红 -->
+                        <ellipse cx="11.5" cy="24" rx="2.2" ry="1.1" fill="#fb7185" opacity="0.35"/>
+                        <ellipse cx="28.5" cy="24" rx="2.2" ry="1.1" fill="#fb7185" opacity="0.35"/>
+                        <!-- 鼻孔 -->
+                        <circle cx="18.2" cy="26.5" r="0.55" fill="#fda4af"/>
+                        <circle cx="21.8" cy="26.5" r="0.55" fill="#fda4af"/>
+                    </svg>
                 </div>
-                <span class="font-bold text-lg">好看创作者</span>
+                <span class="font-bold text-lg tracking-tight text-slate-800">好看创作者</span>
             </div>
             <div class="flex items-center gap-4">
                 <div class="flex items-center gap-2">
@@ -199,17 +291,124 @@
             <!-- Sidebar -->
             <aside class="w-56 border-r flex flex-col py-6 sticky top-14 h-[calc(100vh-3.5rem)]">
                 <div class="px-4 mb-6">
-                    <button type="button" class="w-full bg-[#004e7c] text-white py-2.5 rounded-md text-sm font-medium hover:bg-[#003d63]">上传壁纸</button>
+                    <button type="button" id="nav-btn-upload" class="w-full bg-[#004e7c] text-white py-2.5 rounded-md text-sm font-medium hover:bg-[#003d63]">上传壁纸</button>
                 </div>
-                <nav class="flex-1 px-2 space-y-1">
-                    <a href="#" class="sidebar-item flex items-center px-4 py-3 text-sm text-slate-600 rounded-md">作品数据</a>
-                    <a href="#" class="sidebar-item flex items-center px-4 py-3 text-sm text-slate-600 rounded-md font-semibold bg-slate-50">合辑管理</a>
+                <nav class="flex-1 px-2 space-y-1" id="creator-sidebar-nav">
+                    <button type="button" data-creator-view="works-stats" class="nav-creator-item sidebar-item w-full text-left flex items-center px-4 py-3 text-sm text-slate-600 rounded-md border-0 bg-transparent cursor-pointer">
+                        <i class="fas fa-chart-line w-5 text-slate-400 text-xs"></i><span class="ml-1">作品数据</span>
+                    </button>
+                    <button type="button" data-creator-view="collections-stats" class="nav-creator-item sidebar-item w-full text-left flex items-center px-4 py-3 text-sm text-slate-600 rounded-md border-0 bg-transparent cursor-pointer nav-active">
+                        <i class="fas fa-layer-group w-5 text-slate-400 text-xs"></i><span class="ml-1">合辑数据</span>
+                    </button>
                     <a href="#" class="sidebar-item flex items-center px-4 py-3 text-sm text-slate-600 rounded-md border-t mt-4 pt-4">规则</a>
                 </nav>
             </aside>
 
             <!-- Main Content -->
-            <main class="flex-1 p-8 flex gap-12 overflow-y-auto">
+            <main class="flex-1 p-8 overflow-y-auto min-h-0">
+                <!-- 合辑维度：订阅 + 展示汇总 -->
+                <div id="view-collections-stats" class="creator-view max-w-6xl">
+                    <div class="flex flex-col gap-4 mb-6">
+                        <div class="flex flex-wrap items-end justify-between gap-4">
+                            <div>
+                                <h2 class="text-xl font-bold text-slate-800">合辑数据</h2>
+                                <p class="text-sm text-slate-500 mt-1">按合辑查看订阅与展示表现；点击合辑可下钻到合辑内各作品的展示明细。</p>
+                            </div>
+                            <div class="flex items-center gap-2 text-xs text-slate-500">
+                                <span class="font-medium text-slate-600">统计周期</span>
+                                <select id="collection-stats-range" class="border border-slate-200 rounded-md px-2 py-1.5 text-slate-700 bg-white text-sm">
+                                    <option value="7d">近 7 日</option>
+                                    <option value="30d">近 30 日</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3">
+                            <div class="relative w-full max-w-md flex-1 min-w-0">
+                                <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs pointer-events-none" aria-hidden="true"></i>
+                                <input type="search" id="collection-stats-search" autocomplete="off" placeholder="搜索合辑名称…" class="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 bg-white">
+                            </div>
+                            <label class="flex items-center gap-2 text-xs text-slate-500 shrink-0">
+                                <span class="font-medium text-slate-600 whitespace-nowrap">排序</span>
+                                <select id="collection-stats-sort" class="border border-slate-200 rounded-md px-2 py-2 text-slate-700 bg-white text-sm min-w-[11rem]">
+                                    <option value="imp_period_desc">当前周期展示 · 多→少</option>
+                                    <option value="imp_period_asc">当前周期展示 · 少→多</option>
+                                    <option value="subs_total_desc">累计订阅 · 多→少</option>
+                                    <option value="subs_total_asc">累计订阅 · 少→多</option>
+                                    <option value="subs_new_period_desc">周期内新增订阅 · 多→少</option>
+                                    <option value="subs_new_period_asc">周期内新增订阅 · 少→多</option>
+                                    <option value="imp_total_desc">累计展示 · 多→少</option>
+                                    <option value="imp_total_asc">累计展示 · 少→多</option>
+                                    <option value="works_desc">作品数量 · 多→少</option>
+                                    <option value="works_asc">作品数量 · 少→多</option>
+                                    <option value="name_asc">合辑名称 · A→Z</option>
+                                    <option value="name_desc">合辑名称 · Z→A</option>
+                                </select>
+                            </label>
+                        </div>
+                    </div>
+                    <div id="collection-stats-cards" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+                </div>
+
+                <!-- 作品维度：展示数据 -->
+                <div id="view-works-stats" class="creator-view hidden max-w-6xl">
+                    <div class="flex flex-wrap items-end justify-between gap-4 mb-6">
+                        <div>
+                            <h2 class="text-xl font-bold text-slate-800">作品数据</h2>
+                            <p class="text-sm text-slate-500 mt-1">按单张壁纸查看展示次数；可筛选所属合辑。</p>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-3 w-full lg:w-auto lg:flex-1 lg:justify-end">
+                            <div class="relative flex-1 min-w-[12rem] max-w-sm">
+                                <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs pointer-events-none" aria-hidden="true"></i>
+                                <input type="search" id="works-stats-search" autocomplete="off" placeholder="搜索作品、合辑…" class="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 bg-white">
+                            </div>
+                            <label class="text-xs text-slate-500 flex items-center gap-2 shrink-0">
+                                <span class="font-medium text-slate-600">合辑</span>
+                                <select id="works-filter-collection" class="border border-slate-200 rounded-md px-2 py-1.5 text-slate-700 bg-white text-sm min-w-[10rem]"></select>
+                            </label>
+                            <select id="works-stats-range" class="border border-slate-200 rounded-md px-2 py-1.5 text-slate-700 bg-white text-sm shrink-0">
+                                <option value="7d">近 7 日</option>
+                                <option value="30d">近 30 日</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm text-left">
+                                <thead id="works-stats-thead" class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wide">
+                                    <tr>
+                                        <th scope="col" class="px-4 py-3 font-semibold text-left text-slate-600 normal-case">
+                                            <button type="button" class="works-sort-btn" data-works-sort="title">作品<i class="fas fa-sort sort-icon text-[10px]" aria-hidden="true"></i></button>
+                                        </th>
+                                        <th scope="col" class="px-4 py-3 font-semibold text-left text-slate-600 normal-case">
+                                            <button type="button" class="works-sort-btn" data-works-sort="collection">所属合辑<i class="fas fa-sort sort-icon text-[10px]" aria-hidden="true"></i></button>
+                                        </th>
+                                        <th scope="col" class="px-4 py-3 font-semibold text-slate-600 normal-case">
+                                            <div class="flex justify-end">
+                                                <button type="button" class="works-sort-btn" data-works-sort="impressions">展示次数<i class="fas fa-sort sort-icon text-[10px]" aria-hidden="true"></i></button>
+                                            </div>
+                                        </th>
+                                        <th scope="col" class="px-4 py-3 font-semibold text-slate-600 normal-case">
+                                            <div class="flex justify-end">
+                                                <button type="button" class="works-sort-btn" data-works-sort="lockScreen">锁屏展示<i class="fas fa-sort sort-icon text-[10px]" aria-hidden="true"></i></button>
+                                            </div>
+                                        </th>
+                                        <th scope="col" class="px-4 py-3 font-semibold text-slate-600 normal-case">
+                                            <div class="flex justify-end">
+                                                <button type="button" class="works-sort-btn" data-works-sort="detail">详情页曝光<i class="fas fa-sort sort-icon text-[10px]" aria-hidden="true"></i></button>
+                                            </div>
+                                        </th>
+                                        <th scope="col" class="px-4 py-3 font-semibold text-left text-slate-600 normal-case">
+                                            <button type="button" class="works-sort-btn" data-works-sort="updated">更新<i class="fas fa-sort sort-icon text-[10px]" aria-hidden="true"></i></button>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody id="works-stats-tbody" class="divide-y divide-slate-100"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="view-upload" class="creator-view hidden flex gap-12">
                 
                 <!-- Form Fields -->
                 <div class="w-[35%] space-y-8">
@@ -337,7 +536,48 @@
 
                 </div>
 
+                </div>
             </main>
+        </div>
+    </div>
+
+    <!-- 合辑下钻：合辑内作品展示 -->
+    <div id="collection-detail-modal" class="fixed inset-0 z-[150] hidden" aria-modal="true" role="dialog" data-open-collection-id="">
+        <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-[1px]" data-close-collection-modal></div>
+        <div class="absolute inset-y-0 right-0 w-full max-w-lg bg-white shadow-2xl flex flex-col border-l border-slate-200">
+            <div class="px-5 py-4 border-b border-slate-200 flex items-center justify-between shrink-0">
+                <h3 id="collection-detail-title" class="font-bold text-slate-800 pr-4 truncate">合辑</h3>
+                <button type="button" class="p-2 rounded-lg text-slate-400 hover:bg-slate-100" data-close-collection-modal aria-label="关闭"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="flex-1 overflow-y-auto p-5 space-y-6">
+                <div id="collection-detail-kpis" class="grid grid-cols-2 gap-3"></div>
+                <div>
+                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">近 7 日展示趋势</p>
+                    <div id="collection-detail-chart" class="stat-bar-track border-b border-slate-100 pb-1"></div>
+                    <p class="text-[10px] text-slate-400 mt-2" id="collection-detail-chart-caption"></p>
+                </div>
+                <div>
+                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">合辑内作品展示</p>
+                    <div class="flex flex-col gap-2 mb-3">
+                        <div class="relative w-full">
+                            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs pointer-events-none" aria-hidden="true"></i>
+                            <input type="search" id="collection-detail-work-search" autocomplete="off" placeholder="搜索该合辑内作品…" class="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 bg-white">
+                        </div>
+                        <label class="flex items-center gap-2 text-xs text-slate-500">
+                            <span class="font-medium text-slate-600 whitespace-nowrap">排序</span>
+                            <select id="collection-detail-work-sort" class="flex-1 min-w-0 border border-slate-200 rounded-lg px-2 py-2 text-slate-700 bg-white text-sm">
+                                <option value="imp_desc">展示次数 · 多→少</option>
+                                <option value="imp_asc">展示次数 · 少→多</option>
+                                <option value="title_asc">作品名称 · A→Z</option>
+                                <option value="title_desc">作品名称 · Z→A</option>
+                                <option value="updated_desc">更新时间 · 新→旧</option>
+                                <option value="updated_asc">更新时间 · 旧→新</option>
+                            </select>
+                        </label>
+                    </div>
+                    <ul id="collection-detail-works" class="space-y-2"></ul>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -1440,6 +1680,536 @@
 
             radios.forEach((r) => r.addEventListener('change', sync));
             sync();
+        })();
+
+        (function initCreatorStatsDemo() {
+            let worksSortKey = 'impressions';
+            let worksSortDir = 'desc';
+
+            /** 演示数据：对接真实接口后可替换为 API 返回 */
+            const DEMO_COLLECTIONS = [
+                {
+                    id: 'col-default',
+                    name: '默认合辑',
+                    cover: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400&h=300&fit=crop',
+                    subsTotal: 128400,
+                    subsNew7d: 1240,
+                    subsNew30d: 5820,
+                    impressionsTotal: 892000,
+                    impressions7d: 45200,
+                    impressions30d: 198400,
+                    trend7d: [4200, 5100, 4800, 6200, 5900, 7100, 6800],
+                    worksCount: 24,
+                },
+                {
+                    id: 'col-spring',
+                    name: '春日特辑',
+                    cover: 'https://images.unsplash.com/photo-1490750967868-88aa4486c946?w=400&h=300&fit=crop',
+                    subsTotal: 45200,
+                    subsNew7d: 890,
+                    subsNew30d: 3100,
+                    impressionsTotal: 310000,
+                    impressions7d: 18600,
+                    impressions30d: 72400,
+                    trend7d: [2100, 2400, 2200, 2800, 2600, 3100, 2900],
+                    worksCount: 12,
+                },
+                {
+                    id: 'col-night',
+                    name: '城市夜景',
+                    cover: 'https://images.unsplash.com/photo-1514565131-fce0801e5785?w=400&h=300&fit=crop',
+                    subsTotal: 28900,
+                    subsNew7d: 320,
+                    subsNew30d: 1400,
+                    impressionsTotal: 156000,
+                    impressions7d: 9200,
+                    impressions30d: 38100,
+                    trend7d: [1100, 1300, 1200, 1400, 1500, 1600, 1450],
+                    worksCount: 8,
+                },
+            ];
+
+            const DEMO_WORKS = [
+                { id: 'w1', collectionId: 'col-default', title: '抽象流体 · 蓝', thumb: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=120&h=200&fit=crop', impressions7d: 4200, impressions30d: 18200, lockScreen7d: 3100, detailViews7d: 980, updatedAt: '2026-03-28' },
+                { id: 'w2', collectionId: 'col-default', title: '极简渐变', thumb: 'https://images.unsplash.com/photo-1557682250-33bd709cbe85?w=120&h=200&fit=crop', impressions7d: 3800, impressions30d: 16500, lockScreen7d: 2900, detailViews7d: 820, updatedAt: '2026-03-27' },
+                { id: 'w3', collectionId: 'col-spring', title: '樱花街道', thumb: 'https://images.unsplash.com/photo-1522383225653-ed111181a951?w=120&h=200&fit=crop', impressions7d: 5100, impressions30d: 22100, lockScreen7d: 4000, detailViews7d: 1050, updatedAt: '2026-03-29' },
+                { id: 'w4', collectionId: 'col-spring', title: '新绿田野', thumb: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=120&h=200&fit=crop', impressions7d: 2900, impressions30d: 11800, lockScreen7d: 2100, detailViews7d: 640, updatedAt: '2026-03-25' },
+                { id: 'w5', collectionId: 'col-night', title: '霓虹天桥', thumb: 'https://images.unsplash.com/photo-1514565131-fce0801e5785?w=120&h=200&fit=crop', impressions7d: 3600, impressions30d: 14200, lockScreen7d: 2800, detailViews7d: 720, updatedAt: '2026-03-26' },
+                { id: 'w6', collectionId: 'col-night', title: '江岸灯火', thumb: 'https://images.unsplash.com/photo-1477959858617-67f85cf4f290?w=120&h=200&fit=crop', impressions7d: 2100, impressions30d: 8900, lockScreen7d: 1650, detailViews7d: 410, updatedAt: '2026-03-22' },
+            ];
+
+            function formatCount(n) {
+                if (n == null || isNaN(n)) return '—';
+                if (n >= 100000000) return (n / 100000000).toFixed(n % 100000000 === 0 ? 0 : 1) + '亿';
+                if (n >= 10000) return (n / 10000).toFixed(n % 10000 === 0 ? 0 : 1) + '万';
+                return n.toLocaleString('zh-CN');
+            }
+
+            function collectionById(id) {
+                return DEMO_COLLECTIONS.find((c) => c.id === id);
+            }
+
+            function collectionName(id) {
+                const c = collectionById(id);
+                return c ? c.name : id;
+            }
+
+            function getRangeKey(rangeEl) {
+                return rangeEl && rangeEl.value === '30d' ? '30d' : '7d';
+            }
+
+            function impressionsForCollection(c, rangeKey) {
+                return rangeKey === '30d' ? c.impressions30d : c.impressions7d;
+            }
+
+            function subsNewForCollection(c, rangeKey) {
+                return rangeKey === '30d' ? c.subsNew30d : c.subsNew7d;
+            }
+
+            function impressionsForWork(w, rangeKey) {
+                return rangeKey === '30d' ? w.impressions30d : w.impressions7d;
+            }
+
+            function lockScreenForWork(w, rangeKey) {
+                if (rangeKey === '30d') {
+                    return Math.round(w.lockScreen7d * (w.impressions30d / Math.max(1, w.impressions7d)));
+                }
+                return w.lockScreen7d;
+            }
+
+            function detailViewsForWork(w, rangeKey) {
+                if (rangeKey === '30d') {
+                    return Math.round(w.detailViews7d * (w.impressions30d / Math.max(1, w.impressions7d)));
+                }
+                return w.detailViews7d;
+            }
+
+            function normalizeSearchQuery(el) {
+                if (!el || el.value == null) return '';
+                return String(el.value).trim().toLowerCase();
+            }
+
+            function matchesSearch(text, needle) {
+                if (!needle) return true;
+                return String(text).toLowerCase().includes(needle);
+            }
+
+            function filterCollectionsForSearch(list) {
+                const q = normalizeSearchQuery(document.getElementById('collection-stats-search'));
+                if (!q) return list.slice();
+                return list.filter((c) => matchesSearch(c.name, q) || matchesSearch(c.id, q));
+            }
+
+            function filterWorksForSearch(rows) {
+                const q = normalizeSearchQuery(document.getElementById('works-stats-search'));
+                if (!q) return rows.slice();
+                return rows.filter((w) =>
+                    matchesSearch(w.title, q)
+                    || matchesSearch(w.id, q)
+                    || matchesSearch(collectionName(w.collectionId), q));
+            }
+
+            function sortFilteredCollections(cols, rk) {
+                const sel = document.getElementById('collection-stats-sort');
+                const mode = sel ? sel.value : 'imp_period_desc';
+                const arr = cols.slice();
+                arr.sort((a, b) => {
+                    switch (mode) {
+                        case 'imp_period_desc':
+                            return impressionsForCollection(b, rk) - impressionsForCollection(a, rk);
+                        case 'imp_period_asc':
+                            return impressionsForCollection(a, rk) - impressionsForCollection(b, rk);
+                        case 'subs_total_desc':
+                            return b.subsTotal - a.subsTotal;
+                        case 'subs_total_asc':
+                            return a.subsTotal - b.subsTotal;
+                        case 'subs_new_period_desc':
+                            return subsNewForCollection(b, rk) - subsNewForCollection(a, rk);
+                        case 'subs_new_period_asc':
+                            return subsNewForCollection(a, rk) - subsNewForCollection(b, rk);
+                        case 'imp_total_desc':
+                            return b.impressionsTotal - a.impressionsTotal;
+                        case 'imp_total_asc':
+                            return a.impressionsTotal - b.impressionsTotal;
+                        case 'works_desc':
+                            return b.worksCount - a.worksCount;
+                        case 'works_asc':
+                            return a.worksCount - b.worksCount;
+                        case 'name_asc':
+                            return a.name.localeCompare(b.name, 'zh-CN');
+                        case 'name_desc':
+                            return b.name.localeCompare(a.name, 'zh-CN');
+                        default:
+                            return impressionsForCollection(b, rk) - impressionsForCollection(a, rk);
+                    }
+                });
+                return arr;
+            }
+
+            function compareWorksRow(a, b, rk) {
+                let cmp;
+                switch (worksSortKey) {
+                    case 'impressions':
+                        cmp = impressionsForWork(a, rk) - impressionsForWork(b, rk);
+                        break;
+                    case 'lockScreen':
+                        cmp = lockScreenForWork(a, rk) - lockScreenForWork(b, rk);
+                        break;
+                    case 'detail':
+                        cmp = detailViewsForWork(a, rk) - detailViewsForWork(b, rk);
+                        break;
+                    case 'title':
+                        cmp = a.title.localeCompare(b.title, 'zh-CN');
+                        break;
+                    case 'collection':
+                        cmp = collectionName(a.collectionId).localeCompare(collectionName(b.collectionId), 'zh-CN');
+                        break;
+                    case 'updated':
+                        cmp = String(a.updatedAt).localeCompare(String(b.updatedAt));
+                        break;
+                    default:
+                        cmp = impressionsForWork(a, rk) - impressionsForWork(b, rk);
+                }
+                return worksSortDir === 'desc' ? -cmp : cmp;
+            }
+
+            function syncWorksSortHeaderUi() {
+                const thead = document.getElementById('works-stats-thead');
+                if (!thead) return;
+                thead.querySelectorAll('[data-works-sort]').forEach((btn) => {
+                    const key = btn.getAttribute('data-works-sort');
+                    const icon = btn.querySelector('.sort-icon');
+                    const active = key === worksSortKey;
+                    btn.classList.toggle('is-active', active);
+                    const th = btn.closest('th');
+                    if (th) {
+                        if (active) th.setAttribute('aria-sort', worksSortDir === 'desc' ? 'descending' : 'ascending');
+                        else th.removeAttribute('aria-sort');
+                    }
+                    if (icon) {
+                        const ic = active ? (worksSortDir === 'desc' ? 'fa-sort-down' : 'fa-sort-up') : 'fa-sort';
+                        icon.className = `sort-icon text-[10px] fas ${ic}`;
+                    }
+                });
+            }
+
+            function renderCollectionDetailWorkList(collectionId) {
+                const list = document.getElementById('collection-detail-works');
+                if (!list) return;
+                const rk = getRangeKey(document.getElementById('collection-stats-range'));
+                const q = normalizeSearchQuery(document.getElementById('collection-detail-work-search'));
+                const sortMode = (document.getElementById('collection-detail-work-sort') || {}).value || 'imp_desc';
+                let works = DEMO_WORKS.filter((w) => w.collectionId === collectionId);
+                if (q) {
+                    works = works.filter((w) => matchesSearch(w.title, q) || matchesSearch(w.id, q));
+                }
+                works.sort((a, b) => {
+                    switch (sortMode) {
+                        case 'imp_asc':
+                            return impressionsForWork(a, rk) - impressionsForWork(b, rk);
+                        case 'title_asc':
+                            return a.title.localeCompare(b.title, 'zh-CN');
+                        case 'title_desc':
+                            return b.title.localeCompare(a.title, 'zh-CN');
+                        case 'updated_desc':
+                            return String(b.updatedAt).localeCompare(String(a.updatedAt));
+                        case 'updated_asc':
+                            return String(a.updatedAt).localeCompare(String(b.updatedAt));
+                        case 'imp_desc':
+                        default:
+                            return impressionsForWork(b, rk) - impressionsForWork(a, rk);
+                    }
+                });
+                list.innerHTML = works.length
+                    ? works.map((w) => {
+                        const imp = impressionsForWork(w, rk);
+                        return `
+                            <li class="flex items-center gap-3 p-2 rounded-lg border border-slate-100 bg-white">
+                                <img src="${escapeAttr(w.thumb)}" alt="" class="w-10 h-14 rounded object-cover bg-slate-100 shrink-0">
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-semibold text-slate-800 truncate">${escapeHtml(w.title)}</p>
+                                    <p class="text-[11px] text-slate-500">展示 ${formatCount(imp)}（${rk === '30d' ? '近30日' : '近7日'}）</p>
+                                </div>
+                            </li>
+                        `;
+                    }).join('')
+                    : `<li class="text-sm text-slate-500 py-4 text-center">${q ? '无匹配作品' : '该合辑下暂无作品数据'}</li>`;
+            }
+
+            function refreshOpenCollectionDetailIfNeeded() {
+                const modal = document.getElementById('collection-detail-modal');
+                if (!modal || modal.classList.contains('hidden')) return;
+                const id = modal.getAttribute('data-open-collection-id');
+                if (id) renderCollectionDetailWorkList(id);
+            }
+
+            function renderCollectionCards() {
+                const container = document.getElementById('collection-stats-cards');
+                const rangeEl = document.getElementById('collection-stats-range');
+                if (!container) return;
+                const rk = getRangeKey(rangeEl);
+                const periodLabel = rk === '30d' ? '近 30 日' : '近 7 日';
+                const cols = sortFilteredCollections(filterCollectionsForSearch(DEMO_COLLECTIONS), rk);
+
+                if (!cols.length) {
+                    const q = normalizeSearchQuery(document.getElementById('collection-stats-search'));
+                    container.innerHTML = `<div class="sm:col-span-2 lg:col-span-3 rounded-xl border border-dashed border-slate-200 bg-slate-50/80 py-16 text-center text-sm text-slate-500">${q ? '未找到匹配的合辑，请尝试其他关键词' : '暂无合辑数据'}</div>`;
+                    return;
+                }
+
+                container.innerHTML = cols.map((c) => {
+                    const imp = impressionsForCollection(c, rk);
+                    const subNew = subsNewForCollection(c, rk);
+                    return `
+                        <article class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm hover:border-blue-200 transition-colors cursor-pointer text-left w-full"
+                            data-collection-id="${escapeAttr(c.id)}" role="button" tabindex="0">
+                            <div class="flex gap-0">
+                                <div class="w-28 h-24 shrink-0 bg-slate-100">
+                                    <img src="${escapeAttr(c.cover)}" alt="" class="w-full h-full object-cover">
+                                </div>
+                                <div class="flex-1 min-w-0 p-3 flex flex-col justify-center">
+                                    <h3 class="font-bold text-slate-800 truncate text-sm">${escapeHtml(c.name)}</h3>
+                                    <p class="text-[11px] text-slate-500 mt-0.5">${c.worksCount} 张作品</p>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-px bg-slate-100 border-t border-slate-100">
+                                <div class="bg-slate-50/90 p-3">
+                                    <p class="text-[10px] text-slate-500 font-medium uppercase tracking-wide">累计订阅</p>
+                                    <p class="text-lg font-bold text-slate-800 mt-0.5">${formatCount(c.subsTotal)}</p>
+                                    <p class="text-[11px] text-emerald-600 mt-1">+${formatCount(subNew)} <span class="text-slate-400 font-normal">${periodLabel}新增</span></p>
+                                </div>
+                                <div class="bg-slate-50/90 p-3">
+                                    <p class="text-[10px] text-slate-500 font-medium uppercase tracking-wide">${periodLabel}展示</p>
+                                    <p class="text-lg font-bold text-slate-800 mt-0.5">${formatCount(imp)}</p>
+                                    <p class="text-[11px] text-slate-500 mt-1">累计 ${formatCount(c.impressionsTotal)}</p>
+                                </div>
+                            </div>
+                            <div class="px-3 py-2 text-[11px] text-blue-600 font-medium border-t border-slate-100 bg-white">查看合辑内作品展示 <i class="fas fa-chevron-right text-[9px] ml-0.5"></i></div>
+                        </article>
+                    `;
+                }).join('');
+
+                container.querySelectorAll('[data-collection-id]').forEach((el) => {
+                    const open = () => openCollectionDetail(el.getAttribute('data-collection-id'));
+                    el.addEventListener('click', open);
+                    el.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            open();
+                        }
+                    });
+                });
+            }
+
+            function renderTrendBars(values, container) {
+                if (!container || !values || !values.length) return;
+                const max = Math.max(...values, 1);
+                container.innerHTML = values.map((v) => {
+                    const h = Math.max(8, Math.round((v / max) * 100));
+                    return `<div class="stat-bar-column" title="${escapeAttr(formatCount(v))}">
+                        <div class="stat-bar-fill" style="height:${h}%"></div>
+                    </div>`;
+                }).join('');
+            }
+
+            function openCollectionDetail(collectionId) {
+                const c = collectionById(collectionId);
+                if (!c) return;
+                const modal = document.getElementById('collection-detail-modal');
+                const titleEl = document.getElementById('collection-detail-title');
+                const kpis = document.getElementById('collection-detail-kpis');
+                const chart = document.getElementById('collection-detail-chart');
+                const cap = document.getElementById('collection-detail-chart-caption');
+                const workSearch = document.getElementById('collection-detail-work-search');
+                if (!modal || !titleEl || !kpis || !chart) return;
+
+                modal.setAttribute('data-open-collection-id', collectionId);
+                if (workSearch) workSearch.value = '';
+                const detailSort = document.getElementById('collection-detail-work-sort');
+                if (detailSort) detailSort.value = 'imp_desc';
+
+                titleEl.textContent = c.name;
+                kpis.innerHTML = `
+                    <div class="rounded-lg border border-slate-100 bg-slate-50 p-3">
+                        <p class="text-[10px] text-slate-500 font-semibold uppercase">累计订阅</p>
+                        <p class="text-xl font-bold text-slate-800 mt-1">${formatCount(c.subsTotal)}</p>
+                    </div>
+                    <div class="rounded-lg border border-slate-100 bg-slate-50 p-3">
+                        <p class="text-[10px] text-slate-500 font-semibold uppercase">累计展示</p>
+                        <p class="text-xl font-bold text-slate-800 mt-1">${formatCount(c.impressionsTotal)}</p>
+                    </div>
+                    <div class="rounded-lg border border-slate-100 bg-slate-50 p-3 col-span-2">
+                        <p class="text-[10px] text-slate-500 font-semibold uppercase">近 7 日</p>
+                        <p class="text-sm text-slate-700 mt-1">新增订阅 <strong class="text-slate-900">${formatCount(c.subsNew7d)}</strong>
+                        <span class="text-slate-300 mx-2">|</span>
+                        展示 <strong class="text-slate-900">${formatCount(c.impressions7d)}</strong></p>
+                    </div>
+                `;
+                renderTrendBars(c.trend7d, chart);
+                if (cap) {
+                    const labels = ['一', '二', '三', '四', '五', '六', '日'];
+                    cap.textContent = `按自然日：${labels.map((d, i) => `周${d} ${formatCount(c.trend7d[i])}`).join(' · ')}`;
+                }
+
+                renderCollectionDetailWorkList(collectionId);
+
+                modal.classList.remove('hidden');
+                document.body.classList.add('overflow-hidden');
+            }
+
+            function closeCollectionDetail() {
+                const modal = document.getElementById('collection-detail-modal');
+                if (modal) {
+                    modal.classList.add('hidden');
+                    modal.setAttribute('data-open-collection-id', '');
+                }
+                const workSearch = document.getElementById('collection-detail-work-search');
+                if (workSearch) workSearch.value = '';
+                document.body.classList.remove('overflow-hidden');
+            }
+
+            function fillWorksCollectionFilter() {
+                const sel = document.getElementById('works-filter-collection');
+                if (!sel) return;
+                sel.innerHTML = `<option value="">全部合辑</option>${DEMO_COLLECTIONS.map((c) => `<option value="${escapeAttr(c.id)}">${escapeHtml(c.name)}</option>`).join('')}`;
+            }
+
+            function renderWorksTable() {
+                const tbody = document.getElementById('works-stats-tbody');
+                const filterEl = document.getElementById('works-filter-collection');
+                const rangeEl = document.getElementById('works-stats-range');
+                if (!tbody) return;
+                const cid = filterEl ? filterEl.value : '';
+                const rk = getRangeKey(rangeEl);
+                let rows = DEMO_WORKS.slice();
+                if (cid) rows = rows.filter((w) => w.collectionId === cid);
+                rows = filterWorksForSearch(rows);
+                rows.sort((a, b) => compareWorksRow(a, b, rk));
+
+                tbody.innerHTML = rows.map((w) => {
+                    const imp = impressionsForWork(w, rk);
+                    const ls = lockScreenForWork(w, rk);
+                    const dv = detailViewsForWork(w, rk);
+                    return `
+                        <tr class="hover:bg-slate-50/80">
+                            <td class="px-4 py-3">
+                                <div class="flex items-center gap-3">
+                                    <img src="${escapeAttr(w.thumb)}" alt="" class="w-9 h-12 rounded object-cover bg-slate-100 shrink-0">
+                                    <span class="font-medium text-slate-800">${escapeHtml(w.title)}</span>
+                                </div>
+                            </td>
+                            <td class="px-4 py-3 text-slate-600">${escapeHtml(collectionName(w.collectionId))}</td>
+                            <td class="px-4 py-3 text-right font-semibold text-slate-800">${formatCount(imp)}</td>
+                            <td class="px-4 py-3 text-right text-slate-600">${formatCount(ls)}</td>
+                            <td class="px-4 py-3 text-right text-slate-600">${formatCount(dv)}</td>
+                            <td class="px-4 py-3 text-slate-500 text-xs whitespace-nowrap">${escapeHtml(w.updatedAt)}</td>
+                        </tr>
+                    `;
+                }).join('');
+
+                if (!rows.length) {
+                    const q = normalizeSearchQuery(document.getElementById('works-stats-search'));
+                    const msg = q ? '未找到匹配的作品或合辑' : '暂无作品';
+                    tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-12 text-center text-slate-500 text-sm">${escapeHtml(msg)}</td></tr>`;
+                }
+                syncWorksSortHeaderUi();
+            }
+
+            function setCreatorView(view) {
+                document.querySelectorAll('.creator-view').forEach((v) => v.classList.add('hidden'));
+                const map = {
+                    upload: 'view-upload',
+                    'works-stats': 'view-works-stats',
+                    'collections-stats': 'view-collections-stats',
+                };
+                const id = map[view] || map['collections-stats'];
+                const el = document.getElementById(id);
+                if (el) el.classList.remove('hidden');
+
+                document.querySelectorAll('.nav-creator-item').forEach((btn) => {
+                    btn.classList.toggle('nav-active', btn.getAttribute('data-creator-view') === view);
+                });
+            }
+
+            const navUpload = document.getElementById('nav-btn-upload');
+            if (navUpload) {
+                navUpload.addEventListener('click', () => setCreatorView('upload'));
+            }
+            document.querySelectorAll('[data-creator-view]').forEach((btn) => {
+                btn.addEventListener('click', () => setCreatorView(btn.getAttribute('data-creator-view')));
+            });
+
+            document.querySelectorAll('[data-close-collection-modal]').forEach((el) => {
+                el.addEventListener('click', closeCollectionDetail);
+            });
+            document.addEventListener('keydown', (e) => {
+                const modal = document.getElementById('collection-detail-modal');
+                if (e.key === 'Escape' && modal && !modal.classList.contains('hidden')) {
+                    closeCollectionDetail();
+                }
+            });
+
+            const cr = document.getElementById('collection-stats-range');
+            if (cr) {
+                cr.addEventListener('change', () => {
+                    renderCollectionCards();
+                    refreshOpenCollectionDetailIfNeeded();
+                });
+            }
+
+            const cs = document.getElementById('collection-stats-search');
+            if (cs) cs.addEventListener('input', renderCollectionCards);
+
+            const csort = document.getElementById('collection-stats-sort');
+            if (csort) csort.addEventListener('change', renderCollectionCards);
+
+            const wthead = document.getElementById('works-stats-thead');
+            if (wthead) {
+                wthead.addEventListener('click', (e) => {
+                    const btn = e.target.closest('[data-works-sort]');
+                    if (!btn) return;
+                    const key = btn.getAttribute('data-works-sort');
+                    if (worksSortKey === key) {
+                        worksSortDir = worksSortDir === 'desc' ? 'asc' : 'desc';
+                    } else {
+                        worksSortKey = key;
+                        if (key === 'title' || key === 'collection') worksSortDir = 'asc';
+                        else if (key === 'updated') worksSortDir = 'desc';
+                        else worksSortDir = 'desc';
+                    }
+                    renderWorksTable();
+                });
+            }
+
+            const wr = document.getElementById('works-stats-range');
+            const wf = document.getElementById('works-filter-collection');
+            const ws = document.getElementById('works-stats-search');
+            if (wr) wr.addEventListener('change', renderWorksTable);
+            if (wf) wf.addEventListener('change', renderWorksTable);
+            if (ws) ws.addEventListener('input', renderWorksTable);
+
+            const cdws = document.getElementById('collection-detail-work-search');
+            if (cdws) {
+                cdws.addEventListener('input', () => {
+                    const modal = document.getElementById('collection-detail-modal');
+                    const id = modal && modal.getAttribute('data-open-collection-id');
+                    if (id) renderCollectionDetailWorkList(id);
+                });
+            }
+
+            const cdwSort = document.getElementById('collection-detail-work-sort');
+            if (cdwSort) {
+                cdwSort.addEventListener('change', () => {
+                    const modal = document.getElementById('collection-detail-modal');
+                    const id = modal && modal.getAttribute('data-open-collection-id');
+                    if (id) renderCollectionDetailWorkList(id);
+                });
+            }
+
+            fillWorksCollectionFilter();
+            renderCollectionCards();
+            renderWorksTable();
+            setCreatorView('collections-stats');
         })();
     </script>
 </body>

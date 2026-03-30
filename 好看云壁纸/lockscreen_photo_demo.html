@@ -317,8 +317,8 @@
 <body>
   <h1>锁屏多尺寸照片 — 最佳实践模拟</h1>
   <p class="subtitle">
-    <strong style="color:#dce2ec">左右始终撑满</strong>槽位宽度；高度按原比例随宽度放大。
-    超高则<strong>上下裁切</strong>；若按宽算出的高度略低于槽位（相对缺口 ≤ 约 <strong>24%</strong>），则改用 <code style="color:#c5cce0">cover</code> 把<strong>上下也撑满</strong>（可能少量裁左右）；缺口再大则留白 + 模糊底。
+    <strong style="color:#dce2ec">竖图（高 &gt; 宽）</strong>一律用 <code style="color:#c5cce0">cover</code> 撑满整块槽位（可略裁左右或上下）。
+    横图：<strong>左右始终撑满</strong>；超高则<strong>上下裁切</strong>；若理论高略低于槽位（缺口 ≤ 约 <strong>24%</strong>）则改 cover 撑满；缺口再大则留白 + 模糊底。
   </p>
 
   <div class="stage">
@@ -357,7 +357,7 @@
     <strong>做法说明（与 Android 动态壁纸可对齐）</strong><br />
     1. 壁纸绘制区应占<strong>整块屏幕</strong>；勿在照片层用 padding 留出「状态栏区」，否则透明处会一直露出模糊底，看起来像阈值失效。<br />
     2. 换图时生成一次「模糊底」：可缩小后再模糊再放大，省算力。<br />
-    3. 前景：默认 <strong>宽 = 槽位宽</strong>，高等比。高 &gt; 槽位则裁上下。高 &lt; 槽位时若 <code>(槽位高 − 理论高) / 槽位高 ≤ 0.24</code> 则改 <strong>cover</strong> 铺满（略裁左右）；否则留白 + 模糊层。<br />
+    3. 前景：<strong>竖图</strong>始终 <strong>cover</strong> 铺满槽位。横图默认 <strong>宽 = 槽位宽</strong>，高等比；高 &gt; 槽位则裁上下；高 &lt; 槽位时若 <code>(槽位高 − 理论高) / 槽位高 ≤ 0.24</code> 则改 cover；否则留白 + 模糊层。<br />
     4. 灭屏时停动画；亮屏再绘制，省电。<br />
     5. 交互：黑层淡入结束后在灭屏状态下换下一张（与 Android 在黑底下预载一致）；亮屏只揭遮罩，不再换图。仅通过下方电源键切换灭屏 / 亮屏。
   </div>
@@ -366,7 +366,7 @@
     (function () {
       /**
        * 多组像素尺寸 + 固定 seed（picsum 可复现）。
-       * 宽铺满 + 高缺口阈值：近全面屏竖图 cover 补满，过矮横图留白。
+       * 竖图始终 cover 撑满；横图宽铺满 + 高缺口阈值决定 cover 或留白。
        */
       const SAMPLES = [
         { label: "竖图 9:16", w: 1080, h: 1920, seed: 501 },
@@ -446,6 +446,10 @@
         if (scaledH >= slot.h - 0.5) {
           return "width-crop";
         }
+        /* 竖图：始终 cover 撑满，不再 letterbox */
+        if (item.h > item.w) {
+          return "snap-cover";
+        }
         var shortfall = slot.h > 0 ? (slot.h - scaledH) / slot.h : 1;
         if (shortfall <= HEIGHT_SHORTFALL_COVER_RATIO) {
           return "snap-cover";
@@ -479,12 +483,16 @@
         if (mode === "width-crop") {
           badgeText = "上下：宽优先裁切撑满（理论高 ≥ 槽位高）";
         } else if (mode === "snap-cover") {
-          badgeText =
-            "上下：cover 撑满（高缺口 " +
-            shortfallPct +
-            "% ≤ " +
-            (HEIGHT_SHORTFALL_COVER_RATIO * 100).toFixed(0) +
-            "%，或略裁左右）";
+          if (item.h > item.w) {
+            badgeText = "竖图：cover 撑满槽位（可略裁左右）";
+          } else {
+            badgeText =
+              "上下：cover 撑满（高缺口 " +
+              shortfallPct +
+              "% ≤ " +
+              (HEIGHT_SHORTFALL_COVER_RATIO * 100).toFixed(0) +
+              "%，或略裁左右）";
+          }
         } else {
           badgeText =
             "上下：留白 + 模糊底（高缺口 " +

@@ -230,18 +230,6 @@
             height: 100%;
             object-fit: cover;
         }
-        .photo-status-badge {
-            position: absolute;
-            bottom: 6px;
-            left: 6px;
-            font-size: 10px;
-            padding: 2px 8px;
-            border-radius: 8px;
-            color: #fff;
-            backdrop-filter: blur(6px);
-        }
-        .photo-status-badge.on { background: rgba(16, 185, 129, 0.8); }
-        .photo-status-badge.off { background: rgba(0,0,0,0.4); }
         .photo-add-b {
             aspect-ratio: 1;
             border-radius: 1.25rem;
@@ -1364,6 +1352,24 @@
 
                 <!-- 照片网格（已授权后显示） -->
                 <div id="photo-grid-section" class="mb-8 hidden">
+                    <!-- 照片轮播开关 -->
+                    <div id="photo-carousel-switch-bar" class="flex items-center justify-between p-4 bg-white rounded-[1.5rem] mb-4 shadow-sm border border-slate-100">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-emerald-50 text-emerald-500 rounded-xl flex items-center justify-center">
+                                <i class="fa-solid fa-rotate"></i>
+                            </div>
+                            <div>
+                                <div class="text-sm font-bold text-slate-700">照片轮播</div>
+                                <div class="text-[10px] text-slate-500">关闭后照片将不在壁纸队列中展示</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="photo-carousel-status text-xs font-bold text-emerald-600">轮播中</span>
+                            <div class="photo-carousel-switch w-11 h-[26px] rounded-full bg-emerald-500 relative cursor-pointer transition-colors" onclick="togglePhotoCarousel()">
+                                <div class="absolute top-[3px] left-[3px] w-5 h-5 rounded-full bg-white shadow-sm transition-transform" style="transform:translateX(18px);"></div>
+                            </div>
+                        </div>
+                    </div>
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-lg font-black text-slate-800 tracking-tight">我的照片</h3>
                         <span id="photoManageTrigger" class="text-xs text-indigo-600 font-bold cursor-pointer" onclick="togglePhotoManageMode()">管理</span>
@@ -1488,6 +1494,45 @@
                             </div>
                             <i class="fa-solid fa-chevron-right text-slate-400 text-xs"></i>
                         </button>
+                        <!-- 智能展示开关 -->
+                        <div id="smart-display-switch-row" class="w-full flex items-center justify-between p-4">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 bg-emerald-50 text-emerald-500 rounded-xl flex items-center justify-center"><i class="fa-solid fa-expand"></i></div>
+                                <div class="text-left">
+                                    <span class="text-sm font-bold text-slate-700 block">智能展示</span>
+                                    <span class="text-[10px] text-slate-500">根据照片尺寸自动智能充满</span>
+                                </div>
+                            </div>
+                            <div id="smart-display-switch" class="w-11 h-[26px] rounded-full bg-slate-900 relative cursor-pointer transition-colors" onclick="toggleSmartDisplaySwitch(this)">
+                                <div class="absolute top-[3px] left-[3px] w-5 h-5 rounded-full bg-white shadow-sm transition-transform" style="transform:translateX(18px);"></div>
+                            </div>
+                        </div>
+                        <!-- 桌面壁纸高斯模糊开关 -->
+                        <div id="home-blur-switch-row" class="profile-android-only w-full flex items-center justify-between p-4">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 bg-pink-50 text-pink-500 rounded-xl flex items-center justify-center"><i class="fa-solid fa-droplet"></i></div>
+                                <div class="text-left">
+                                    <span class="text-sm font-bold text-slate-700 block">桌面壁纸模糊</span>
+                                    <span class="text-[10px] text-slate-500">桌面壁纸使用高斯模糊效果</span>
+                                </div>
+                            </div>
+                            <div id="home-blur-switch" class="w-11 h-[26px] rounded-full bg-slate-200 relative cursor-pointer transition-colors" onclick="toggleHomeBlurSwitch(this)">
+                                <div class="absolute top-[3px] left-[3px] w-5 h-5 rounded-full bg-white shadow-sm transition-transform" style="transform:translateX(0);"></div>
+                            </div>
+                        </div>
+                        <!-- 订阅更新推送通知 -->
+                        <div id="push-notify-switch-row" class="w-full flex items-center justify-between p-4">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 bg-blue-50 text-blue-500 rounded-xl flex items-center justify-center"><i class="fa-solid fa-bell"></i></div>
+                                <div class="text-left">
+                                    <span class="text-sm font-bold text-slate-700 block">订阅更新提醒</span>
+                                    <span class="text-[10px] text-slate-500">推送通知订阅壁纸更新时间</span>
+                                </div>
+                            </div>
+                            <div id="push-notify-switch" class="w-11 h-[26px] rounded-full bg-slate-900 relative cursor-pointer transition-colors" onclick="togglePushNotifySwitch(this)">
+                                <div class="absolute top-[3px] left-[3px] w-5 h-5 rounded-full bg-white shadow-sm transition-transform" style="transform:translateX(18px);"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -2081,18 +2126,18 @@
 
         // ========== 用户照片数据（模拟相册选中的初始数据，授权流程会覆盖） ==========
         const USER_PHOTOS_B = [
-            { src: 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=300&h=300&fit=crop', on: true },
-            { src: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=300&h=300&fit=crop', on: true },
-            { src: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=300&h=300&fit=crop', on: true },
-            { src: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=300&h=300&fit=crop', on: true },
-            { src: 'https://images.unsplash.com/photo-1477346611705-65d1883cee1e?w=300&h=300&fit=crop', on: false },
-            { src: 'https://images.unsplash.com/photo-1557682250-33bd709cbe85?w=300&h=300&fit=crop', on: true },
+            { src: 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=300&h=300&fit=crop' },
+            { src: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=300&h=300&fit=crop' },
+            { src: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=300&h=300&fit=crop' },
+            { src: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=300&h=300&fit=crop' },
+            { src: 'https://images.unsplash.com/photo-1477346611705-65d1883cee1e?w=300&h=300&fit=crop' },
+            { src: 'https://images.unsplash.com/photo-1557682250-33bd709cbe85?w=300&h=300&fit=crop' },
         ];
 
         // ========== 照片模块状态（授权 → 选择 → 展示） ==========
         let photoModuleState = {
             auth: 'none',   // 'none' | 'limited' | 'granted' | 'denied'
-            photos: []      // [{ src, on }]
+            photos: []      // [{ src }]
         };
         const ALBUM_PICKER_PHOTOS = [
             'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=300&h=300&fit=crop',
@@ -2135,6 +2180,26 @@
             if (getProfileLockAuto()) intervalRow.classList.remove('profile-interval-row-disabled');
             else intervalRow.classList.add('profile-interval-row-disabled');
         }
+
+        // 智能展示开关：根据照片尺寸自动识别进行智能充满（默认开）
+        const SMART_DISPLAY_KEY = 'smart_display_enabled';
+        function getSmartDisplayEnabled() { return localStorage.getItem(SMART_DISPLAY_KEY) !== '0'; }
+        function setSmartDisplayEnabled(on) { localStorage.setItem(SMART_DISPLAY_KEY, on ? '1' : '0'); }
+
+        // 桌面壁纸高斯模糊开关（默认关）
+        const HOME_BLUR_KEY = 'home_blur_enabled';
+        function getHomeBlurEnabled() { return localStorage.getItem(HOME_BLUR_KEY) === '1'; }
+        function setHomeBlurEnabled(on) { localStorage.setItem(HOME_BLUR_KEY, on ? '1' : '0'); }
+
+        // 推送通知开关（默认开）
+        const PUSH_NOTIFY_KEY = 'push_notify_enabled';
+        function getPushNotifyEnabled() { return localStorage.getItem(PUSH_NOTIFY_KEY) !== '0'; }
+        function setPushNotifyEnabled(on) { localStorage.setItem(PUSH_NOTIFY_KEY, on ? '1' : '0'); }
+
+        // 照片轮播开关：控制所有照片是否参与壁纸轮播（默认开）
+        const PHOTO_CAROUSEL_KEY = 'photo_carousel_enabled';
+        function getPhotoCarouselEnabled() { return localStorage.getItem(PHOTO_CAROUSEL_KEY) !== '0'; }
+        function setPhotoCarouselEnabled(on) { localStorage.setItem(PHOTO_CAROUSEL_KEY, on ? '1' : '0'); }
 
         // ========== 锁屏轮播图片 ==========
         const LS_IMAGES = [
@@ -2308,11 +2373,21 @@
             introBar.classList.remove('hidden');
             gridSection.classList.toggle('hidden', photos.length === 0);
             emptySection.classList.toggle('hidden', photos.length > 0);
+            
             const introSub = document.getElementById('photo-intro-bar-sub');
+            const carouselEnabled = getPhotoCarouselEnabled();
             if (introSub) {
-                if (photos.length > 0) introSub.textContent = `你的 ${photos.length} 张照片将在锁屏自动轮播，每次亮屏都是回忆`;
-                else if (hasAccess) introSub.textContent = '添加照片后将在锁屏自动轮播，每次亮屏都是回忆';
-                else introSub.textContent = '开启相册权限并添加照片后，将在锁屏自动轮播';
+                if (photos.length > 0) {
+                    if (carouselEnabled) {
+                        introSub.textContent = `你的 ${photos.length} 张照片将在锁屏自动轮播，每次亮屏都是回忆`;
+                    } else {
+                        introSub.textContent = '照片轮播已关闭，开启后照片将在锁屏自动轮播';
+                    }
+                } else if (hasAccess) {
+                    introSub.textContent = '添加照片后将在锁屏自动轮播，每次亮屏都是回忆';
+                } else {
+                    introSub.textContent = '开启相册权限并添加照片后，将在锁屏自动轮播';
+                }
             }
 
             heroText.textContent = photos.length > 0 ? '添加照片' : '选择照片';
@@ -2427,10 +2502,26 @@
                 photoPickerMode = 'lockScreen';
                 return;
             }
-            photoModuleState.photos = photoPickerSelected.map(src => ({ src, on: true }));
+            const existingSrcs = photoModuleState.photos.map(p => p.src);
+            const newPhotos = photoPickerSelected.filter(src => !existingSrcs.includes(src));
+            const keptPhotos = photoModuleState.photos.filter(p => photoPickerSelected.includes(p.src));
+            photoModuleState.photos = [
+                ...keptPhotos,
+                ...newPhotos.map(src => ({ src }))
+            ];
             document.getElementById('photo-picker-modal').classList.remove('show');
             updatePhotoView();
-            showToast('已添加 ' + photoPickerSelected.length + ' 张照片到锁屏轮播');
+            
+            if (newPhotos.length > 0) {
+                showToast('已添加 ' + newPhotos.length + ' 张新照片');
+                preloadNewPhotos(newPhotos);
+                
+                if (!getPhotoCarouselEnabled()) {
+                    setTimeout(() => showPhotoCarouselGuide(), 800);
+                }
+            } else {
+                showToast('照片列表已更新');
+            }
             showLockScreenGuideModal('photo');
         }
 
@@ -2453,11 +2544,91 @@
                     <div class="photo-item ${manageMode ? 'manage-mode' : ''} ${photoSelectedIndices.has(i) ? 'selected' : ''}" data-index="${i}" onclick="${manageMode ? `togglePhotoSelection(${i})` : `event.stopPropagation();showImageViewerPhoto(${i})`}">
                         <img src="${p.src}" alt="" loading="lazy">
                         ${manageMode ? `<span class="photo-manage-check"><i class="fa-solid fa-check"></i></span>` : ''}
-                        ${!manageMode ? `<div class="photo-status-badge ${p.on ? 'on' : 'off'}">${p.on ? '轮播中' : '已暂停'}</div>` : ''}
                     </div>
                 `).join('')}
             `;
             updatePhotoManageBar();
+            updatePhotoCarouselStatus();
+        }
+
+        function updatePhotoCarouselStatus() {
+            const photos = photoModuleState.photos;
+            const carouselEnabled = getPhotoCarouselEnabled();
+            const introSub = document.getElementById('photo-intro-bar-sub');
+            const carouselSwitch = document.getElementById('photo-carousel-switch-bar');
+            
+            if (introSub && photos.length > 0) {
+                if (carouselEnabled) {
+                    introSub.textContent = `你的 ${photos.length} 张照片将在锁屏自动轮播，每次亮屏都是回忆`;
+                } else {
+                    introSub.textContent = '照片轮播已关闭，开启后照片将在锁屏自动轮播';
+                }
+            }
+            
+            if (carouselSwitch) {
+                const switchEl = carouselSwitch.querySelector('.photo-carousel-switch');
+                const statusText = carouselSwitch.querySelector('.photo-carousel-status');
+                if (switchEl) {
+                    const dot = switchEl.querySelector('div');
+                    if (carouselEnabled) {
+                        switchEl.classList.remove('bg-slate-200');
+                        switchEl.classList.add('bg-emerald-500');
+                        if (dot) dot.style.transform = 'translateX(18px)';
+                    } else {
+                        switchEl.classList.remove('bg-emerald-500');
+                        switchEl.classList.add('bg-slate-200');
+                        if (dot) dot.style.transform = 'translateX(0)';
+                    }
+                }
+                if (statusText) {
+                    statusText.textContent = carouselEnabled ? '轮播中' : '已关闭';
+                    statusText.className = `photo-carousel-status text-xs font-bold ${carouselEnabled ? 'text-emerald-600' : 'text-slate-400'}`;
+                }
+            }
+        }
+
+        function togglePhotoCarousel() {
+            const currentState = getPhotoCarouselEnabled();
+            setPhotoCarouselEnabled(!currentState);
+            updatePhotoCarouselStatus();
+            if (!currentState) {
+                showToast('照片轮播已开启');
+            } else {
+                showToast('照片轮播已关闭，照片将不在壁纸队列中展示');
+            }
+        }
+
+        function showPhotoCarouselGuide() {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 z-[400] flex items-center justify-center bg-black/50 backdrop-blur-sm';
+            modal.id = 'photo-carousel-guide-modal';
+            modal.innerHTML = `
+                <div class="bg-white rounded-[2rem] p-6 mx-6 max-w-sm w-full shadow-2xl">
+                    <div class="w-14 h-14 bg-emerald-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <i class="fa-solid fa-images text-emerald-500 text-2xl"></i>
+                    </div>
+                    <h3 class="text-lg font-black text-slate-800 text-center mb-2">开启照片轮播</h3>
+                    <p class="text-sm text-slate-500 text-center mb-6">你已添加新照片！开启照片轮播后，这些照片将在锁屏自动展示。</p>
+                    <div class="space-y-3">
+                        <button onclick="enablePhotoCarouselFromGuide()" class="w-full py-3.5 bg-emerald-500 text-white text-sm font-bold rounded-2xl active:scale-[0.98] transition-transform">开启照片轮播</button>
+                        <button onclick="closePhotoCarouselGuide()" class="w-full py-3 text-slate-500 text-sm font-bold">稍后再说</button>
+                    </div>
+                </div>
+            `;
+            modal.onclick = (e) => { if (e.target === modal) closePhotoCarouselGuide(); };
+            document.body.appendChild(modal);
+        }
+
+        function enablePhotoCarouselFromGuide() {
+            setPhotoCarouselEnabled(true);
+            updatePhotoCarouselStatus();
+            closePhotoCarouselGuide();
+            showToast('照片轮播已开启');
+        }
+
+        function closePhotoCarouselGuide() {
+            const modal = document.getElementById('photo-carousel-guide-modal');
+            if (modal) modal.remove();
         }
 
         function togglePhotoManageMode() {
@@ -2655,8 +2826,19 @@
             if (detailProductId != null) subscribedProductIds.add(detailProductId);
             updateDetailBar(detailProductId);
             updateDetailReviewEntry(detailProductId);
-            showToast('订阅成功！');
-            showLockScreenGuideModal('subscribe');
+            
+            showLoadingOverlay('正在同步壁纸数据…');
+            const product = CAT_PRODUCTS.find(p => p.id === detailProductId);
+            const previewUrls = product?.previews || [];
+            
+            preloadImages(previewUrls, () => {
+                hideLoadingOverlay();
+                showToast('订阅成功！壁纸已准备就绪');
+                showLockScreenGuideModal('subscribe');
+                if (getPushNotifyEnabled()) {
+                    showSubscriptionPushNotice(product);
+                }
+            });
         }
 
         function handleDetailUnsubscribe() {
@@ -2694,6 +2876,99 @@
 
         function closeReviewModal() {
             document.getElementById('review-modal').classList.remove('show');
+        }
+
+        // ========== 图片预缓存与Loading ==========
+        function preloadImages(urls, callback) {
+            if (!urls || urls.length === 0) {
+                callback && callback();
+                return;
+            }
+            let loaded = 0;
+            const total = urls.length;
+            urls.forEach(url => {
+                const img = new Image();
+                img.onload = img.onerror = () => {
+                    loaded++;
+                    if (loaded >= total) callback && callback();
+                };
+                img.src = url;
+            });
+            setTimeout(() => {
+                if (loaded < total) callback && callback();
+            }, 5000);
+        }
+
+        function preloadNewPhotos(urls) {
+            preloadImages(urls, () => {
+                console.log('新照片预加载完成');
+            });
+        }
+
+        function showLoadingOverlay(msg) {
+            let overlay = document.getElementById('loading-overlay');
+            if (!overlay) {
+                overlay = document.createElement('div');
+                overlay.id = 'loading-overlay';
+                overlay.className = 'fixed inset-0 z-[500] flex items-center justify-center bg-black/60 backdrop-blur-sm';
+                document.body.appendChild(overlay);
+            }
+            overlay.innerHTML = `
+                <div class="bg-white rounded-3xl p-8 mx-6 max-w-xs w-full shadow-2xl text-center">
+                    <div class="w-12 h-12 mx-auto mb-4 border-3 border-slate-200 border-t-indigo-500 rounded-full animate-spin"></div>
+                    <p class="text-sm font-bold text-slate-700">${msg || '加载中…'}</p>
+                </div>
+            `;
+            overlay.style.display = 'flex';
+        }
+
+        function hideLoadingOverlay() {
+            const overlay = document.getElementById('loading-overlay');
+            if (overlay) overlay.style.display = 'none';
+        }
+
+        function showSubscriptionPushNotice(product) {
+            if (!product) return;
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            const timeStr = `${tomorrow.getMonth() + 1}月${tomorrow.getDate()}日 08:00`;
+            
+            setTimeout(() => {
+                const notice = document.createElement('div');
+                notice.className = 'fixed top-4 left-4 right-4 z-[450] bg-white rounded-2xl p-4 shadow-xl border border-slate-100 transform -translate-y-full opacity-0 transition-all duration-300';
+                notice.id = 'push-notice';
+                notice.innerHTML = `
+                    <div class="flex items-start gap-3">
+                        <div class="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center shrink-0">
+                            <i class="fa-solid fa-bell text-indigo-500"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h4 class="text-sm font-bold text-slate-800 mb-1">订阅成功提醒</h4>
+                            <p class="text-xs text-slate-500 leading-relaxed">「${product.name}」下次壁纸更新时间：<span class="text-indigo-600 font-bold">${timeStr}</span>，届时将自动推送新壁纸。</p>
+                        </div>
+                        <button onclick="closePushNotice()" class="text-slate-400 hover:text-slate-600">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                `;
+                document.body.appendChild(notice);
+                
+                requestAnimationFrame(() => {
+                    notice.style.transform = 'translateY(0)';
+                    notice.style.opacity = '1';
+                });
+                
+                setTimeout(closePushNotice, 6000);
+            }, 500);
+        }
+
+        function closePushNotice() {
+            const notice = document.getElementById('push-notice');
+            if (notice) {
+                notice.style.transform = 'translateY(-100%)';
+                notice.style.opacity = '0';
+                setTimeout(() => notice.remove(), 300);
+            }
         }
 
         // ========== 锁屏壁纸引导弹窗（订阅成功/添加照片成功后，按平台条件引导） ==========
@@ -2851,10 +3126,12 @@
             showLockScreenPreview([coverSrc], 0, { noOriginalMode: true });
         }
 
-        /** 锁屏全屏预览：支持多图跟手滑动；可选「查看原图」（noOriginalMode: true 时不显示） */
+        /** 锁屏全屏预览：支持多图跟手滑动；可选「查看原图」（noOriginalMode: true 时不显示）
+         *  现在支持智能展示和模糊背景，与lockscreen_photo_demo一致 */
         function showLockScreenPreview(imagesOrSrc, startIndex, opts) {
             const options = opts && typeof opts === 'object' ? opts : {};
             const noOriginalMode = !!options.noOriginalMode;
+            const smartDisplay = getSmartDisplayEnabled();
 
             const images = Array.isArray(imagesOrSrc) ? imagesOrSrc : [imagesOrSrc];
             let index = typeof startIndex === 'number' ? Math.max(0, Math.min(startIndex, images.length - 1)) : 0;
@@ -2869,20 +3146,92 @@
 
             const overlay = document.createElement('div');
             overlay.className = 'ls-fullscreen';
-            overlay.style.backgroundImage = images.length > 0 ? `url(${images[index]})` : 'none';
+            
+            const blurLayer = document.createElement('div');
+            blurLayer.className = 'ls-blur-layer';
+            blurLayer.style.cssText = `
+                position: absolute;
+                inset: -12%;
+                background-position: center;
+                background-size: cover;
+                background-repeat: no-repeat;
+                filter: blur(42px) saturate(1.08) brightness(0.72);
+                transform: scale(1.08);
+                z-index: 0;
+            `;
+            blurLayer.style.backgroundImage = images.length > 0 ? `url(${images[index]})` : 'none';
+            overlay.appendChild(blurLayer);
 
             const track = document.createElement('div');
             track.className = 'ls-track';
-            images.forEach((src) => {
+            track.style.zIndex = '1';
+            
+            images.forEach((src, idx) => {
                 const slide = document.createElement('div');
                 slide.className = 'ls-slide';
-                slide.style.backgroundImage = `url(${src})`;
-                const img = document.createElement('img');
-                img.src = src;
-                img.alt = '';
-                slide.appendChild(img);
+                slide.dataset.idx = idx;
+                
+                if (smartDisplay) {
+                    slide.style.cssText = `
+                        position: relative;
+                        width: 100%;
+                        height: 100%;
+                        flex-shrink: 0;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        overflow: hidden;
+                    `;
+                    const img = document.createElement('img');
+                    img.src = src;
+                    img.alt = '';
+                    img.style.cssText = `
+                        width: 100%;
+                        height: auto;
+                        display: block;
+                        flex-shrink: 0;
+                    `;
+                    img.onload = function() {
+                        applySmartDisplayToSlide(slide, img, overlay);
+                    };
+                    slide.appendChild(img);
+                } else {
+                    slide.style.backgroundImage = `url(${src})`;
+                    const img = document.createElement('img');
+                    img.src = src;
+                    img.alt = '';
+                    slide.appendChild(img);
+                }
                 track.appendChild(slide);
             });
+
+            function applySmartDisplayToSlide(slide, img, container) {
+                const slotW = container.offsetWidth || window.innerWidth;
+                const slotH = container.offsetHeight || window.innerHeight;
+                const imgW = img.naturalWidth;
+                const imgH = img.naturalHeight;
+                if (!imgW || !imgH || !slotW || !slotH) return;
+                
+                const scaledH = (slotW * imgH) / imgW;
+                const HEIGHT_SHORTFALL_COVER_RATIO = 0.24;
+                
+                if (scaledH >= slotH - 0.5) {
+                    img.style.width = '100%';
+                    img.style.height = 'auto';
+                    img.style.objectFit = 'cover';
+                } else {
+                    const shortfall = (slotH - scaledH) / slotH;
+                    if (shortfall <= HEIGHT_SHORTFALL_COVER_RATIO) {
+                        img.style.width = '100%';
+                        img.style.height = '100%';
+                        img.style.objectFit = 'cover';
+                        img.style.objectPosition = 'center';
+                    } else {
+                        img.style.width = '100%';
+                        img.style.height = 'auto';
+                    }
+                }
+            }
 
             const setTrackOffset = (px) => {
                 track.style.transition = 'none';
@@ -2892,7 +3241,7 @@
                 index = Math.max(0, Math.min(i, images.length - 1));
                 track.style.transition = animate ? 'transform 0.25s ease-out' : 'none';
                 track.style.transform = `translateX(-${index * 100}%)`;
-                overlay.style.backgroundImage = `url(${images[index]})`;
+                blurLayer.style.backgroundImage = `url(${images[index]})`;
             };
 
             const bottomHtml = noOriginalMode
@@ -2900,12 +3249,23 @@
                 : `${images.length > 1 ? '<span class="ls-index"></span>' : ''}<button type="button" class="ls-toggle-btn">查看原图</button><span class="ls-hint">点击屏幕退出预览</span>`;
 
             overlay.appendChild(track);
+            
+            const vignette = document.createElement('div');
+            vignette.style.cssText = `
+                position: absolute;
+                inset: 0;
+                pointer-events: none;
+                background: radial-gradient(ellipse 90% 75% at 50% 45%, transparent 40%, rgba(0, 0, 0, 0.35) 100%);
+                z-index: 2;
+            `;
+            overlay.appendChild(vignette);
+            
             overlay.insertAdjacentHTML('beforeend', `
-                <div class="ls-preview-content" style="text-align:center;">
-                    <div style="font-size:20px;font-weight:500;margin-bottom:8px;">${month}月${day}日 星期${week}</div>
-                    <div style="font-size:80px;font-weight:200;line-height:1;">${h}:${m}</div>
+                <div class="ls-preview-content" style="text-align:center;z-index:5;">
+                    <div style="font-size:20px;font-weight:500;margin-bottom:8px;text-shadow:0 1px 8px rgba(0,0,0,0.45);">${month}月${day}日 星期${week}</div>
+                    <div style="font-size:80px;font-weight:200;line-height:1;text-shadow:0 2px 24px rgba(0,0,0,0.4);">${h}:${m}</div>
                 </div>
-                <div class="ls-bottom">${bottomHtml}</div>
+                <div class="ls-bottom" style="z-index:5;">${bottomHtml}</div>
             `);
 
             const indexEl = overlay.querySelector('.ls-index');
@@ -2921,6 +3281,8 @@
                     e.stopPropagation();
                     isOriginalMode = !isOriginalMode;
                     overlay.classList.toggle('ls-original-mode', isOriginalMode);
+                    blurLayer.style.display = isOriginalMode ? 'none' : 'block';
+                    vignette.style.display = isOriginalMode ? 'none' : 'block';
                     updateUI();
                 });
             }
@@ -2983,6 +3345,99 @@
             if (el.closest('#profile-lock-switch-row')) {
                 setProfileLockAuto(!isOn);
                 updateProfileIntervalRowEnabled();
+            }
+        }
+
+        function toggleSmartDisplaySwitch(el) {
+            const dot = el.querySelector('div');
+            const isOn = el.classList.contains('bg-slate-900');
+            if (isOn) {
+                el.classList.replace('bg-slate-900', 'bg-slate-200');
+                dot.style.transform = 'translateX(0)';
+                setSmartDisplayEnabled(false);
+                showToast('已关闭智能展示');
+            } else {
+                el.classList.replace('bg-slate-200', 'bg-slate-900');
+                dot.style.transform = 'translateX(18px)';
+                setSmartDisplayEnabled(true);
+                showToast('已开启智能展示，照片将自动适配屏幕');
+            }
+        }
+
+        function toggleHomeBlurSwitch(el) {
+            const dot = el.querySelector('div');
+            const isOn = el.classList.contains('bg-slate-900');
+            if (isOn) {
+                el.classList.replace('bg-slate-900', 'bg-slate-200');
+                dot.style.transform = 'translateX(0)';
+                setHomeBlurEnabled(false);
+                showToast('已关闭桌面壁纸模糊');
+            } else {
+                el.classList.replace('bg-slate-200', 'bg-slate-900');
+                dot.style.transform = 'translateX(18px)';
+                setHomeBlurEnabled(true);
+                showToast('已开启桌面壁纸模糊效果');
+            }
+        }
+
+        function togglePushNotifySwitch(el) {
+            const dot = el.querySelector('div');
+            const isOn = el.classList.contains('bg-slate-900');
+            if (isOn) {
+                el.classList.replace('bg-slate-900', 'bg-slate-200');
+                dot.style.transform = 'translateX(0)';
+                setPushNotifyEnabled(false);
+                showToast('已关闭订阅更新提醒');
+            } else {
+                el.classList.replace('bg-slate-200', 'bg-slate-900');
+                dot.style.transform = 'translateX(18px)';
+                setPushNotifyEnabled(true);
+                showToast('已开启订阅更新提醒');
+            }
+        }
+
+        function initSettingSwitches() {
+            const smartSwitch = document.getElementById('smart-display-switch');
+            if (smartSwitch) {
+                const on = getSmartDisplayEnabled();
+                const dot = smartSwitch.querySelector('div');
+                if (on) {
+                    smartSwitch.classList.remove('bg-slate-200');
+                    smartSwitch.classList.add('bg-slate-900');
+                    dot.style.transform = 'translateX(18px)';
+                } else {
+                    smartSwitch.classList.remove('bg-slate-900');
+                    smartSwitch.classList.add('bg-slate-200');
+                    dot.style.transform = 'translateX(0)';
+                }
+            }
+            const blurSwitch = document.getElementById('home-blur-switch');
+            if (blurSwitch) {
+                const on = getHomeBlurEnabled();
+                const dot = blurSwitch.querySelector('div');
+                if (on) {
+                    blurSwitch.classList.remove('bg-slate-200');
+                    blurSwitch.classList.add('bg-slate-900');
+                    dot.style.transform = 'translateX(18px)';
+                } else {
+                    blurSwitch.classList.remove('bg-slate-900');
+                    blurSwitch.classList.add('bg-slate-200');
+                    dot.style.transform = 'translateX(0)';
+                }
+            }
+            const pushSwitch = document.getElementById('push-notify-switch');
+            if (pushSwitch) {
+                const on = getPushNotifyEnabled();
+                const dot = pushSwitch.querySelector('div');
+                if (on) {
+                    pushSwitch.classList.remove('bg-slate-200');
+                    pushSwitch.classList.add('bg-slate-900');
+                    dot.style.transform = 'translateX(18px)';
+                } else {
+                    pushSwitch.classList.remove('bg-slate-900');
+                    pushSwitch.classList.add('bg-slate-200');
+                    dot.style.transform = 'translateX(0)';
+                }
             }
         }
 
@@ -3139,14 +3594,28 @@
                 const pwd = (document.getElementById('profile-login-pwd') || {}).value;
                 if (!pwd || pwd.length < 6 || pwd.length > 20) { showToast('请输入6-20位密码'); return; }
             }
-            profileUser = {
-                nickname: '用户' + phone.slice(-4),
-                id: 'HK' + Date.now().toString(36).toUpperCase().slice(-8),
-                avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120&h=120&fit=crop'
-            };
             closeProfileLoginModal();
-            renderProfileHeader();
-            showToast('登录成功');
+            showLoadingOverlay('正在登录，同步数据中…');
+            
+            setTimeout(() => {
+                profileUser = {
+                    nickname: '用户' + phone.slice(-4),
+                    id: 'HK' + Date.now().toString(36).toUpperCase().slice(-8),
+                    avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120&h=120&fit=crop'
+                };
+                
+                const allPreviewUrls = [];
+                subscribedProductIds.forEach(pid => {
+                    const p = CAT_PRODUCTS.find(pr => pr.id === pid);
+                    if (p && p.previews) allPreviewUrls.push(...p.previews);
+                });
+                
+                preloadImages(allPreviewUrls, () => {
+                    hideLoadingOverlay();
+                    renderProfileHeader();
+                    showToast('登录成功，数据已同步');
+                });
+            }, 800);
         }
         function doProfileLogout() {
             profileUser = null;
@@ -3522,6 +3991,7 @@
                 const isAndroid = getPhotoPermissionPlatform() === 'android';
                 const lockRow = document.getElementById('profile-lock-switch-row');
                 const intervalRow = document.getElementById('profile-interval-row');
+                const homeBlurRow = document.getElementById('home-blur-switch-row');
                 if (lockRow) {
                     lockRow.classList.toggle('profile-android-only', !isAndroid);
                     const sw = lockRow.querySelector('.w-11');
@@ -3531,7 +4001,9 @@
                     if (dot) dot.style.transform = on ? 'translateX(18px)' : 'translateX(0)';
                 }
                 if (intervalRow) intervalRow.classList.toggle('profile-android-only', !isAndroid);
+                if (homeBlurRow) homeBlurRow.classList.toggle('profile-android-only', !isAndroid);
                 updateProfileIntervalRowEnabled();
+                initSettingSwitches();
             }
         }
     </script>
