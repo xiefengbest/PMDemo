@@ -1,22 +1,43 @@
-# PMDemo (Product Management Portfolio)
+# PMDemo
 
-## 📖 简介 | Introduction
-本项目包含多个核心产品线和相关文档的集合，涵盖移动端应用、智能硬件及创作者生态等业务模块。项目致力于提供极致的用户体验与符合国际化标准的产品架构。
-This project contains a collection of multiple core product lines and related documentation, covering mobile applications, smart hardware, and creator ecosystems.
+一个用于交流与学习的前端原型仓库，主要包含产品页面原型、交互演示和配套说明文档。
+本仓库不提供线上服务能力，不包含可直接用于生产环境的后端实现。
 
-## 📂 目录结构 | Project Structure
-- **好看云壁纸APP** (Cloud Wallpaper App)
-- **好看智能相框-手机端** (Smart Photo Frame - Mobile Client)
-- **好看智能相框-相框端** (Smart Photo Frame - Device Client)
-- **创作者平台** (Creator Platform)
-- **realme 主动页面底部功能区域修改** (Realme Active Page Bottom Function Area Modification)
-- **好看app隐私问题** (Privacy Policy & Compliance)
+## 项目定位
 
-## 🚀 快速开始 | Quick Start
-请进入各个子目录查看具体的项目文档、产品方案和运行指南。
-Please navigate to the respective subdirectories for specific project documentation, product proposals, and run guides.
+- 用途：产品交流、方案评审、界面与交互学习
+- 形态：以静态页面（HTML/CSS/JS）和文档为主
+- 目标：沉淀可复用的页面原型与设计实现思路
 
-## 📄 规范与合规 | Compliance & Standards
-- **架构规范**：遵循高内聚、低耦合的设计原则，确保代码简洁、美观且易于维护。
-- **国际化设计**：支持多语言扩展与全球化部署标准。
-- **隐私合规**：严格遵守行业规范与数据保护隐私协议（详见隐私问题目录）。
+## 主要目录（按当前仓库结构）
+
+- `好看智能相框/`
+  - `手机端/`：移动端原型与历史版本
+  - `相框端/`：设备端原型与交互说明
+  - `下载页面/`：下载页相关原型
+  - `docs/`：项目文档汇总（建议从 `docs/README.md` 开始）
+- `好看云壁纸/`
+  - 云壁纸相关原型与历史快照
+- `创作者平台/`
+  - 创作者相关页面原型
+- `realme/`
+  - 相关页面方案与变体
+
+## 使用方式
+
+1. 克隆仓库到本地。
+2. 直接用浏览器打开各模块下的 `index.html` 进行预览。
+3. 需要了解背景与规则时，先阅读对应目录下的 `docs/` 文档。
+
+## 隐私与安全说明
+
+- 本仓库以演示与学习为目的。
+- 页面中的账号、手机号、链接、Token 等示例字段均应视为演示占位，不代表真实生产凭据。
+- 如发现疑似敏感信息，请通过仓库 Issue 提醒，作者会尽快处理。
+
+## 许可与引用声明
+
+本仓库内容仅用于学习交流。
+任何组织或个人在引用、转载、改编、二次发布或商用本仓库内容前，必须先联系作者并获得书面授权。
+未经授权使用的，均视为侵权，作者保留追究相关法律责任的权利。
+
