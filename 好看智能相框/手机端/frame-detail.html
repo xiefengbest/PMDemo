@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#ffffff">
+    <title>相框详情（独立演示）</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&display=swap');
+        :root { --app-height: 100vh; }
+        @supports (height: 100dvh) { :root { --app-height: 100dvh; } }
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            overscroll-behavior-y: contain;
+        }
+        .scroll-hide::-webkit-scrollbar { display: none; }
+        .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+        .action-blur {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            background-color: rgba(28, 28, 30, 0.9);
+        }
+        .check-pop { animation: pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes pop {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .photo-item {
+            position: relative;
+            aspect-ratio: 1;
+            background: #f3f4f6;
+            cursor: pointer;
+            overflow: hidden;
+        }
+        .photo-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        .photo-item.selected img { transform: scale(0.88); border-radius: 12px; }
+        .photo-item .select-overlay {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+            border-radius: 0;
+        }
+        .photo-item.selected .select-overlay {
+            border-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.08);
+        }
+        .photo-item .check-circle {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            border: 2px solid rgba(255,255,255,0.7);
+            background: rgba(0,0,0,0.15);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+            z-index: 3;
+            pointer-events: auto;
+        }
+        .photo-item .check-zone {
+            position: absolute;
+            top: 0; right: 0;
+            width: 44px; height: 44px;
+            z-index: 4;
+            cursor: pointer;
+        }
+        .photo-item.selected .check-circle {
+            background: #3b82f6;
+            border-color: #fff;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+        }
+        .photo-item .check-number {
+            color: white;
+            font-size: 11px;
+            font-weight: 800;
+            line-height: 1;
+        }
+        #viewerImgWrap { touch-action: pan-x; }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <p class="text-center text-xs text-gray-500 py-2 px-4">
+        由 <code class="text-gray-700">index.html</code> 中 <code class="text-gray-700">#deviceModal</code>（相框详情，PRD z-40）导出；合辑详情为独立层 <code class="text-gray-700">#albumModal</code>（z-45）。
+    </p>
+    <div id="app" class="relative w-full max-w-md mx-auto bg-white overflow-hidden border-x border-gray-200 shadow-sm" style="height: var(--app-height); max-height: -webkit-fill-available;">
+
+        <!-- Device Detail Modal（与 index.html 结构一致，默认展开） -->
+        <div id="deviceModal" class="absolute inset-0 bg-white z-40 flex flex-col" style="transform: translateX(0);">
+            <div class="bg-white/90 backdrop-blur-md sticky top-0 z-10 border-b border-gray-100">
+                <div class="px-4 pt-4 pb-1 flex items-center gap-2">
+                    <button type="button" onclick="demoBack()" class="p-1 text-blue-600" title="演示页无宿主，可关闭窗口或返回上一页">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m15 18-6-6 6-6"/></svg>
+                    </button>
+                    <h2 id="deviceModalTitle" class="text-xl font-bold flex-1">设备照片</h2>
+                    <button type="button" onclick="openDeviceMenu()" class="p-1.5 text-gray-500 active:bg-gray-100 rounded-full transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+                    </button>
+                </div>
+                <div id="deviceInfoBar" class="px-4 pb-3 pt-1 flex items-center gap-3 text-[11px] text-gray-400"></div>
+            </div>
+            <div id="deviceModalScroll" class="flex-1 overflow-y-auto">
+                <div id="deviceMemberSection" class="px-4 pt-3 pb-1">
+                    <div class="bg-gray-50 rounded-2xl p-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-xs font-bold text-gray-500">相框成员</span>
+                            <button type="button" onclick="openFrameMemberInvite()" class="text-xs font-bold text-blue-600 flex items-center gap-1 active:opacity-60">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>
+                                邀请家人
+                            </button>
+                        </div>
+                        <div id="deviceMemberList" class="flex gap-4 overflow-x-auto scroll-hide"></div>
+                    </div>
+                </div>
+                <div id="deviceSubSection" class="hidden px-4 pt-3 pb-1">
+                    <h3 class="text-sm font-bold text-gray-900 mb-2.5">订阅壁纸</h3>
+                    <div id="deviceSubList" class="flex gap-2.5 overflow-x-auto scroll-hide pb-3"></div>
+                </div>
+                <div id="devicePersonSection" class="hidden px-4 pt-2 pb-1">
+                    <h3 class="text-sm font-bold text-gray-900 mb-2.5">人物</h3>
+                    <div id="devicePersonList" class="flex gap-3.5 overflow-x-auto scroll-hide pb-3"></div>
+                </div>
+                <div class="px-4">
+                    <div id="devicePhotoHeader" class="flex justify-between items-center sticky top-0 z-[9] bg-white py-2">
+                        <h3 class="text-base font-bold">全部照片</h3>
+                        <div class="flex bg-gray-100 p-0.5 rounded-lg" id="deviceGroupSwitcher">
+                            <button type="button" onclick="setDeviceGroupMode('year')" class="px-3 py-1 text-[11px] font-bold rounded-md transition-all text-gray-400">年</button>
+                            <button type="button" onclick="setDeviceGroupMode('month')" class="px-3 py-1 text-[11px] font-bold rounded-md transition-all bg-white text-gray-900 shadow-sm">月</button>
+                            <button type="button" onclick="setDeviceGroupMode('day')" class="px-3 py-1 text-[11px] font-bold rounded-md transition-all text-gray-400">日</button>
+                        </div>
+                    </div>
+                    <div id="deviceModalContent"></div>
+                </div>
+            </div>
+            <div id="deviceSelBar" class="hidden p-3">
+                <div class="action-blur rounded-2xl p-2.5 flex gap-2 shadow-2xl items-center border border-white/10">
+                    <button type="button" onclick="cancelDeviceSelection()" class="bg-white/10 text-white/70 h-11 w-11 rounded-xl flex items-center justify-center transition-all active:scale-95 flex-shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                    </button>
+                    <button type="button" onclick="deviceDeleteSelected()" id="deviceDelBtn" class="flex-1 bg-white/5 hover:bg-red-500/20 text-white h-11 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95">
+                        <svg class="text-red-400" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                        <span class="text-xs font-bold">删除</span>
+                    </button>
+                    <button type="button" onclick="deviceSendSelected()" id="deviceSendBtn" class="flex-[2.5] bg-blue-600 hover:bg-blue-500 text-white h-11 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-blue-900/40 active:scale-95 transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+                        <span class="text-xs font-black">发送到相框 (<span id="deviceSelCount">0</span>)</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Device Menu Action Sheet -->
+        <div id="deviceMenuMask" class="fixed inset-0 bg-black/40 z-[55] hidden flex items-end justify-center" onclick="closeDeviceMenu()">
+            <div id="deviceMenuSheet" class="w-full max-w-md mx-auto mb-2 px-3 translate-y-full transition-transform duration-300" onclick="event.stopPropagation()">
+                <div class="bg-white rounded-2xl overflow-hidden shadow-2xl">
+                    <div class="px-5 pt-4 pb-2 text-center border-b border-gray-100">
+                        <span id="deviceMenuTitle" class="text-xl font-bold text-gray-900">相框设置</span>
+                    </div>
+                    <div>
+                        <button type="button" onclick="startRenameDevice()" class="w-full py-3.5 text-center text-sm font-medium text-blue-600 active:bg-gray-50 flex items-center justify-center gap-2 border-b border-gray-100">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+                            重命名相框
+                        </button>
+                        <button type="button" onclick="openLocationPicker()" class="w-full py-3.5 text-center text-sm font-medium text-blue-600 active:bg-gray-50 flex items-center justify-center gap-2 border-b border-gray-100">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                            修改位置
+                        </button>
+                        <button type="button" onclick="confirmResetPersonSuggestions()" class="w-full py-3.5 text-center text-sm font-medium text-blue-600 active:bg-gray-50 flex items-center justify-center gap-2 border-b border-gray-100">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+                            重置人物相册
+                        </button>
+                        <button type="button" onclick="closeDeviceMenu();showUnbindDialog()" class="w-full py-3.5 text-center text-sm font-medium text-red-500 active:bg-gray-50 flex items-center justify-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" x2="12" y1="2" y2="12"/></svg>
+                            解绑相框
+                        </button>
+                    </div>
+                </div>
+                <button type="button" onclick="closeDeviceMenu()" class="w-full mt-2 bg-white rounded-2xl py-3.5 text-center text-sm font-bold text-blue-600 active:bg-gray-50 shadow-2xl">取消</button>
+            </div>
+        </div>
+
+        <!-- Location Picker -->
+        <div id="locationPickerMask" class="fixed inset-0 bg-black/40 z-[56] hidden flex items-end justify-center" onclick="closeLocationPicker()">
+            <div id="locationPickerSheet" class="w-full max-w-md mx-auto mb-2 px-3 translate-y-full transition-transform duration-300" onclick="event.stopPropagation()">
+                <div class="bg-white rounded-2xl overflow-hidden shadow-2xl">
+                    <div class="px-5 pt-4 pb-2 text-center border-b border-gray-100">
+                        <span class="text-xl font-bold text-gray-900">选择位置</span>
+                    </div>
+                    <div class="max-h-64 overflow-y-auto" id="locationList"></div>
+                </div>
+                <button type="button" onclick="closeLocationPicker()" class="w-full mt-2 bg-white rounded-2xl py-3.5 text-center text-sm font-bold text-blue-600 active:bg-gray-50 shadow-2xl">取消</button>
+            </div>
+        </div>
+
+        <!-- Rename Dialog -->
+        <div id="renameMask" class="fixed inset-0 bg-black/40 z-[62] hidden flex items-center justify-center" onclick="closeRenameDialog()">
+            <div class="bg-white rounded-2xl shadow-2xl w-72 overflow-hidden" onclick="event.stopPropagation()">
+                <div class="px-5 pt-5 pb-3 text-center">
+                    <h3 id="renameTitle" class="text-xl font-bold text-gray-900 mb-3">修改昵称</h3>
+                    <input id="renameInput" type="text" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-center focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all" placeholder="请输入">
+                </div>
+                <div class="flex border-t border-gray-100">
+                    <button type="button" onclick="closeRenameDialog()" class="flex-1 py-3.5 text-center text-sm font-medium text-gray-500 active:bg-gray-50 border-r border-gray-100">取消</button>
+                    <button type="button" onclick="confirmRename()" class="flex-1 py-3.5 text-center text-sm font-bold text-blue-600 active:bg-gray-50">确定</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delete Confirm Dialog -->
+        <div id="deleteDialogMask" class="fixed inset-0 bg-black/40 z-[60] hidden flex items-end justify-center">
+            <div id="deleteDialogSheet" class="w-full max-w-md mx-auto mb-2 px-3 translate-y-full transition-transform duration-300">
+                <div class="bg-white rounded-2xl overflow-hidden shadow-2xl">
+                    <div class="px-5 pt-5 pb-3 text-center">
+                        <h3 id="deleteDialogTitle" class="text-xl font-bold text-gray-900 mb-1">删除照片</h3>
+                        <p id="deleteDialogDesc" class="text-[12px] text-gray-500 leading-relaxed"></p>
+                    </div>
+                    <div id="deleteDialogActions" class="border-t border-gray-100"></div>
+                </div>
+                <button type="button" onclick="closeDeleteDialog()" class="w-full mt-2 bg-white rounded-2xl py-3.5 text-center text-sm font-bold text-blue-600 active:bg-gray-50 shadow-2xl">取消</button>
+            </div>
+        </div>
+
+        <!-- Unbind Confirm Dialog -->
+        <div id="unbindMask" class="fixed inset-0 bg-black/40 z-[60] hidden flex items-end justify-center">
+            <div id="unbindSheet" class="w-full max-w-md mx-auto mb-2 px-3 translate-y-full transition-transform duration-300">
+                <div class="bg-white rounded-2xl overflow-hidden shadow-2xl">
+                    <div class="px-5 pt-5 pb-3 text-center">
+                        <h3 id="unbindTitle" class="text-xl font-bold text-gray-900 mb-1">解绑相框</h3>
+                        <p id="unbindDesc" class="text-[12px] text-gray-500 leading-relaxed">解绑后将断开连接，您发布到该相框的照片将被移除，其他用户发布的照片不受影响。</p>
+                    </div>
+                    <div class="border-t border-gray-100">
+                        <button type="button" onclick="confirmUnbindDemo()" class="w-full py-3.5 text-center text-sm font-bold text-red-600 active:bg-gray-50">确认解绑</button>
+                    </div>
+                </div>
+                <button type="button" onclick="closeUnbindDialog()" class="w-full mt-2 bg-white rounded-2xl py-3.5 text-center text-sm font-bold text-blue-600 active:bg-gray-50 shadow-2xl">取消</button>
+            </div>
+        </div>
+
+        <!-- Frame Picker Sheet（转发到其他相框） -->
+        <div id="framePickerMask" class="fixed inset-0 bg-black/40 z-[58] hidden" onclick="closeFramePicker()"></div>
+        <div id="framePickerSheet" class="fixed bottom-0 left-0 right-0 z-[59] translate-y-full transition-transform duration-300">
+            <div class="max-w-md mx-auto bg-white rounded-t-2xl shadow-2xl overflow-hidden">
+                <div class="flex justify-between items-center px-5 pt-5 pb-3">
+                    <h3 class="text-base font-bold">选择相框</h3>
+                    <button type="button" onclick="closeFramePicker()" class="text-gray-400 active:opacity-60">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                    </button>
+                </div>
+                <div id="framePickerList" class="px-5 pb-3 max-h-64 overflow-y-auto"></div>
+                <div class="px-5 pb-6 pt-2 border-t border-gray-100">
+                    <button type="button" onclick="confirmFrameSendDemo()" id="framePickerConfirmBtn" class="w-full h-11 bg-blue-600 text-white text-sm font-bold rounded-xl flex items-center justify-center gap-2 active:scale-[0.98] transition-transform shadow-lg shadow-blue-600/30">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+                        <span id="framePickerConfirmText">发送</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Device Member Invite Sheet -->
+        <div id="memberInviteMask" class="fixed inset-0 bg-black/40 z-[61] hidden" onclick="closeFrameMemberInvite()"></div>
+        <div id="memberInviteSheet" class="fixed bottom-0 left-0 right-0 z-[62] translate-y-full transition-transform duration-300">
+            <div class="max-w-md mx-auto bg-white rounded-t-2xl shadow-2xl overflow-hidden safe-bottom">
+                <div class="flex items-center justify-between px-5 pt-4 pb-3">
+                    <h3 class="text-base font-bold text-gray-900">邀请家人共同管理相框</h3>
+                    <button type="button" onclick="closeFrameMemberInvite()" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center active:bg-gray-200 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2.5"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                    </button>
+                </div>
+                <div class="mx-5 mb-4 p-3.5 bg-gray-50 rounded-xl flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-xs font-bold text-gray-700 truncate">https://92-cn.levect.com/frames/...?token=abc123</p>
+                        <p class="text-[10px] text-gray-400 mt-0.5">链接有效期 24 小时</p>
+                    </div>
+                </div>
+                <div class="px-5 pb-5">
+                    <button type="button" onclick="copyMemberInviteLink()" class="w-full h-12 bg-blue-600 text-white font-bold text-base rounded-xl transition-all flex items-center justify-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                        复制邀请链接
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Image Viewer -->
+        <div id="imageViewer" class="fixed inset-0 z-[55] bg-black hidden flex-col" style="display:none;">
+            <div class="absolute inset-0 flex items-center justify-center" id="viewerImgWrap">
+                <img id="viewerImg" class="max-w-full max-h-full object-contain select-none" alt="" draggable="false">
+            </div>
+            <div class="absolute top-0 left-0 right-0 flex items-center justify-between px-4 pt-12 pb-3 bg-gradient-to-b from-black/60 to-transparent z-10">
+                <button type="button" onclick="closeViewer()" class="text-white/90 p-2 active:opacity-60">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m15 18-6-6 6-6"/></svg>
+                </button>
+                <span id="viewerCounter" class="text-white/70 text-xs font-bold"></span>
+                <div class="w-10"></div>
+            </div>
+            <div class="absolute bottom-0 left-0 right-0 pb-10 pt-4 px-5 bg-gradient-to-t from-black/60 to-transparent z-10 flex gap-3">
+                <button type="button" onclick="viewerDelete()" class="flex-1 bg-white/10 backdrop-blur-md text-white h-12 rounded-2xl flex items-center justify-center gap-2 active:scale-95 transition-all border border-white/10">
+                    <svg class="text-red-400" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                    <span class="text-sm font-bold">删除</span>
+                </button>
+                <button type="button" onclick="viewerSend()" class="flex-[2] bg-blue-600 text-white h-12 rounded-2xl flex items-center justify-center gap-2 shadow-lg shadow-blue-900/40 active:scale-95 transition-all">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+                    <span class="text-sm font-black" id="viewerSendText">发送到相框</span>
+                </button>
+            </div>
+            <button type="button" onclick="viewerPrev()" id="viewerPrevBtn" class="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 backdrop-blur text-white flex items-center justify-center active:bg-white/20 z-10">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m15 18-6-6 6-6"/></svg>
+            </button>
+            <button type="button" onclick="viewerNext()" id="viewerNextBtn" class="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 backdrop-blur text-white flex items-center justify-center active:bg-white/20 z-10">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
+            </button>
+        </div>
+
+        <div id="toast" class="fixed top-10 left-1/2 -translate-x-1/2 z-[70] opacity-0 pointer-events-none transition-all duration-300">
+            <div class="bg-black/85 text-white px-5 py-2.5 rounded-full shadow-xl flex items-center gap-2 font-medium text-xs">
+                <span id="toastMsg">操作成功</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function setAppHeight() {
+            const vh = window.innerHeight;
+            document.documentElement.style.setProperty('--app-height', vh + 'px');
+        }
+        setAppHeight();
+        window.addEventListener('resize', setAppHeight);
+        window.addEventListener('orientationchange', () => setTimeout(setAppHeight, 100));
+
+        const PHOTO_SEEDS = [
+            'morning-light','sunset-glow','mountain-peak','calm-lake','autumn-leaves',
+            'spring-bloom','winter-snow','ocean-wave','golden-field','starry-sky'
+        ];
+        const generateMockData = (count, startId) => {
+            const data = [];
+            const dates = [
+                { y: '2025', m: '03', days: ['28','25','22','18','15','12','08','05','02'] },
+                { y: '2025', m: '02', days: ['27','24','20','17','14','10','07','03'] },
+                { y: '2025', m: '01', days: ['30','26','21','16','12','08','04','01'] }
+            ];
+            let di = 0, dj = 0;
+            for (let i = 0; i < count; i++) {
+                const id = startId + i;
+                const seed = PHOTO_SEEDS[i % PHOTO_SEEDS.length] + '-' + id;
+                const d = dates[di];
+                data.push({
+                    id,
+                    year: d.y + '年',
+                    month: d.y + '年' + d.m + '月',
+                    day: d.y + '年' + d.m + '月' + d.days[dj] + '日',
+                    url: `https://picsum.photos/seed/${seed}/300/300`,
+                    sent: false
+                });
+                dj++;
+                if (dj >= dates[di].days.length) { dj = 0; di = Math.min(di + 1, dates.length - 1); }
+            }
+            return data;
+        };
+
+        const SUBSCRIPTIONS = [
+            { id: 'sub-history', name: '历史上的今天', cover: 'https://picsum.photos/seed/history-today/400/300', status: 'active' },
+            { id: 'sub-flowers', name: '繁花', cover: 'https://picsum.photos/seed/blooming-flowers/400/300', status: 'active' }
+        ];
+        const DEVICE_PERSONS = [
+            { id: 'dp-1', name: '妈妈', avatar: 'https://picsum.photos/seed/mom-face/200/200', photoCount: 42 },
+            { id: 'dp-2', name: '爸爸', avatar: 'https://picsum.photos/seed/dad-face/200/200', photoCount: 35 },
+            { id: 'dp-3', name: '宝贝', avatar: 'https://picsum.photos/seed/baby-cute/200/200', photoCount: 58 }
+        ];
+        const SENDERS = [
+            { name: '我', avatar: 'https://picsum.photos/seed/owner-me/100/100' },
+            { name: '妈妈', avatar: 'https://picsum.photos/seed/mom-face/100/100' }
+        ];
+        const FRAME_MEMBERS = [
+            { id: 'fm-me', name: '我', avatar: '', isOwner: true },
+            { id: 'fm-mom', name: '妈妈', avatar: 'https://picsum.photos/seed/mom-face/100/100', isOwner: false },
+            { id: 'fm-dad', name: '爸爸', avatar: 'https://picsum.photos/seed/dad-face/100/100', isOwner: false }
+        ];
+
+        const FRAME_DEVICES = [
+            { id: 'frame-demo-a', name: '好看智能相框', location: '客厅', status: 'online', photoCount: 0, coverSeed: 'frame-living-room', photos: [], subscriptions: [], persons: [], members: [FRAME_MEMBERS[0], FRAME_MEMBERS[1]], hiddenPersons: [] },
+            { id: 'frame-demo-b', name: '好看智能相框', location: '卧室', status: 'online', photoCount: 18, coverSeed: 'frame-bedroom', photos: generateMockData(18, 6000), subscriptions: [SUBSCRIPTIONS[1]], persons: [DEVICE_PERSONS[0], DEVICE_PERSONS[2]], members: [FRAME_MEMBERS[0], FRAME_MEMBERS[1], FRAME_MEMBERS[2]], hiddenPersons: [] }
+        ];
+        FRAME_DEVICES.forEach(d => {
+            d.photos.forEach((p, i) => { p.sender = SENDERS[i % SENDERS.length]; });
+        });
+
+        let deviceSelectedIds = [];
+        let currentDeviceId = null;
+        let deviceGroupMode = 'month';
+        let pickerSelectedFrames = [];
+        let devicePendingSendIds = [];
+        let pendingSendCount = 0;
+        let pendingRemoveSubId = '';
+        let currentRenameType = 'device';
+        let viewerPhotos = [];
+        let viewerIndex = 0;
+        let viewerTouchStartX = 0;
+
+        function renderDeviceList() {}
+
+        function demoBack() {
+            if (history.length > 1) history.back();
+            else showToast('独立演示页：请直接关闭标签页');
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            document.getElementById('toastMsg').innerText = msg;
+            t.style.opacity = '1';
+            setTimeout(() => { t.style.opacity = '0'; }, 2000);
+        }
+
+        function openDeviceDetail(deviceId) {
+            const device = FRAME_DEVICES.find(d => d.id === deviceId);
+            if (!device) return;
+            currentDeviceId = deviceId;
+            document.getElementById('deviceModalTitle').textContent = device.name;
+            const hasPhotos = device.photos && device.photos.length > 0;
+            const memberCount = (device.members || []).length;
+            document.getElementById('deviceInfoBar').innerHTML = `
+                <span class="flex items-center gap-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                    ${device.location}
+                </span>
+                ${hasPhotos ? `<span>·</span><span class="device-photo-count">${device.photoCount} 张照片</span>` : ''}
+                <span>·</span>
+                <span class="flex items-center gap-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    ${memberCount} 位成员
+                </span>`;
+            deviceSelectedIds = [];
+            deviceGroupMode = 'month';
+            document.getElementById('deviceSelBar').classList.add('hidden');
+            renderDeviceSubscriptions(device);
+            renderDevicePersons(device);
+            renderDeviceMembers(device);
+            updateDeviceGroupSwitcher();
+            refreshDevicePhotos();
+        }
+
+        function renderDeviceSubscriptions(device) {
+            const section = document.getElementById('deviceSubSection');
+            const list = document.getElementById('deviceSubList');
+            const subs = device.subscriptions || [];
+            if (subs.length === 0) {
+                section.classList.add('hidden');
+                return;
+            }
+            section.classList.remove('hidden');
+            let html = subs.map(s => `
+                <div class="flex-shrink-0 w-28">
+                    <div class="relative rounded-xl overflow-hidden shadow-sm mb-1.5 aspect-[4/3]">
+                        <img src="${s.cover}" class="w-full h-full object-cover" alt="">
+                        <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/50 to-transparent px-2 pb-1.5 pt-3">
+                            <span class="text-white text-[9px] font-bold leading-none">${s.name}</span>
+                        </div>
+                        <span class="absolute top-1 left-1 text-[7px] font-bold px-1.5 py-0.5 rounded-full leading-none ${s.status === 'active' ? 'bg-green-500 text-white' : 'bg-gray-400 text-white'}">${s.status === 'active' ? '更新中' : '已过期'}</span>
+                        <button type="button" onclick="event.stopPropagation();confirmRemoveSub('${s.id}','${s.name.replace(/'/g, "\\'")}')" class="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/40 flex items-center justify-center active:bg-black/70 backdrop-blur-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+                    <p class="text-[9px] text-gray-400 px-0.5">每日更新</p>
+                </div>
+            `).join('');
+            html += `
+                <div class="flex-shrink-0 w-28 cursor-pointer active:opacity-80" onclick="showToast('完整 App 中此处会进入商城订阅')">
+                    <div class="rounded-xl border-2 border-dashed border-gray-200 aspect-[4/3] flex flex-col items-center justify-center gap-1 mb-1.5">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                        <span class="text-[9px] text-gray-400 font-medium">订阅更多</span>
+                    </div>
+                </div>`;
+            list.innerHTML = html;
+        }
+
+        function renderDevicePersons(device) {
+            const section = document.getElementById('devicePersonSection');
+            const list = document.getElementById('devicePersonList');
+            const persons = device.persons || [];
+            if (persons.length === 0) {
+                section.classList.add('hidden');
+                return;
+            }
+            section.classList.remove('hidden');
+            list.innerHTML = persons.map(p => `
+                <div class="flex flex-col items-center gap-1.5 flex-shrink-0 cursor-pointer active:opacity-70" onclick="openDevicePersonDetail('${p.id}','${p.name.replace(/'/g, "\\'")}',${p.photoCount})">
+                    <div class="w-14 h-14 rounded-full overflow-hidden border border-gray-100 shadow-sm">
+                        <img src="${p.avatar}" class="w-full h-full object-cover" alt="">
+                    </div>
+                    <span class="text-[10px] font-medium text-gray-700">${p.name}</span>
+                    <span class="text-[8px] text-gray-400 -mt-1">${p.photoCount}张</span>
+                </div>
+            `).join('');
+        }
+
+        function renderDeviceMembers(device) {
+            const list = document.getElementById('deviceMemberList');
+            const members = device.members || [];
+            const memberHtml = members.map(m => {
+                const avatar = m.avatar
+                    ? `<div class="w-12 h-12 rounded-full overflow-hidden border border-gray-100 shadow-sm"><img src="${m.avatar}" class="w-full h-full object-cover" alt=""></div>`
+                    : `<div class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white text-sm font-bold shadow-md">我</div>`;
+                return `
+                    <div class="flex flex-col items-center gap-1.5 flex-shrink-0">
+                        ${avatar}
+                        <span class="text-[10px] text-gray-500 font-medium">${m.name}</span>
+                    </div>`;
+            }).join('');
+            list.innerHTML = memberHtml + `
+                <div class="flex flex-col items-center gap-1.5 flex-shrink-0 cursor-pointer active:opacity-60" onclick="openFrameMemberInvite()">
+                    <div class="w-12 h-12 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                    </div>
+                    <span class="text-[10px] text-gray-400 font-medium">添加</span>
+                </div>`;
+        }
+
+        function openDevicePersonDetail(personId, personName, photoCount) {
+            showToast('合辑详情（人物）在完整 index.html 的 #albumModal；此处为演示：「' + personName + '」共 ' + photoCount + ' 张');
+        }
+
+        function confirmRemoveSub(subId, subName) {
+            pendingRemoveSubId = subId;
+            showDeleteDialog('移除订阅', `确定要从当前相框移除「${subName}」吗？移除后该壁纸将不再每日更新到此相框。`, [{ label: '移除订阅', action: 'removeSub', bold: true }]);
+        }
+
+        function setDeviceGroupMode(mode) {
+            deviceGroupMode = mode;
+            updateDeviceGroupSwitcher();
+            refreshDevicePhotos();
+        }
+
+        function updateDeviceGroupSwitcher() {
+            const switcher = document.getElementById('deviceGroupSwitcher');
+            const btns = switcher.querySelectorAll('button');
+            const modes = ['year', 'month', 'day'];
+            btns.forEach((btn, i) => {
+                const active = modes[i] === deviceGroupMode;
+                btn.className = `px-3 py-1 text-[11px] font-bold rounded-md transition-all ${active ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-400'}`;
+            });
+        }
+
+        function refreshDevicePhotos() {
+            const device = FRAME_DEVICES.find(d => d.id === currentDeviceId);
+            if (!device) return;
+            const photos = device.photos;
+            const photoHeader = document.getElementById('devicePhotoHeader');
+            const contentEl = document.getElementById('deviceModalContent');
+            if (!photos || photos.length === 0) {
+                if (photoHeader) photoHeader.classList.add('hidden');
+                contentEl.innerHTML = `
+                    <div class="flex flex-col items-center justify-center py-16 text-center">
+                        <div class="w-20 h-20 bg-gray-50 rounded-3xl flex items-center justify-center mb-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="1.5"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+                        </div>
+                        <h3 class="text-base font-bold text-gray-600 mb-1">还没有照片</h3>
+                        <p class="text-sm text-gray-400 mb-5 px-8">在「照片」页面选择照片发送到此相框</p>
+                        <button type="button" onclick="showToast('完整流程见 index.html 照片页')" class="text-sm font-bold text-white bg-blue-600 px-5 py-2.5 rounded-full active:opacity-70 transition-opacity flex items-center gap-1.5 shadow-lg shadow-blue-600/30">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+                            去选择照片
+                        </button>
+                    </div>`;
+                return;
+            }
+            if (photoHeader) photoHeader.classList.remove('hidden');
+            const groupKey = deviceGroupMode === 'year' ? 'year' : deviceGroupMode === 'day' ? 'day' : 'month';
+            const groups = [...new Set(photos.map(p => p[groupKey]))];
+            const cols = deviceGroupMode === 'year' ? 4 : 3;
+            contentEl.innerHTML = groups.map(group => {
+                const gPhotos = photos.filter(p => p[groupKey] === group);
+                return `
+                <div class="mb-6 gallery-group" data-group-label="${group}">
+                    <div class="flex justify-between items-center mb-2 sticky top-[36px] z-[8] bg-white py-1.5">
+                        <div class="flex items-baseline gap-2">
+                            <span class="text-sm font-black text-gray-800">${group}</span>
+                            <span class="text-[11px] text-gray-400">${gPhotos.length} 张</span>
+                        </div>
+                        <div class="flex gap-1.5">
+                            <button type="button" onclick="toggleDeviceGroupSelect('${group}','${groupKey}')" class="text-[10px] font-bold text-gray-500 bg-gray-100 px-2.5 py-1 rounded-full active:opacity-60 transition-opacity">${isDeviceGroupAllSelected(group, groupKey, photos) ? '取消全选' : '全选'}</button>
+                        </div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:repeat(${cols},1fr);gap:2px;">
+                        ${gPhotos.map(p => renderDevicePhotoItem(p)).join('')}
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function renderDevicePhotoItem(p) {
+            const active = deviceSelectedIds.includes(p.id);
+            const order = active ? deviceSelectedIds.indexOf(p.id) + 1 : 0;
+            const sender = p.sender;
+            return `
+                <div class="photo-item ${active ? 'selected' : ''}" onclick="openViewer(${p.id},'device')">
+                    <img src="${p.url}" loading="lazy" alt="">
+                    <div class="select-overlay"></div>
+                    ${sender ? `<div class="absolute bottom-[3px] left-[3px] flex items-center bg-black/40 backdrop-blur-sm rounded-full z-[1] pointer-events-none" style="gap:2px;padding:1px 5px 1px 1px;">
+                        <img src="${sender.avatar}" style="width:12px;height:12px;" class="rounded-full object-cover" alt="">
+                        <span class="text-white font-medium leading-none" style="font-size:7px;">${sender.name}</span>
+                    </div>` : ''}
+                    <div class="check-zone" onclick="event.stopPropagation();toggleDevicePhotoSelect(${p.id})"></div>
+                    <div class="check-circle ${active ? 'check-pop' : ''}">
+                        ${active ? `<span class="check-number">${order}</span>` : ''}
+                    </div>
+                </div>`;
+        }
+
+        function isDeviceGroupAllSelected(group, groupKey, photos) {
+            const gps = photos.filter(p => p[groupKey] === group);
+            return gps.length > 0 && gps.every(p => deviceSelectedIds.includes(p.id));
+        }
+
+        function toggleDeviceGroupSelect(group, groupKey) {
+            const device = FRAME_DEVICES.find(d => d.id === currentDeviceId);
+            if (!device) return;
+            const gps = device.photos.filter(p => p[groupKey] === group);
+            if (isDeviceGroupAllSelected(group, groupKey, device.photos)) {
+                deviceSelectedIds = deviceSelectedIds.filter(id => !gps.some(p => p.id === id));
+            } else {
+                gps.forEach(p => { if (!deviceSelectedIds.includes(p.id)) deviceSelectedIds.push(p.id); });
+            }
+            refreshDevicePhotos();
+            updateDeviceSelBar();
+        }
+
+        function toggleDevicePhotoSelect(id) {
+            const idx = deviceSelectedIds.indexOf(id);
+            if (idx >= 0) deviceSelectedIds.splice(idx, 1);
+            else deviceSelectedIds.push(id);
+            refreshDevicePhotos();
+            updateDeviceSelBar();
+        }
+
+        function updateDeviceSelBar() {
+            const count = deviceSelectedIds.length;
+            const bar = document.getElementById('deviceSelBar');
+            if (count > 0) bar.classList.remove('hidden');
+            else bar.classList.add('hidden');
+            document.getElementById('deviceSelCount').textContent = count;
+            const delBtn = document.getElementById('deviceDelBtn');
+            const sendBtn = document.getElementById('deviceSendBtn');
+            if (count > 0) {
+                delBtn.classList.remove('opacity-40', 'pointer-events-none');
+                sendBtn.classList.remove('opacity-40', 'pointer-events-none');
+            } else {
+                delBtn.classList.add('opacity-40', 'pointer-events-none');
+                sendBtn.classList.add('opacity-40', 'pointer-events-none');
+            }
+        }
+
+        function cancelDeviceSelection() {
+            deviceSelectedIds = [];
+            document.getElementById('deviceSelBar').classList.add('hidden');
+            refreshDevicePhotos();
+        }
+
+        function deviceSendSelected() {
+            if (deviceSelectedIds.length === 0) return;
+            pendingSendCount = deviceSelectedIds.length;
+            devicePendingSendIds = [...deviceSelectedIds];
+            openDeviceFramePicker();
+        }
+
+        function openDeviceFramePicker() {
+            const otherFrames = FRAME_DEVICES.filter(d => d.id !== currentDeviceId);
+            pickerSelectedFrames = [];
+            const mask = document.getElementById('framePickerMask');
+            const sheet = document.getElementById('framePickerSheet');
+            const list = document.getElementById('framePickerList');
+            list.innerHTML = otherFrames.map(d => `
+                <label onclick="toggleDeviceFramePick('${d.id}')" class="flex items-center gap-3 py-3 border-b border-gray-50 cursor-pointer active:bg-gray-50 rounded-lg px-1">
+                    <div class="w-10 h-10 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
+                        <img src="https://picsum.photos/seed/${d.coverSeed}/100/100" class="w-full h-full object-cover" alt="">
+                    </div>
+                    <div class="text-sm font-bold truncate flex-1 min-w-0">${d.name}</div>
+                    <div id="dfp-${d.id}" class="w-5 h-5 rounded-full border-2 border-gray-300 flex items-center justify-center transition-all"></div>
+                </label>
+            `).join('');
+            if (otherFrames.length === 0) {
+                list.innerHTML = '<div class="text-center text-gray-400 text-sm py-6">没有其他相框可发送</div>';
+            }
+            mask.classList.remove('hidden');
+            requestAnimationFrame(() => { sheet.style.transform = 'translateY(0)'; });
+            updateDeviceFramePickerBtn();
+        }
+
+        function toggleDeviceFramePick(id) {
+            const idx = pickerSelectedFrames.indexOf(id);
+            if (idx >= 0) pickerSelectedFrames.splice(idx, 1);
+            else pickerSelectedFrames.push(id);
+            FRAME_DEVICES.filter(d => d.id !== currentDeviceId).forEach(d => {
+                const el = document.getElementById('dfp-' + d.id);
+                if (!el) return;
+                const picked = pickerSelectedFrames.includes(d.id);
+                el.className = `w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${picked ? 'border-blue-600 bg-blue-600' : 'border-gray-300'}`;
+                el.innerHTML = picked ? '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>' : '';
+            });
+            updateDeviceFramePickerBtn();
+        }
+
+        function updateDeviceFramePickerBtn() {
+            const btn = document.getElementById('framePickerConfirmBtn');
+            const text = document.getElementById('framePickerConfirmText');
+            if (pickerSelectedFrames.length === 0) {
+                btn.classList.add('opacity-50');
+                btn.disabled = true;
+                text.textContent = '请选择相框';
+            } else {
+                btn.classList.remove('opacity-50');
+                btn.disabled = false;
+                text.textContent = `发送 ${pendingSendCount} 张到相框`;
+            }
+        }
+
+        function closeFramePicker() {
+            document.getElementById('framePickerSheet').style.transform = 'translateY(100%)';
+            setTimeout(() => { document.getElementById('framePickerMask').classList.add('hidden'); }, 300);
+        }
+
+        function confirmFrameSendDemo() {
+            if (pickerSelectedFrames.length === 0) return;
+            closeFramePicker();
+            deviceSelectedIds = [];
+            devicePendingSendIds = [];
+            document.getElementById('deviceSelBar').classList.add('hidden');
+            refreshDevicePhotos();
+            showToast(`演示：已模拟发送 ${pendingSendCount} 张照片到其他相框`);
+        }
+
+        function deviceDeleteSelected() {
+            if (deviceSelectedIds.length === 0) return;
+            const count = deviceSelectedIds.length;
+            showDeleteDialog(`删除 ${count} 张照片`, '请选择删除方式，删除后照片将无法恢复', [
+                { label: '仅从当前相框删除', action: 'deviceCurrent', bold: false },
+                { label: '从所有相框中删除', action: 'deviceAll', bold: true }
+            ]);
+        }
+
+        function showDeleteDialog(title, desc, actions) {
+            document.getElementById('deleteDialogTitle').textContent = title;
+            document.getElementById('deleteDialogDesc').textContent = desc;
+            document.getElementById('deleteDialogActions').innerHTML = actions.map(a =>
+                `<button type="button" onclick="executeDelete('${a.action}')" class="w-full py-3.5 text-center text-sm ${a.bold ? 'font-bold text-red-600' : 'font-medium text-red-500'} active:bg-gray-50 border-t border-gray-100">${a.label}</button>`
+            ).join('');
+            const mask = document.getElementById('deleteDialogMask');
+            const sheet = document.getElementById('deleteDialogSheet');
+            mask.classList.remove('hidden');
+            requestAnimationFrame(() => { sheet.style.transform = 'translateY(0)'; });
+        }
+
+        function closeDeleteDialog() {
+            const sheet = document.getElementById('deleteDialogSheet');
+            sheet.style.transform = 'translateY(100%)';
+            setTimeout(() => { document.getElementById('deleteDialogMask').classList.add('hidden'); }, 300);
+        }
+
+        function executeDelete(action) {
+            closeDeleteDialog();
+            setTimeout(() => {
+                if (action === 'deviceCurrent') {
+                    const idsToDelete = new Set(deviceSelectedIds);
+                    const device = FRAME_DEVICES.find(d => d.id === currentDeviceId);
+                    if (device) {
+                        device.photos = device.photos.filter(p => !idsToDelete.has(p.id));
+                        device.photoCount = device.photos.length;
+                    }
+                    deviceSelectedIds = [];
+                    document.getElementById('deviceSelBar').classList.add('hidden');
+                    refreshDevicePhotos();
+                    syncInfoBarPhotoCount();
+                    showToast(`已从当前相框删除照片`);
+                } else if (action === 'deviceAll') {
+                    const idsToDelete = new Set(deviceSelectedIds);
+                    FRAME_DEVICES.forEach(d => {
+                        d.photos = d.photos.filter(p => !idsToDelete.has(p.id));
+                        d.photoCount = d.photos.length;
+                    });
+                    deviceSelectedIds = [];
+                    document.getElementById('deviceSelBar').classList.add('hidden');
+                    refreshDevicePhotos();
+                    syncInfoBarPhotoCount();
+                    showToast(`已从所有相框中删除照片`);
+                } else if (action === 'removeSub') {
+                    const device = FRAME_DEVICES.find(d => d.id === currentDeviceId);
+                    let removedName = '';
+                    if (device) {
+                        const sub = (device.subscriptions || []).find(s => s.id === pendingRemoveSubId);
+                        if (sub) removedName = sub.name;
+                        device.subscriptions = (device.subscriptions || []).filter(s => s.id !== pendingRemoveSubId);
+                        renderDeviceSubscriptions(device);
+                    }
+                    pendingRemoveSubId = '';
+                    showToast(removedName ? `已取消订阅「${removedName}」` : '已移除订阅');
+                } else if (action === 'viewerDeleteDeviceCurrent') {
+                    const photo = viewerPhotos[viewerIndex];
+                    const device = FRAME_DEVICES.find(d => d.id === currentDeviceId);
+                    if (device) {
+                        device.photos = device.photos.filter(p => p.id !== photo.id);
+                        device.photoCount = device.photos.length;
+                    }
+                    viewerPhotos.splice(viewerIndex, 1);
+                    if (viewerIndex >= viewerPhotos.length) viewerIndex = viewerPhotos.length - 1;
+                    if (viewerPhotos.length === 0) closeViewer();
+                    else updateViewerDisplay();
+                    refreshDevicePhotos();
+                    syncInfoBarPhotoCount();
+                    showToast('已从当前相框删除照片');
+                } else if (action === 'viewerDeleteDeviceAll') {
+                    const photo = viewerPhotos[viewerIndex];
+                    FRAME_DEVICES.forEach(d => {
+                        d.photos = d.photos.filter(p => p.id !== photo.id);
+                        d.photoCount = d.photos.length;
+                    });
+                    viewerPhotos.splice(viewerIndex, 1);
+                    if (viewerIndex >= viewerPhotos.length) viewerIndex = viewerPhotos.length - 1;
+                    if (viewerPhotos.length === 0) closeViewer();
+                    else updateViewerDisplay();
+                    refreshDevicePhotos();
+                    syncInfoBarPhotoCount();
+                    showToast('已从所有相框中删除照片');
+                } else if (action === 'resetPersonDemo') {
+                    const device = FRAME_DEVICES.find(d => d.id === currentDeviceId);
+                    if (device && device.hiddenPersons && device.hiddenPersons.length) {
+                        device.persons = device.persons || [];
+                        device.persons.push(...device.hiddenPersons);
+                        device.hiddenPersons = [];
+                        renderDevicePersons(device);
+                        showToast('已重置人物相册');
+                    }
+                }
+            }, 200);
+        }
+
+        function syncInfoBarPhotoCount() {
+            const device = FRAME_DEVICES.find(d => d.id === currentDeviceId);
+            if (!device) return;
+            const el = document.querySelector('#deviceInfoBar .device-photo-count');
+            if (el) el.textContent = device.photoCount + ' 张照片';
+        }
+
+        function openDeviceMenu() {
+            const device = FRAME_DEVICES.find(d => d.id === currentDeviceId);
+            if (!device) return;
+            document.getElementById('deviceMenuTitle').textContent = device.name;
+            const mask = document.getElementById('deviceMenuMask');
+            const sheet = document.getElementById('deviceMenuSheet');
+            mask.classList.remove('hidden');
+            requestAnimationFrame(() => { sheet.style.transform = 'translateY(0)'; });
+        }
+
+        function closeDeviceMenu() {
+            const sheet = document.getElementById('deviceMenuSheet');
+            sheet.style.transform = 'translateY(100%)';
+            setTimeout(() => { document.getElementById('deviceMenuMask').classList.add('hidden'); }, 300);
+        }
+
+        const LOCATION_OPTIONS = ['客厅', '书房', '主卧', '次卧', '奶奶家', '姥姥家', '办公室', '其他'];
+
+        function startRenameDevice() {
+            closeDeviceMenu();
+            const device = FRAME_DEVICES.find(d => d.id === currentDeviceId);
+            if (!device) return;
+            setTimeout(() => {
+                document.getElementById('renameInput').value = device.name;
+                document.getElementById('renameTitle').textContent = '重命名相框';
+                currentRenameType = 'device';
+                document.getElementById('renameMask').classList.remove('hidden');
+            }, 320);
+        }
+
+        function openLocationPicker() {
+            closeDeviceMenu();
+            const device = FRAME_DEVICES.find(d => d.id === currentDeviceId);
+            if (!device) return;
+            setTimeout(() => {
+                const list = document.getElementById('locationList');
+                list.innerHTML = LOCATION_OPTIONS.map(loc => `
+                    <button type="button" onclick="selectLocation('${loc}')" class="w-full py-3.5 text-center text-sm font-medium ${device.location === loc ? 'text-blue-600 bg-blue-50' : 'text-gray-700'} active:bg-gray-50 border-b border-gray-100 last:border-0 flex items-center justify-center gap-2">
+                        ${loc}
+                        ${device.location === loc ? '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>' : ''}
+                    </button>
+                `).join('');
+                document.getElementById('locationPickerMask').classList.remove('hidden');
+                requestAnimationFrame(() => {
+                    document.getElementById('locationPickerSheet').style.transform = 'translateY(0)';
+                });
+            }, 320);
+        }
+
+        function closeLocationPicker() {
+            const sheet = document.getElementById('locationPickerSheet');
+            sheet.style.transform = 'translateY(100%)';
+            setTimeout(() => { document.getElementById('locationPickerMask').classList.add('hidden'); }, 300);
+        }
+
+        function selectLocation(loc) {
+            const device = FRAME_DEVICES.find(d => d.id === currentDeviceId);
+            if (!device) return;
+            device.location = loc;
+            const hasPhotos = device.photos && device.photos.length > 0;
+            const memberCount = (device.members || []).length;
+            document.getElementById('deviceInfoBar').innerHTML = `
+                <span class="flex items-center gap-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                    ${device.location}
+                </span>
+                ${hasPhotos ? `<span>·</span><span class="device-photo-count">${device.photoCount} 张照片</span>` : ''}
+                <span>·</span>
+                <span class="flex items-center gap-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    ${memberCount} 位成员
+                </span>`;
+            closeLocationPicker();
+            showToast(`位置已修改为「${loc}」`);
+        }
+
+        function confirmResetPersonSuggestions() {
+            closeDeviceMenu();
+            setTimeout(() => {
+                const device = FRAME_DEVICES.find(d => d.id === currentDeviceId);
+                const hidden = (device && device.hiddenPersons) ? device.hiddenPersons.length : 0;
+                if (!hidden) {
+                    showToast('没有可重置的内容');
+                    return;
+                }
+                showDeleteDialog('重置人物相册', '重置后，所有已隐藏的人物将重新显示。此操作无法撤销。', [{ label: '重置', action: 'resetPersonDemo', bold: true }]);
+            }, 320);
+        }
+
+        function showUnbindDialog() {
+            const device = FRAME_DEVICES.find(d => d.id === currentDeviceId);
+            if (!device) return;
+            document.getElementById('unbindTitle').textContent = `解绑「${device.name}」`;
+            document.getElementById('unbindMask').classList.remove('hidden');
+            requestAnimationFrame(() => {
+                document.getElementById('unbindSheet').style.transform = 'translateY(0)';
+            });
+        }
+
+        function closeUnbindDialog() {
+            const sheet = document.getElementById('unbindSheet');
+            sheet.style.transform = 'translateY(100%)';
+            setTimeout(() => { document.getElementById('unbindMask').classList.add('hidden'); }, 300);
+        }
+
+        function confirmUnbindDemo() {
+            closeUnbindDialog();
+            showToast('演示环境：未真正解绑设备');
+        }
+
+        function closeRenameDialog() {
+            document.getElementById('renameMask').classList.add('hidden');
+        }
+
+        function confirmRename() {
+            const newValue = document.getElementById('renameInput').value.trim();
+            if (!newValue) return;
+            if (currentRenameType === 'device') {
+                const device = FRAME_DEVICES.find(d => d.id === currentDeviceId);
+                if (device) {
+                    const oldName = device.name;
+                    device.name = newValue;
+                    document.getElementById('deviceModalTitle').textContent = newValue;
+                    closeRenameDialog();
+                    showToast(`已将「${oldName}」改名为「${newValue}」`);
+                }
+            }
+        }
+
+        function openFrameMemberInvite() {
+            const mask = document.getElementById('memberInviteMask');
+            const sheet = document.getElementById('memberInviteSheet');
+            mask.classList.remove('hidden');
+            setTimeout(() => { sheet.style.transform = 'translateY(0)'; }, 10);
+        }
+
+        function closeFrameMemberInvite() {
+            const mask = document.getElementById('memberInviteMask');
+            const sheet = document.getElementById('memberInviteSheet');
+            sheet.style.transform = 'translateY(100%)';
+            setTimeout(() => { mask.classList.add('hidden'); }, 280);
+        }
+
+        function copyMemberInviteLink() {
+            closeFrameMemberInvite();
+            showToast('邀请链接已复制到剪贴板');
+        }
+
+        function getViewerPhotoList() {
+            const device = FRAME_DEVICES.find(d => d.id === currentDeviceId);
+            return device ? device.photos : [];
+        }
+
+        function openViewer(id) {
+            viewerPhotos = getViewerPhotoList();
+            const idStr = String(id);
+            viewerIndex = viewerPhotos.findIndex(p => String(p.id) === idStr);
+            if (viewerIndex < 0) viewerIndex = 0;
+            const viewer = document.getElementById('imageViewer');
+            viewer.style.display = 'flex';
+            updateViewerDisplay();
+            const wrap = document.getElementById('viewerImgWrap');
+            wrap.ontouchstart = e => { viewerTouchStartX = e.touches[0].clientX; };
+            wrap.ontouchend = e => {
+                const dx = e.changedTouches[0].clientX - viewerTouchStartX;
+                if (Math.abs(dx) > 50) {
+                    if (dx < 0) viewerNext(); else viewerPrev();
+                }
+            };
+        }
+
+        function updateViewerDisplay() {
+            if (viewerPhotos.length === 0) { closeViewer(); return; }
+            const photo = viewerPhotos[viewerIndex];
+            document.getElementById('viewerImg').src = photo.url.replace(/\/\d+\/\d+$/, '/800/800');
+            document.getElementById('viewerCounter').textContent = `${viewerIndex + 1} / ${viewerPhotos.length}`;
+            document.getElementById('viewerPrevBtn').style.visibility = viewerIndex > 0 ? 'visible' : 'hidden';
+            document.getElementById('viewerNextBtn').style.visibility = viewerIndex < viewerPhotos.length - 1 ? 'visible' : 'hidden';
+        }
+
+        function closeViewer() {
+            document.getElementById('imageViewer').style.display = 'none';
+            viewerPhotos = [];
+        }
+
+        function viewerPrev() {
+            if (viewerIndex > 0) { viewerIndex--; updateViewerDisplay(); }
+        }
+
+        function viewerNext() {
+            if (viewerIndex < viewerPhotos.length - 1) { viewerIndex++; updateViewerDisplay(); }
+        }
+
+        function viewerSend() {
+            if (viewerPhotos.length === 0) return;
+            const photo = viewerPhotos[viewerIndex];
+            pendingSendCount = 1;
+            deviceSelectedIds = [photo.id];
+            devicePendingSendIds = [photo.id];
+            openDeviceFramePicker();
+        }
+
+        function viewerDelete() {
+            if (viewerPhotos.length === 0) return;
+            showDeleteDialog('删除相框照片', '确定要删除这张照片吗？', [
+                { label: '仅从当前相框删除', action: 'viewerDeleteDeviceCurrent', bold: false },
+                { label: '从所有相框中删除', action: 'viewerDeleteDeviceAll', bold: true }
+            ]);
+        }
+
+        (function init() {
+            const params = new URLSearchParams(location.search);
+            const id = params.get('device') || 'frame-demo-b';
+            openDeviceDetail(id);
+        })();
+    </script>
+</body>
+</html>
