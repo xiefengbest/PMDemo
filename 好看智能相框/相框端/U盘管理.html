@@ -1,0 +1,1523 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>U盘管理</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1a1a1a;
+            color: #111;
+            overflow: hidden;
+            height: 100vh;
+        }
+        .screen { width: 100%; height: 100%; position: relative; background: radial-gradient(circle, #333 0%, #000 100%); }
+        .photo-slide { width: 100%; height: 100%; object-fit: cover; transition: opacity 1s ease-in-out; }
+        .modal-overlay { background: rgba(0,0,0,0.6); backdrop-filter: blur(12px); }
+        .progress-bar-fill { transition: width 0.5s linear; }
+        .sidebar-item-active { background-color: #eff6ff; color: #2563eb; font-weight: 600; }
+
+        @keyframes slideInUp {
+            from { transform: translate(-50%, 50px); opacity: 0; }
+            to { transform: translate(-50%, 0); opacity: 1; }
+        }
+        .guide-animation { animation: slideInUp 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+
+        @keyframes scanning-dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+        .scanning-text::after { content: ''; animation: scanning-dots 1.5s infinite; }
+
+        /* ===== Photo Grid Styles ===== */
+        .photo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+            gap: 12px;
+        }
+        .photo-item {
+            position: relative;
+            border-radius: 16px;
+            overflow: hidden;
+            aspect-ratio: 1;
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .photo-item:active { transform: scale(0.97); }
+        .photo-item img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .photo-item .select-check {
+            position: absolute; top: 10px; left: 10px;
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            border: 3px solid rgba(255,255,255,0.9);
+            background: rgba(0,0,0,0.25);
+            display: none;
+            align-items: center; justify-content: center;
+            z-index: 3;
+            transition: all 0.15s;
+            backdrop-filter: blur(4px);
+        }
+        .select-mode .photo-item .select-check { display: flex; }
+        .photo-item.selected .select-check {
+            background: #2563eb;
+            border-color: #2563eb;
+            box-shadow: 0 2px 8px rgba(37,99,235,0.4);
+        }
+        .group-tab {
+            padding: 10px 24px;
+            border-radius: 24px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            outline: none;
+        }
+        .group-tab.active { background: #2563eb; color: white; box-shadow: 0 2px 8px rgba(37,99,235,0.3); }
+        .group-tab:not(.active) { background: #f3f4f6; color: #6b7280; }
+        .group-tab:not(.active):hover { background: #e5e7eb; }
+
+        .filter-tab, .sort-tab {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .filter-tab.active { background: #dbeafe; color: #2563eb; }
+        .filter-tab:not(.active) { background: #f9fafb; color: #9ca3af; }
+        .filter-tab:not(.active):hover { background: #f3f4f6; color: #6b7280; }
+        .sort-tab.active { background: #fef3c7; color: #d97706; }
+        .sort-tab:not(.active) { background: #f9fafb; color: #9ca3af; }
+        .sort-tab:not(.active):hover { background: #f3f4f6; color: #6b7280; }
+
+        .select-bottom-bar {
+            position: fixed;
+            bottom: 0; left: 20rem; right: 0;
+            background: white;
+            border-top: 1px solid #e5e7eb;
+            padding: 20px 48px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 65;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.06);
+        }
+    </style>
+</head>
+<body>
+
+<div id="app" class="screen text-white">
+    <!-- 背景照片展示 -->
+    <div id="main-gallery" class="w-full h-full">
+        <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80" class="photo-slide" id="current-photo">
+
+        <!-- 后台同步状态 -->
+        <div id="status-dot" class="hidden absolute top-8 right-8 flex items-center bg-black/40 backdrop-blur-md px-4 py-2 rounded-full border border-white/10">
+            <span class="flex h-2 w-2 mr-3">
+                <span class="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-blue-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+            </span>
+            <span class="text-xs font-medium tracking-widest text-blue-100">后台同步中...</span>
+        </div>
+
+        <!-- 同步完成常驻通知 -->
+        <div id="sync-done-notice" class="hidden absolute top-8 right-8 flex items-center bg-black/40 backdrop-blur-md pl-5 pr-3 py-3 rounded-full border border-white/10 z-10 cursor-pointer" onclick="dismissSyncNotice()">
+            <span id="notice-dot" class="flex h-2 w-2 mr-3">
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-green-400"></span>
+            </span>
+            <span id="sync-done-text" class="text-xs font-medium tracking-widest text-green-100 mr-3">同步完成 · <span id="sync-done-count">0</span> 张照片已备份</span>
+            <button class="text-white/50 hover:text-white transition p-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+
+        <!-- U盘引导气泡 -->
+        <div id="usb-guide" class="hidden absolute bottom-32 left-1/2 -translate-x-1/2 z-30 guide-animation">
+            <div class="bg-blue-600 pl-4 pr-2 py-2 rounded-[2rem] shadow-[0_25px_50px_-12px_rgba(37,99,235,0.5)] flex items-center border border-white/20">
+                <div class="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center mr-4">
+                    <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 12V4a2 2 0 00-2-2H8a2 2 0 00-2 2v8" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M6 12h12v7a3 3 0 01-3 3H9a3 3 0 01-3-3v-7z" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div class="pr-6">
+                    <p class="font-bold text-white text-lg leading-tight">发现 U 盘</p>
+                    <p class="text-blue-100 text-xs opacity-80"></p>
+                </div>
+                <button onclick="enterBackupFromGuide()" class="bg-white text-blue-600 px-8 py-3 rounded-[1.5rem] font-black hover:bg-blue-50 transition active:scale-95 shadow-sm">去管理</button>
+            </div>
+        </div>
+
+        <!-- 设置入口按钮 -->
+        <div class="absolute bottom-8 right-8 z-30">
+            <button id="settings-entry-btn" onclick="openSettingsFromEntry()" class="relative bg-black/30 backdrop-blur-md p-5 rounded-full border border-white/10 text-white/60 hover:text-white hover:bg-black/50 transition active:scale-95">
+                <svg class="w-9 h-9" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                <span id="settings-red-dot" class="hidden absolute -top-0.5 -right-0.5 w-5 h-5 bg-red-500 rounded-full border-2 border-black/40 animate-pulse"></span>
+            </button>
+        </div>
+
+        <!-- 模拟操作台 -->
+        <div class="absolute bottom-10 left-0 right-0 flex justify-center space-x-6 z-20">
+            <button id="usb-mock-btn" onclick="simulateUSBInsert()" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-2xl font-bold shadow-2xl transition-all active:scale-95">模拟插入U盘</button>
+            <button id="usb-empty-btn" onclick="simulateUSBEmpty()" class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-4 rounded-2xl font-bold shadow-2xl transition-all active:scale-95 text-sm">模拟插入空U盘</button>
+            <button onclick="toggleSettings(true)" class="bg-white/10 hover:bg-white/20 text-white backdrop-blur-md px-8 py-4 rounded-2xl font-bold shadow-2xl transition-all">打开设置</button>
+            <button onclick="simulateReset()" class="bg-red-600/20 hover:bg-red-600/40 text-red-200 border border-red-500/30 px-6 py-4 rounded-2xl font-bold transition-all text-xs">模拟重置</button>
+            <button onclick="toggleBoundUsers()" class="bg-purple-600/20 hover:bg-purple-600/40 text-purple-200 border border-purple-500/30 px-6 py-4 rounded-2xl font-bold transition-all text-xs">切换绑定状态</button>
+        </div>
+    </div>
+
+    <!-- 选择用户弹窗 -->
+    <div id="user-picker-modal" class="hidden fixed inset-0 modal-overlay flex items-center justify-center z-[100] p-6 text-gray-900">
+        <div class="bg-white rounded-[2.5rem] max-w-md w-full overflow-hidden shadow-2xl border border-gray-100 relative">
+            <button onclick="closeUserPicker()" class="absolute top-6 right-6 text-gray-300 hover:text-gray-500 transition">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <div class="p-10 pb-5">
+                <h2 id="picker-modal-title" class="text-2xl font-black text-gray-900 mb-2">选择关联账号</h2>
+                <p id="picker-modal-desc" class="text-gray-400 text-sm">将 <span id="sync-photo-count" class="font-bold text-blue-600">0</span> 张照片同步到选中账号的相框</p>
+            </div>
+            <div class="px-8 pb-4 space-y-3" id="user-list"></div>
+            <div class="px-10 pb-10">
+                <button onclick="closeUserPicker()" class="w-full py-4 rounded-2xl bg-gray-100 text-gray-600 font-bold hover:bg-gray-200 transition">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 照片全屏查看弹窗 -->
+    <div id="photo-viewer-modal" class="hidden fixed inset-0 bg-black/95 z-[100] flex flex-col">
+        <!-- 顶部工具栏 -->
+        <div class="flex items-center justify-between px-8 py-5 bg-gradient-to-b from-black/60 to-transparent absolute top-0 left-0 right-0 z-10">
+            <div class="flex items-center space-x-3">
+                <span id="viewer-filename" class="text-white/80 text-base font-medium">IMG_20241225_001.jpg</span>
+                <span id="viewer-sync-status" class="text-sm px-3 py-1.5 rounded-full bg-blue-500 text-white font-bold">已同步</span>
+            </div>
+            <button onclick="closePhotoViewer()" class="text-white/70 hover:text-white transition p-3 active:bg-white/10 rounded-full">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+
+        <!-- 照片区域 -->
+        <div class="flex-1 flex items-center justify-center relative">
+            <button onclick="viewPrevPhoto()" id="viewer-prev-btn" class="absolute left-4 text-white/50 hover:text-white transition p-4 rounded-full hover:bg-white/10 active:bg-white/20">
+                <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+            </button>
+            <img id="viewer-photo" src="" class="max-w-full max-h-full object-contain" alt="">
+            <button onclick="viewNextPhoto()" id="viewer-next-btn" class="absolute right-4 text-white/50 hover:text-white transition p-4 rounded-full hover:bg-white/10 active:bg-white/20">
+                <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+            </button>
+        </div>
+
+        <!-- 底部操作栏 -->
+        <div class="flex items-center justify-center space-x-5 px-6 py-6 bg-gradient-to-t from-black/60 to-transparent absolute bottom-0 left-0 right-0">
+            <button onclick="syncCurrentPhoto()" id="viewer-sync-btn" class="flex items-center space-x-2 bg-blue-500 hover:bg-blue-600 text-white px-8 py-4 rounded-2xl font-bold text-base transition active:scale-95">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"></path></svg>
+                <span>同步到相框</span>
+            </button>
+            <button onclick="deleteCurrentPhoto()" class="flex items-center space-x-2 bg-red-500 hover:bg-red-600 text-white px-8 py-4 rounded-2xl font-bold text-base transition active:scale-95">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                <span>删除</span>
+            </button>
+        </div>
+
+        <!-- 照片计数 -->
+        <div class="absolute bottom-28 left-1/2 -translate-x-1/2 text-white/50 text-base">
+            <span id="viewer-index">1</span> / <span id="viewer-total">100</span>
+        </div>
+    </div>
+
+    <!-- 绑定账号弹窗 -->
+    <div id="bind-account-modal" class="hidden fixed inset-0 modal-overlay flex items-center justify-center z-[100] p-6 text-gray-900">
+        <div class="bg-white rounded-[2.5rem] max-w-3xl w-full overflow-hidden shadow-2xl border border-gray-100 relative">
+            <button onclick="closeBindModal()" class="absolute top-6 right-6 text-gray-300 hover:text-gray-500 transition z-10">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <div class="p-10 pb-6 text-center border-b border-gray-100">
+                <h2 class="text-2xl font-black text-gray-900 mb-2">绑定家庭成员账号</h2>
+                <p class="text-gray-400 text-sm">使用手机扫码完成绑定，即可同步照片到相框</p>
+            </div>
+            <div class="flex">
+                <!-- 左侧：下载 APP -->
+                <div class="flex-1 p-10 text-center border-r border-gray-100">
+                    <div class="inline-flex items-center justify-center w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl mb-4">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">第一步：下载 APP</h3>
+                    <p class="text-gray-400 text-xs mb-6">扫码下载「好看相框」APP</p>
+                    <div class="w-40 h-40 bg-gray-100 rounded-2xl mx-auto flex items-center justify-center mb-4 p-3">
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://app.haokan.com/download" class="w-full h-full" alt="下载APP二维码">
+                    </div>
+                    <p class="text-gray-400 text-xs">iOS / Android 通用</p>
+                </div>
+                <!-- 右侧：扫码绑定 -->
+                <div class="flex-1 p-10 text-center">
+                    <div class="inline-flex items-center justify-center w-12 h-12 bg-green-100 text-green-600 rounded-2xl mb-4">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">第二步：扫码绑定</h3>
+                    <p class="text-gray-400 text-xs mb-6">打开 APP 扫码绑定此相框</p>
+                    <div class="w-40 h-40 bg-gray-100 rounded-2xl mx-auto flex items-center justify-center mb-4 p-3">
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=haokan://bind?device=FRAME_20240101_001" class="w-full h-full" alt="绑定设备二维码">
+                    </div>
+                    <p class="text-gray-400 text-xs">设备码：FRAME_001</p>
+                </div>
+            </div>
+            <div class="px-10 py-6 bg-gray-50 flex items-center justify-between">
+                <p class="text-gray-400 text-xs">绑定成功后，请刷新页面查看已绑定的账号</p>
+                <button onclick="simulateBindSuccess()" class="bg-green-500 hover:bg-green-600 text-white px-6 py-2.5 rounded-xl font-bold text-sm transition">模拟绑定成功</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 删除确认弹窗 -->
+    <div id="delete-confirm-modal" class="hidden fixed inset-0 modal-overlay flex items-center justify-center z-[100] p-6 text-gray-900">
+        <div class="bg-white rounded-[2.5rem] max-w-sm w-full overflow-hidden shadow-2xl border border-gray-100 p-10 text-center">
+            <div class="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+            </div>
+            <h3 class="text-xl font-black text-gray-900 mb-2">确认删除</h3>
+            <p class="text-gray-500 text-sm mb-6">确定要删除选中的 <span id="delete-count-text" class="text-gray-900 font-bold">0</span> 张照片吗？</p>
+            <label class="flex items-center justify-center space-x-3 mb-8 cursor-pointer select-none">
+                <input type="checkbox" id="delete-original-check" class="w-5 h-5 rounded border-gray-300 text-red-500 focus:ring-red-400 accent-red-500">
+                <span class="text-sm text-gray-600">同时删除 U 盘中的原始照片</span>
+            </label>
+            <div class="flex space-x-4">
+                <button onclick="closeModal('delete-confirm-modal')" class="flex-1 py-4 rounded-2xl bg-gray-100 text-gray-600 font-bold hover:bg-gray-200 transition">取消</button>
+                <button onclick="confirmDelete()" class="flex-1 py-4 rounded-2xl bg-red-500 text-white font-bold hover:bg-red-600 transition">确认删除</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 设置页面 -->
+    <div id="settings-page" class="hidden fixed inset-0 bg-gray-50 z-[60] flex text-gray-900">
+        <!-- 左侧导航栏 -->
+        <div class="w-80 bg-white border-r border-gray-100 flex flex-col pt-12 shadow-sm flex-shrink-0">
+            <div class="px-8 mb-10 flex items-center">
+                <button onclick="toggleSettings(false)" class="p-2 hover:bg-gray-100 rounded-full transition mr-2 text-gray-400">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
+                </button>
+                <h1 class="text-2xl font-black text-gray-900">设置</h1>
+            </div>
+            <nav class="flex-1 px-4 space-y-2">
+                <div id="nav-usb" onclick="switchTab('usb')" class="hidden p-5 rounded-2xl text-gray-500 hover:bg-gray-50 cursor-pointer transition flex items-center text-base">
+                    <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"></path></svg>
+                    U 盘照片管理
+                </div>
+                <div id="nav-other" onclick="switchTab('other')" class="p-5 rounded-2xl sidebar-item-active cursor-pointer transition flex items-center text-base">
+                    <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    其他设置
+                </div>
+            </nav>
+        </div>
+
+        <!-- 右侧内容区 -->
+        <div class="flex-1 overflow-y-auto" id="settings-content">
+            <!-- U盘管理标签页 -->
+            <div id="tab-usb-content" class="hidden p-12">
+                <div class="max-w-5xl mx-auto">
+                    <!-- 标题行（含内联用户选择器） -->
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-3xl font-black text-gray-900">U 盘照片管理</h2>
+                        <button onclick="openAccountPicker()" id="inline-user-display" class="flex items-center space-x-2 bg-gray-50 border border-gray-200 rounded-2xl px-6 py-3 hover:bg-blue-50 hover:border-blue-200 transition cursor-pointer active:scale-95">
+                            <span class="text-base text-gray-400">关联账号：</span>
+                            <img id="picker-avatar" src="" class="w-7 h-7 rounded-full object-cover hidden" alt="">
+                            <span id="picker-user-name" class="text-base font-bold text-blue-600">请选择</span>
+                            <svg class="w-5 h-5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                    </div>
+
+                    <!-- 扫描中 UI -->
+                    <div id="backup-ui-scanning" class="hidden bg-white border border-gray-100 rounded-[2.5rem] overflow-hidden shadow-xl shadow-gray-200/50 p-8">
+                        <div class="flex items-center space-x-4 mb-6">
+                            <div class="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center flex-shrink-0">
+                                <svg class="w-7 h-7 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M18 12V4a2 2 0 00-2-2H8a2 2 0 00-2 2v8" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M6 12h12v7a3 3 0 01-3 3H9a3 3 0 01-3-3v-7z" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold text-gray-900">正在扫描 U 盘照片</h3>
+                                <p class="text-gray-400 text-sm mt-1">请稍候，正在读取照片文件...</p>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 rounded-2xl p-5">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-sm text-gray-500">扫描进度</span>
+                                <span id="scan-percent" class="text-sm font-bold text-blue-600">0%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
+                                <div id="scan-progress-fill" class="h-full bg-blue-500 rounded-full transition-all duration-300" style="width:0%"></div>
+                            </div>
+                            <p id="scan-status-text" class="text-xs text-gray-400 mt-3">正在读取文件列表...</p>
+                        </div>
+                    </div>
+
+                    <!-- 空U盘 UI -->
+                    <div id="backup-ui-empty" class="hidden bg-white border border-gray-100 rounded-[2.5rem] overflow-hidden shadow-xl shadow-gray-200/50 py-20 px-10">
+                        <div class="text-center max-w-md mx-auto">
+                            <div id="empty-icon" class="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6"></div>
+                            <h3 id="empty-title" class="text-xl font-bold text-gray-900 mb-2"></h3>
+                            <p id="empty-desc" class="text-gray-400 text-base mb-2"></p>
+                            <p id="supported-formats" class="text-gray-300 text-sm hidden">支持的格式：JPG、PNG、BMP</p>
+                        </div>
+                    </div>
+
+                    <!-- 照片浏览区 -->
+                    <div id="photo-browser" class="hidden">
+                        <!-- 内联同步进度条 -->
+                        <div id="sync-progress-bar" class="hidden bg-blue-50 border border-blue-200 rounded-2xl p-4 mb-4 sticky top-0 z-10 shadow-sm backdrop-blur-sm">
+                            <div class="flex items-center justify-between mb-2.5">
+                                <div class="flex items-center space-x-2">
+                                    <svg id="sync-spinner" class="animate-spin w-4 h-4 text-blue-500 flex-shrink-0" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                    <span class="text-sm font-bold text-blue-700">正在同步至 <span id="inline-target">爸爸</span> · <span id="inline-current">0</span>/<span id="inline-total">0</span> 张</span>
+                                </div>
+                                <div class="flex items-center space-x-3">
+                                    <span id="inline-percent" class="text-lg font-black text-blue-600">0%</span>
+                                    <button onclick="togglePause()" id="inline-pause-btn" class="px-4 py-1.5 rounded-lg text-xs font-bold bg-white border border-blue-200 text-blue-600 hover:bg-blue-100 transition">暂停</button>
+                                    <button onclick="cancelTask()" class="px-4 py-1.5 rounded-lg text-xs font-bold bg-white border border-gray-200 text-gray-500 hover:bg-gray-100 transition">取消</button>
+                                </div>
+                            </div>
+                            <div class="w-full bg-blue-100 h-2 rounded-full overflow-hidden">
+                                <div id="inline-progress-fill" class="h-full bg-blue-500 rounded-full transition-all duration-200" style="width:0%"></div>
+                            </div>
+                            <div id="sync-bg-hint" class="flex items-center space-x-2 mt-3 pt-3 border-t border-blue-100 text-blue-500">
+                                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <span class="text-sm">同步将在后台继续进行，你可以返回相框正常使用</span>
+                            </div>
+                        </div>
+
+                        <!-- 同步结果提示 -->
+                        <div id="sync-complete-bar" class="hidden rounded-2xl px-5 py-3.5 mb-4">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-2">
+                                    <svg id="result-icon-success" class="w-5 h-5 text-green-500 flex-shrink-0 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                                    <svg id="result-icon-partial" class="w-5 h-5 text-orange-500 flex-shrink-0 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                    <span id="sync-result-text" class="text-sm font-bold"></span>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <button id="btn-retry-failed" onclick="retryFailed()" class="hidden px-4 py-1.5 rounded-xl text-sm font-bold bg-orange-500 text-white hover:bg-orange-600 transition active:scale-95 flex items-center space-x-1.5">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                                        <span>重试失败项</span>
+                                    </button>
+                                    <button onclick="dismissInlineComplete()" class="text-gray-400 hover:text-gray-600 transition p-1">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 工具栏 -->
+                        <div class="bg-white border border-gray-100 rounded-[2rem] shadow-sm shadow-gray-200/50 p-5 mb-6">
+                            <div class="flex items-center justify-between">
+                                <!-- 左侧：统计 -->
+                                <div id="toolbar-normal" class="flex items-center">
+                                    <span class="text-gray-500 text-base">共 <span id="total-photo-count" class="font-bold text-gray-700">0</span> 张照片</span>
+                                </div>
+                                <div id="toolbar-select" class="hidden flex items-center space-x-5">
+                                    <button onclick="toggleSelectAll()" id="btn-select-all" class="text-blue-600 font-bold text-base hover:underline">全选</button>
+                                    <span class="text-gray-500 text-base">已选择 <span id="selected-count" class="font-bold text-blue-600">0</span> 张</span>
+                                </div>
+                                <!-- 右侧：操作按钮 -->
+                                <div class="flex items-center space-x-3">
+                                    <button id="btn-sync-all" onclick="handleSyncAll()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold text-base transition shadow-sm flex items-center space-x-2 active:scale-95">
+                                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"></path></svg>
+                                        <span>全部同步到相框</span>
+                                    </button>
+                                    <button id="btn-toggle-select" onclick="toggleSelectMode()" class="px-6 py-3 rounded-xl font-bold text-base border border-gray-200 text-gray-600 hover:bg-gray-50 transition active:scale-95">多选</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 照片网格 -->
+                        <div id="photo-grid-container" class="space-y-8 pb-8"></div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- 其他设置标签页 -->
+            <div id="tab-other-content" class="p-16">
+                <div class="max-w-2xl mx-auto">
+                    <h2 class="text-4xl font-black mb-12 text-gray-900">其他设置</h2>
+                    <div class="bg-white border border-gray-100 rounded-[2.5rem] p-16 text-center text-gray-300 shadow-sm">此处为其他系统设置项</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 多选模式底栏 -->
+    <div id="select-bottom-bar" class="hidden select-bottom-bar">
+        <div class="flex items-center space-x-3">
+            <span class="text-gray-500 text-base">已选择 <span id="bar-selected-count" class="font-bold text-blue-600">0</span> 张</span>
+        </div>
+        <div class="flex items-center space-x-3">
+            <button onclick="handleSyncSelected()" id="btn-sync-selected" class="bg-blue-500 hover:bg-blue-600 text-white px-7 py-3.5 rounded-xl font-bold text-base transition disabled:opacity-30 disabled:cursor-not-allowed flex items-center space-x-2 active:scale-95" disabled>
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"></path></svg>
+                <span>同步到相框</span>
+            </button>
+            <button onclick="showDeleteConfirm()" id="btn-delete-selected" class="bg-red-500 hover:bg-red-600 text-white px-7 py-3.5 rounded-xl font-bold text-base transition disabled:opacity-30 disabled:cursor-not-allowed flex items-center space-x-2 active:scale-95" disabled>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                <span>删除选中</span>
+            </button>
+        </div>
+    </div>
+
+    <div id="toast" class="fixed top-12 left-1/2 transform -translate-x-1/2 translate-y-[-100px] bg-gray-900 text-white px-10 py-5 rounded-[1.5rem] shadow-2xl font-bold opacity-0 transition-all duration-500 z-[200]">通知内容</div>
+</div>
+
+<script>
+    // ==================== Mock 照片数据 ====================
+    function generateMockPhotos() {
+        const dates = [
+            { date: '2024-12-25', count: 12 },
+            { date: '2024-12-20', count: 8 },
+            { date: '2024-12-15', count: 6 },
+            { date: '2024-11-28', count: 10 },
+            { date: '2024-11-15', count: 8 },
+            { date: '2024-11-03', count: 5 },
+            { date: '2024-10-20', count: 7 },
+            { date: '2024-10-01', count: 9 },
+            { date: '2024-09-15', count: 6 },
+            { date: '2024-08-20', count: 11 },
+            { date: '2024-08-05', count: 8 },
+            { date: '2024-07-18', count: 7 },
+            { date: '2024-06-10', count: 9 },
+            { date: '2024-05-25', count: 6 },
+            { date: '2024-04-12', count: 8 },
+            { date: '2024-03-05', count: 7 },
+            { date: '2024-02-14', count: 10 },
+            { date: '2024-01-01', count: 12 },
+            { date: '2023-12-25', count: 8 },
+            { date: '2023-11-20', count: 6 },
+            { date: '2023-10-28', count: 9 },
+            { date: '2023-09-15', count: 7 },
+            { date: '2023-08-08', count: 5 },
+            { date: '2023-07-14', count: 8 },
+            { date: '2023-06-01', count: 6 },
+            { date: '2023-05-20', count: 7 },
+        ];
+        const photos = [];
+        let id = 1;
+        dates.forEach(d => {
+            for (let i = 0; i < d.count; i++) {
+                photos.push({
+                    id: id,
+                    url: `https://picsum.photos/seed/usb${id}/400/400`,
+                    date: d.date,
+                    filename: `IMG_${d.date.replace(/-/g, '')}_${String(i + 1).padStart(3, '0')}.jpg`
+                });
+                id++;
+            }
+        });
+        return photos;
+    }
+
+    // ==================== 已绑定用户数据 ====================
+    const allBoundUsers = [
+        { id: 1, name: '爸爸', phone: '13812348888', phoneMasked: '138****8888', avatar: 'https://i.pravatar.cc/100?img=52' },
+        { id: 2, name: '妈妈', phone: '13967896666', phoneMasked: '139****6666', avatar: 'https://i.pravatar.cc/100?img=47' },
+        { id: 3, name: '小明', phone: '13654323333', phoneMasked: '136****3333', avatar: 'https://i.pravatar.cc/100?img=33' },
+        { id: 4, name: '奶奶', phone: '15088889999', phoneMasked: '150****9999', avatar: 'https://i.pravatar.cc/100?img=26' },
+    ];
+    let boundUsers = [];
+
+    function toggleBoundUsers() {
+        if (boundUsers.length > 0) {
+            boundUsers = [];
+            state.selectedUser = null;
+            showToast('已模拟：无绑定账号');
+        } else {
+            boundUsers = [...allBoundUsers];
+            state.selectedUser = boundUsers[0];
+            showToast('已模拟：有绑定账号，已关联：' + boundUsers[0].name);
+        }
+        renderAccountBar();
+    }
+
+    // ==================== 状态管理 ====================
+    let state = {
+        isUsbInserted: false,
+        isScanning: false,
+        scanComplete: false,
+        selectedUser: null,
+        isBackingUp: false,
+        isPaused: false,
+        progress: 0,
+        pendingBackupOnSelect: false,
+        isChangingAccount: false,
+        photos: [],
+        groupBy: 'month',
+        filter: 'all',
+        sortOrder: 'desc',
+        isSelectMode: false,
+        selectedIds: new Set(),
+        syncedIds: new Set(),
+        syncingPhotoIds: [],
+        failedIds: [],
+        retryCount: 0,
+    };
+
+    const USB_GUIDE_AUTO_DISMISS_MS = 10000;
+    let backupTimer = null;
+    let scanTimer = null;
+    let usbGuideTimer = null;
+    let scanProgress = 0;
+    let lastSyncResult = null;
+
+    // ==================== 照片分组与渲染 ====================
+    function getFilteredPhotos() {
+        let photos = [...state.photos];
+        photos.sort((a, b) => {
+            if (state.sortOrder === 'desc') {
+                return b.date.localeCompare(a.date);
+            } else {
+                return a.date.localeCompare(b.date);
+            }
+        });
+        return photos;
+    }
+
+    function groupPhotos(photos, mode) {
+        const groups = {};
+        photos.forEach(p => {
+            const [y, m, d] = p.date.split('-');
+            let key;
+            if (mode === 'year') key = y;
+            else if (mode === 'month') key = `${y}-${m}`;
+            else key = p.date;
+            if (!groups[key]) groups[key] = [];
+            groups[key].push(p);
+        });
+
+        const sortMultiplier = state.sortOrder === 'desc' ? -1 : 1;
+        return Object.entries(groups)
+            .sort((a, b) => sortMultiplier * a[0].localeCompare(b[0]))
+            .map(([key, items]) => ({ key, items }));
+    }
+
+    function formatGroupLabel(key, mode) {
+        const parts = key.split('-');
+        if (mode === 'year') return `${parts[0]}年`;
+        if (mode === 'month') return `${parts[0]}年${parseInt(parts[1])}月`;
+        return `${parts[0]}年${parseInt(parts[1])}月${parseInt(parts[2])}日`;
+    }
+
+    function renderPhotoGrid() {
+        const container = document.getElementById('photo-grid-container');
+        const filteredPhotos = getFilteredPhotos();
+        const groups = groupPhotos(filteredPhotos, state.groupBy);
+        const selectClass = state.isSelectMode ? 'select-mode' : '';
+
+        let html = '';
+        groups.forEach(group => {
+            html += `<div class="bg-white border border-gray-100 rounded-[2rem] shadow-sm shadow-gray-200/50 overflow-hidden">`;
+            html += `<div class="flex items-center justify-between px-6 pt-5 pb-3">`;
+            html += `<div class="flex items-center space-x-3">`;
+            if (state.isSelectMode) {
+                const groupIds = group.items.map(p => p.id);
+                const allSelected = groupIds.every(id => state.selectedIds.has(id));
+                html += `<button onclick="toggleGroupSelect('${group.key}', ${!allSelected})" class="flex items-center space-x-2 text-sm font-bold ${allSelected ? 'text-blue-600' : 'text-gray-400'} hover:text-blue-600 transition">`;
+                html += `<span class="w-5 h-5 rounded border-2 flex items-center justify-center ${allSelected ? 'bg-blue-600 border-blue-600' : 'border-gray-300'}">`;
+                if (allSelected) html += `<svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>`;
+                html += `</span></button>`;
+            }
+            html += `<h3 class="text-lg font-bold text-gray-900">${formatGroupLabel(group.key, state.groupBy)}</h3>`;
+            html += `<span class="text-sm text-gray-400">${group.items.length} 张</span>`;
+            html += `</div>`;
+
+            if (!state.isSelectMode) {
+                const groupIsSyncing = state.isBackingUp && group.items.some(p => state.syncingPhotoIds.includes(p.id));
+                if (groupIsSyncing) {
+                    html += `<span class="inline-flex items-center space-x-1.5 bg-gray-200 text-gray-500 text-sm font-bold px-4 py-2 rounded-xl cursor-not-allowed">`;
+                    html += `<svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>`;
+                    html += `<span>同步中...</span></span>`;
+                } else {
+                    html += `<button onclick="handleSyncGroup('${group.key}')" class="inline-flex items-center space-x-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold px-4 py-2 rounded-xl transition shadow-sm active:scale-95">`;
+                    html += `<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"></path></svg>`;
+                    html += `<span>同步到相框</span></button>`;
+                }
+            }
+            html += `</div>`;
+
+            html += `<div class="photo-grid px-5 pb-5 ${selectClass}">`;
+            group.items.forEach(photo => {
+                const isSelected = state.selectedIds.has(photo.id);
+                html += `<div class="photo-item ${isSelected ? 'selected' : ''}" data-id="${photo.id}" onclick="onPhotoClick(${photo.id})">`;
+                html += `<div class="select-check">`;
+                if (isSelected) html += `<svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>`;
+                html += `</div>`;
+                html += `<img src="${photo.url}" alt="${photo.filename}" loading="lazy">`;
+                html += `</div>`;
+            });
+            html += `</div></div>`;
+        });
+
+        container.innerHTML = html;
+
+        document.getElementById('total-photo-count').textContent = state.photos.length;
+    }
+
+    function setGroupBy(mode) {
+        state.groupBy = mode;
+        document.querySelectorAll('.group-tab').forEach(tab => {
+            tab.classList.toggle('active', tab.dataset.group === mode);
+        });
+        renderPhotoGrid();
+    }
+
+    function setFilter(filter) {
+        state.filter = filter;
+        document.querySelectorAll('.filter-tab').forEach(tab => {
+            tab.classList.toggle('active', tab.dataset.filter === filter);
+        });
+        renderPhotoGrid();
+    }
+
+    function setSortOrder(order) {
+        state.sortOrder = order;
+        document.querySelectorAll('.sort-tab').forEach(tab => {
+            tab.classList.toggle('active', tab.dataset.sort === order);
+        });
+        renderPhotoGrid();
+    }
+
+    // ==================== 选择模式 ====================
+    function toggleSelectMode() {
+        state.isSelectMode = !state.isSelectMode;
+        state.selectedIds.clear();
+        updateSelectUI();
+        renderPhotoGrid();
+    }
+
+    function onPhotoClick(id) {
+        if (state.isSelectMode) {
+            if (state.selectedIds.has(id)) {
+                state.selectedIds.delete(id);
+            } else {
+                state.selectedIds.add(id);
+            }
+            renderPhotoGrid();
+            updateSelectUI();
+        } else {
+            openPhotoViewer(id);
+        }
+    }
+
+    function toggleGroupSelect(groupKey, select) {
+        const groups = groupPhotos(state.photos, state.groupBy);
+        const group = groups.find(g => g.key === groupKey);
+        if (!group) return;
+        group.items.forEach(p => {
+            if (select) state.selectedIds.add(p.id);
+            else state.selectedIds.delete(p.id);
+        });
+        renderPhotoGrid();
+        updateSelectUI();
+    }
+
+    function toggleSelectAll() {
+        const filteredPhotos = getFilteredPhotos();
+        const allSelected = state.selectedIds.size === filteredPhotos.length;
+        if (allSelected) {
+            state.selectedIds.clear();
+        } else {
+            filteredPhotos.forEach(p => state.selectedIds.add(p.id));
+        }
+        renderPhotoGrid();
+        updateSelectUI();
+    }
+
+    function updateSelectUI() {
+        const count = state.selectedIds.size;
+        document.getElementById('toolbar-normal').classList.toggle('hidden', state.isSelectMode);
+        document.getElementById('toolbar-select').classList.toggle('hidden', !state.isSelectMode);
+        document.getElementById('select-bottom-bar').classList.toggle('hidden', !state.isSelectMode);
+        document.getElementById('selected-count').textContent = count;
+        document.getElementById('bar-selected-count').textContent = count;
+        document.getElementById('btn-delete-selected').disabled = count === 0;
+        document.getElementById('btn-sync-selected').disabled = count === 0;
+
+        const toggleBtn = document.getElementById('btn-toggle-select');
+        if (state.isSelectMode) {
+            toggleBtn.textContent = '取消选择';
+            toggleBtn.className = 'px-6 py-3 rounded-xl font-bold text-base border border-red-200 text-red-500 hover:bg-red-50 transition active:scale-95';
+        } else {
+            toggleBtn.textContent = '多选';
+            toggleBtn.className = 'px-6 py-3 rounded-xl font-bold text-base border border-gray-200 text-gray-600 hover:bg-gray-50 transition active:scale-95';
+        }
+
+        const filteredPhotos = getFilteredPhotos();
+        const allSelected = state.selectedIds.size === filteredPhotos.length && filteredPhotos.length > 0;
+        document.getElementById('btn-select-all').textContent = allSelected ? '取消全选' : '全选';
+
+        document.getElementById('btn-sync-all').classList.toggle('hidden', state.isSelectMode);
+    }
+
+    // ==================== 全屏查看 ====================
+    let currentViewingId = null;
+
+    function openPhotoViewer(photoId) {
+        currentViewingId = photoId;
+        updatePhotoViewer();
+        document.getElementById('photo-viewer-modal').classList.remove('hidden');
+    }
+
+    function closePhotoViewer() {
+        document.getElementById('photo-viewer-modal').classList.add('hidden');
+        currentViewingId = null;
+    }
+
+    function updatePhotoViewer() {
+        const photo = state.photos.find(p => p.id === currentViewingId);
+        if (!photo) return;
+
+        const photoIndex = state.photos.findIndex(p => p.id === currentViewingId);
+
+        document.getElementById('viewer-photo').src = photo.url.replace('/400/400', '/800/800');
+        document.getElementById('viewer-filename').textContent = photo.filename;
+        document.getElementById('viewer-index').textContent = photoIndex + 1;
+        document.getElementById('viewer-total').textContent = state.photos.length;
+
+        document.getElementById('viewer-sync-status').textContent = '未同步';
+        document.getElementById('viewer-sync-status').className = 'text-xs px-2 py-1 rounded-full bg-gray-500 text-white';
+
+        document.getElementById('viewer-prev-btn').classList.toggle('invisible', photoIndex === 0);
+        document.getElementById('viewer-next-btn').classList.toggle('invisible', photoIndex === state.photos.length - 1);
+    }
+
+    function viewPrevPhoto() {
+        const photoIndex = state.photos.findIndex(p => p.id === currentViewingId);
+        if (photoIndex > 0) {
+            currentViewingId = state.photos[photoIndex - 1].id;
+            updatePhotoViewer();
+        }
+    }
+
+    function viewNextPhoto() {
+        const photoIndex = state.photos.findIndex(p => p.id === currentViewingId);
+        if (photoIndex < state.photos.length - 1) {
+            currentViewingId = state.photos[photoIndex + 1].id;
+            updatePhotoViewer();
+        }
+    }
+
+    function syncCurrentPhoto() {
+        if (!currentViewingId) return;
+        closePhotoViewer();
+        startSyncFlow([currentViewingId]);
+    }
+
+    function deleteCurrentPhoto() {
+        if (!currentViewingId) return;
+        state.selectedIds.clear();
+        state.selectedIds.add(currentViewingId);
+        document.getElementById('delete-count-text').textContent = 1;
+        document.getElementById('delete-original-check').checked = false;
+        document.getElementById('delete-confirm-modal').classList.remove('hidden');
+    }
+
+    // ==================== 删除功能 ====================
+    function showDeleteConfirm() {
+        if (state.selectedIds.size === 0) return;
+        document.getElementById('delete-count-text').textContent = state.selectedIds.size;
+        document.getElementById('delete-original-check').checked = document.getElementById('bar-delete-original').checked;
+        document.getElementById('delete-confirm-modal').classList.remove('hidden');
+    }
+
+    function confirmDelete() {
+        const deleteOriginal = document.getElementById('delete-original-check').checked;
+        const count = state.selectedIds.size;
+        const wasViewingPhoto = currentViewingId && state.selectedIds.has(currentViewingId);
+
+        state.photos = state.photos.filter(p => !state.selectedIds.has(p.id));
+        state.selectedIds.clear();
+
+        closeModal('delete-confirm-modal');
+
+        if (wasViewingPhoto) {
+            if (state.photos.length > 0) {
+                currentViewingId = state.photos[0].id;
+                updatePhotoViewer();
+            } else {
+                closePhotoViewer();
+            }
+        }
+
+        renderPhotoGrid();
+        updateSelectUI();
+
+        if (deleteOriginal) {
+            showToast(`已删除 ${count} 张照片（含 U 盘原始文件）`);
+        } else {
+            showToast(`已删除 ${count} 张照片（U 盘原始文件已保留）`);
+        }
+
+        if (state.photos.length === 0) {
+            state.isSelectMode = false;
+            updateSelectUI();
+            document.getElementById('photo-browser').classList.add('hidden');
+            document.getElementById('backup-ui-empty').classList.remove('hidden');
+        }
+    }
+
+    // ==================== 同步功能 ====================
+    function handleSyncAll() {
+        if (state.photos.length === 0) {
+            showToast('暂无照片可同步');
+            return;
+        }
+        startSyncFlow(state.photos.map(p => p.id));
+    }
+
+    function handleSyncSelected() {
+        if (state.selectedIds.size === 0) return;
+        const ids = Array.from(state.selectedIds);
+        state.isSelectMode = false;
+        state.selectedIds.clear();
+        updateSelectUI();
+        startSyncFlow(ids);
+    }
+
+    function handleSyncGroup(groupKey) {
+        const groups = groupPhotos(state.photos, state.groupBy);
+        const group = groups.find(g => g.key === groupKey);
+        if (!group) return;
+        startSyncFlow(group.items.map(p => p.id));
+    }
+
+    function startSyncFlow(photoIds) {
+        state.retryCount = 0;
+        state.failedIds = [];
+        // 如果已有关联账号，直接开始同步
+        if (state.selectedUser) {
+            startBackupProcess(photoIds);
+            return;
+        }
+        // 否则弹出账号选择
+        state.syncingPhotoIds = photoIds;
+        state.pendingBackupOnSelect = true;
+        openUserPicker(true);
+    }
+
+    function startBackupProcess(photoIds) {
+        if (!state.selectedUser) return;
+        state.isBackingUp = true;
+        state.isPaused = false;
+        state.progress = 0;
+        state.syncingPhotoIds = photoIds;
+
+        if (state.isSelectMode) {
+            state.isSelectMode = false;
+            updateSelectUI();
+        }
+
+        document.getElementById('sync-progress-bar').classList.remove('hidden');
+        document.getElementById('sync-complete-bar').classList.add('hidden');
+        document.getElementById('status-dot').classList.remove('hidden');
+        document.getElementById('inline-target').textContent = state.selectedUser.name;
+        document.getElementById('inline-total').textContent = photoIds.length;
+        document.getElementById('inline-current').textContent = '0';
+        document.getElementById('inline-progress-fill').style.width = '0%';
+        document.getElementById('inline-percent').textContent = '0%';
+        document.getElementById('inline-pause-btn').textContent = '暂停';
+
+        updateSyncLockUI(true);
+        renderAccountBar();
+        renderPhotoGrid();
+        runProgress();
+    }
+
+    function runProgress() {
+        if (backupTimer) clearInterval(backupTimer);
+        const total = state.syncingPhotoIds.length;
+        let lastSyncedIndex = 0;
+        const increment = Math.max(0.2, 100 / (total * 3));
+
+        backupTimer = setInterval(() => {
+            if (state.isPaused) return;
+            const jitter = increment * (0.5 + Math.random());
+            state.progress += jitter;
+            if (state.progress > 100) state.progress = 100;
+
+            document.getElementById('inline-progress-fill').style.width = state.progress + '%';
+            document.getElementById('inline-percent').textContent = Math.floor(state.progress) + '%';
+            const currentCount = Math.floor((state.progress / 100) * total);
+            document.getElementById('inline-current').textContent = currentCount;
+
+            for (let i = lastSyncedIndex; i < currentCount && i < total; i++) {
+                const photoId = state.syncingPhotoIds[i];
+                const el = document.querySelector(`.photo-item[data-id="${photoId}"]`);
+                if (el) el.style.opacity = '0.5';
+            }
+            lastSyncedIndex = currentCount;
+
+            if (state.progress >= 100) {
+                clearInterval(backupTimer);
+                state.isBackingUp = false;
+
+                const isRetry = state.retryCount > 0;
+                const failRate = isRetry ? 0 : 0.2;
+                state.failedIds = [];
+                const successIds = [];
+                state.syncingPhotoIds.forEach(id => {
+                    if (Math.random() < failRate) {
+                        state.failedIds.push(id);
+                    } else {
+                        successIds.push(id);
+                    }
+                });
+
+                const successCount = successIds.length;
+                const failCount = state.failedIds.length;
+                const hasFail = failCount > 0;
+
+                // 从列表中移除已同步成功的照片
+                state.photos = state.photos.filter(p => !successIds.includes(p.id));
+
+                document.getElementById('status-dot').classList.add('hidden');
+                document.getElementById('sync-progress-bar').classList.add('hidden');
+
+                showSyncResult(successCount, failCount);
+
+                const noticeEl = document.getElementById('sync-done-notice');
+                const noticeDot = document.getElementById('notice-dot');
+                const doneText = document.getElementById('sync-done-text');
+                if (hasFail) {
+                    noticeDot.innerHTML = `<span class="relative inline-flex rounded-full h-2 w-2 bg-orange-400"></span>`;
+                    doneText.className = 'text-xs font-medium tracking-widest text-orange-100 mr-3';
+                    doneText.innerHTML = `同步部分完成 · 成功 ${successCount} 张，失败 ${failCount} 张`;
+                } else {
+                    noticeDot.innerHTML = `<span class="relative inline-flex rounded-full h-2 w-2 bg-green-400"></span>`;
+                    doneText.className = 'text-xs font-medium tracking-widest text-green-100 mr-3';
+                    doneText.innerHTML = `同步完成 · ${total} 张照片已备份`;
+                }
+                noticeEl.classList.remove('hidden');
+
+                lastSyncResult = { success: successCount, fail: failCount, user: state.selectedUser.name };
+                setTimeout(() => {
+                    noticeEl.classList.add('hidden');
+                    if (lastSyncResult) {
+                        document.getElementById('settings-red-dot').classList.remove('hidden');
+                    }
+                }, 15000);
+
+                updateSyncLockUI(false);
+                renderAccountBar();
+                // 全部同步完且无剩余照片时显示同步完成状态
+                if (state.photos.length === 0) {
+                    showEmptyState(true);
+                } else {
+                    renderPhotoGrid();
+                }
+            }
+        }, 100);
+    }
+
+    function togglePause() {
+        state.isPaused = !state.isPaused;
+        document.getElementById('inline-pause-btn').textContent = state.isPaused ? '继续' : '暂停';
+        showToast(state.isPaused ? '已暂停同步' : '已恢复同步');
+    }
+
+    function cancelTask() {
+        clearInterval(backupTimer);
+        state.isBackingUp = false;
+        state.isPaused = false;
+        state.progress = 0;
+        document.getElementById('status-dot').classList.add('hidden');
+        document.getElementById('sync-done-notice').classList.add('hidden');
+        document.getElementById('sync-progress-bar').classList.add('hidden');
+        document.getElementById('sync-complete-bar').classList.add('hidden');
+        updateSyncLockUI(false);
+        renderAccountBar();
+        renderPhotoGrid();
+        showToast('同步任务已取消');
+    }
+
+    function dismissInlineComplete() {
+        document.getElementById('sync-complete-bar').classList.add('hidden');
+    }
+
+    function showSyncResult(successCount, failCount) {
+        const bar = document.getElementById('sync-complete-bar');
+        const text = document.getElementById('sync-result-text');
+        const iconSuccess = document.getElementById('result-icon-success');
+        const iconPartial = document.getElementById('result-icon-partial');
+        const retryBtn = document.getElementById('btn-retry-failed');
+        const hasFail = failCount > 0;
+
+        bar.className = hasFail
+            ? 'rounded-2xl px-5 py-3.5 mb-4 bg-orange-50 border border-orange-200'
+            : 'rounded-2xl px-5 py-3.5 mb-4 bg-green-50 border border-green-200';
+        iconSuccess.classList.toggle('hidden', hasFail);
+        iconPartial.classList.toggle('hidden', !hasFail);
+        retryBtn.classList.toggle('hidden', !hasFail);
+
+        if (hasFail) {
+            text.textContent = `同步部分完成 · 成功 ${successCount} 张，失败 ${failCount} 张`;
+            text.className = 'text-sm font-bold text-orange-700';
+        } else {
+            text.textContent = `同步完成 · ${successCount} 张照片已同步`;
+            text.className = 'text-sm font-bold text-green-700';
+        }
+
+        bar.classList.remove('hidden');
+        if (!hasFail) {
+            setTimeout(() => bar.classList.add('hidden'), 15000);
+        }
+    }
+
+    function retryFailed() {
+        if (state.failedIds.length === 0) return;
+        state.retryCount++;
+        const retryIds = [...state.failedIds];
+        state.failedIds = [];
+        document.getElementById('sync-complete-bar').classList.add('hidden');
+        startBackupProcess(retryIds);
+    }
+
+    function goBackToGallery() {
+        toggleSettings(false);
+        showToast('同步在后台继续，完成后会通知你');
+    }
+
+    function openSettingsFromEntry() {
+        toggleSettings(true);
+        if (lastSyncResult) {
+            showSyncResult(lastSyncResult.success, lastSyncResult.fail);
+            if (lastSyncResult.fail === 0) lastSyncResult = null;
+            document.getElementById('settings-red-dot').classList.add('hidden');
+        }
+    }
+
+    // ==================== 用户选择逻辑 ====================
+    function openUserPicker(isFromSync = false) {
+        if (!isFromSync) state.pendingBackupOnSelect = false;
+        renderUserList();
+
+        if (boundUsers.length === 0) {
+            document.getElementById('picker-modal-title').textContent = '绑定账号';
+            document.getElementById('picker-modal-desc').textContent = '需要先绑定账号才能同步照片到相框';
+        } else {
+            document.getElementById('sync-photo-count').textContent = state.syncingPhotoIds.length;
+            document.getElementById('picker-modal-title').textContent = '选择关联账号';
+            document.getElementById('picker-modal-desc').innerHTML = `将 <span class="font-bold text-blue-600">${state.syncingPhotoIds.length}</span> 张照片同步到选中账号的相框`;
+        }
+        document.getElementById('user-picker-modal').classList.remove('hidden');
+    }
+
+    function openAccountPicker() {
+        if (state.isBackingUp) { showToast('同步进行中，请稍后再操作'); return; }
+        state.pendingBackupOnSelect = false;
+        state.isChangingAccount = true;
+        renderUserList();
+
+        if (boundUsers.length === 0) {
+            document.getElementById('picker-modal-title').textContent = '绑定账号';
+            document.getElementById('picker-modal-desc').textContent = '需要先绑定账号才能同步照片到相框';
+        } else {
+            document.getElementById('picker-modal-title').textContent = '切换关联账号';
+            document.getElementById('picker-modal-desc').textContent = '选择要关联的用户账号';
+        }
+        document.getElementById('user-picker-modal').classList.remove('hidden');
+    }
+
+    function closeUserPicker() {
+        document.getElementById('user-picker-modal').classList.add('hidden');
+        state.pendingBackupOnSelect = false;
+        state.isChangingAccount = false;
+    }
+
+    function renderUserList() {
+        const container = document.getElementById('user-list');
+        let html = '';
+
+        if (boundUsers.length === 0) {
+            html += `<div class="text-center py-8">`;
+            html += `<div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">`;
+            html += `<svg class="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>`;
+            html += `</div>`;
+            html += `<p class="text-gray-500 text-sm mb-2">暂无绑定账号</p>`;
+            html += `<p class="text-gray-400 text-xs mb-6">请先在相框上绑定家庭成员账号</p>`;
+            html += `<button onclick="goToBindAccount()" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl font-bold text-sm transition">去绑定账号</button>`;
+            html += `</div>`;
+        } else {
+            boundUsers.forEach(user => {
+                html += `<button onclick="selectUser(${user.id})" class="w-full flex items-center p-4 rounded-2xl border-2 border-gray-100 bg-gray-50 transition hover:bg-blue-50 hover:border-blue-300">`;
+                html += `<img src="${user.avatar}" class="w-12 h-12 rounded-full object-cover shadow-sm mr-4" alt="${user.name}">`;
+                html += `<div class="text-left flex-1">`;
+                html += `<p class="font-bold text-gray-900 text-base">${user.name}</p>`;
+                html += `<p class="text-gray-400 text-xs mt-0.5">${user.phoneMasked}</p>`;
+                html += `</div>`;
+                html += `<svg class="w-5 h-5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>`;
+                html += `</button>`;
+            });
+        }
+        container.innerHTML = html;
+    }
+
+    let pendingSyncAfterBind = [];
+
+    function goToBindAccount() {
+        // 保存待同步的照片ID，绑定成功后继续同步
+        pendingSyncAfterBind = [...state.syncingPhotoIds];
+        closeUserPicker();
+        document.getElementById('bind-account-modal').classList.remove('hidden');
+    }
+
+    function closeBindModal() {
+        document.getElementById('bind-account-modal').classList.add('hidden');
+        pendingSyncAfterBind = [];
+    }
+
+    function simulateBindSuccess() {
+        boundUsers = [...allBoundUsers];
+        state.selectedUser = boundUsers[0];
+        document.getElementById('bind-account-modal').classList.add('hidden');
+        showToast('绑定成功！已关联账号：' + boundUsers[0].name);
+        renderAccountBar();
+
+        // 如果扫描已完成，确保显示照片浏览器
+        if (state.scanComplete && state.photos.length > 0) {
+            showPhotoBrowser();
+        }
+
+        // 如果之前有待同步的照片，继续同步流程
+        if (pendingSyncAfterBind.length > 0) {
+            const photoIds = [...pendingSyncAfterBind];
+            pendingSyncAfterBind = [];
+            startBackupProcess(photoIds);
+        }
+    }
+
+    function selectUser(userId) {
+        const user = boundUsers.find(u => u.id === userId);
+        if (!user) return;
+
+        document.getElementById('user-picker-modal').classList.add('hidden');
+
+        if (state.isChangingAccount) {
+            state.selectedUser = user;
+            renderAccountBar();
+            showToast(`已切换关联账号：${user.name}`);
+            state.isChangingAccount = false;
+            return;
+        }
+
+        if (state.pendingBackupOnSelect && state.syncingPhotoIds.length > 0) {
+            state.selectedUser = user;
+            renderAccountBar();
+            state.pendingBackupOnSelect = false;
+            startBackupProcess(state.syncingPhotoIds);
+        }
+        state.pendingBackupOnSelect = false;
+    }
+
+    function updateSyncLockUI(locked) {
+        const accountBtn = document.getElementById('inline-user-display');
+        if (locked) {
+            accountBtn.classList.add('opacity-50', 'pointer-events-none');
+        } else {
+            accountBtn.classList.remove('opacity-50', 'pointer-events-none');
+        }
+    }
+
+    function renderAccountBar() {
+        const avatarEl = document.getElementById('picker-avatar');
+        const nameEl = document.getElementById('picker-user-name');
+        if (state.selectedUser) {
+            avatarEl.src = state.selectedUser.avatar;
+            avatarEl.classList.remove('hidden');
+            nameEl.textContent = state.selectedUser.name;
+            nameEl.className = 'text-sm font-bold text-gray-700';
+        } else {
+            avatarEl.classList.add('hidden');
+            nameEl.textContent = '请选择';
+            nameEl.className = 'text-sm font-bold text-blue-600';
+        }
+    }
+
+    // ==================== U盘插入与扫描 ====================
+    function showUsbGuideWithAutoDismiss() {
+        const usbGuide = document.getElementById('usb-guide');
+        usbGuide.classList.remove('hidden');
+        if (usbGuideTimer) clearTimeout(usbGuideTimer);
+        usbGuideTimer = setTimeout(() => {
+            usbGuide.classList.add('hidden');
+            usbGuideTimer = null;
+        }, USB_GUIDE_AUTO_DISMISS_MS);
+    }
+
+    function simulateUSBInsert() {
+        state.isUsbInserted = true;
+        state.isScanning = true;
+        state.scanComplete = false;
+        state.photos = [];
+        scanProgress = 0;
+
+        document.getElementById('usb-mock-btn').classList.add('hidden');
+        document.getElementById('usb-empty-btn').classList.add('hidden');
+        showUsbGuideWithAutoDismiss();
+        updateSidebarUI();
+        showToast('检测到新 U 盘连接');
+
+        runScanProgress(true);
+    }
+
+    function simulateUSBEmpty() {
+        state.isUsbInserted = true;
+        state.isScanning = true;
+        state.scanComplete = false;
+        state.photos = [];
+        scanProgress = 0;
+
+        document.getElementById('usb-mock-btn').classList.add('hidden');
+        document.getElementById('usb-empty-btn').classList.add('hidden');
+        showUsbGuideWithAutoDismiss();
+        updateSidebarUI();
+        showToast('检测到新 U 盘连接');
+
+        runScanProgress(false);
+    }
+
+    function runScanProgress(hasPhotos) {
+        if (scanTimer) clearInterval(scanTimer);
+        scanProgress = 0;
+
+        const statusTexts = [
+            '正在读取文件列表...',
+            '正在分析照片格式...',
+            '正在检测重复文件...',
+            '正在生成缩略图...',
+            '正在整理照片信息...',
+            '即将完成...'
+        ];
+
+        scanTimer = setInterval(() => {
+            scanProgress += Math.random() * 3 + 1;
+            if (scanProgress > 100) scanProgress = 100;
+
+            const scanFill = document.getElementById('scan-progress-fill');
+            const scanPercent = document.getElementById('scan-percent');
+            const scanStatus = document.getElementById('scan-status-text');
+
+            if (scanFill) {
+                scanFill.style.width = scanProgress + '%';
+                scanPercent.textContent = Math.floor(scanProgress) + '%';
+
+                const statusIndex = Math.min(Math.floor(scanProgress / 20), statusTexts.length - 1);
+                scanStatus.textContent = statusTexts[statusIndex];
+            }
+
+            if (scanProgress >= 100) {
+                clearInterval(scanTimer);
+                state.isScanning = false;
+                state.scanComplete = true;
+
+                if (hasPhotos) {
+                    state.photos = generateMockPhotos();
+                    if (!document.getElementById('tab-usb-content').classList.contains('hidden')) {
+                        showPhotoBrowser();
+                    }
+                } else {
+                    state.photos = [];
+                    if (!document.getElementById('tab-usb-content').classList.contains('hidden')) {
+                        showEmptyState();
+                    }
+                }
+            }
+        }, 300);
+    }
+
+    function showScanningUI() {
+        hideAllUsbPanels();
+        document.getElementById('backup-ui-scanning').classList.remove('hidden');
+        const scanFill = document.getElementById('scan-progress-fill');
+        const scanPercent = document.getElementById('scan-percent');
+        if (scanFill) {
+            scanFill.style.width = scanProgress + '%';
+            scanPercent.textContent = Math.floor(scanProgress) + '%';
+        }
+    }
+
+    function showEmptyState(allSynced) {
+        hideAllUsbPanels();
+        const iconEl = document.getElementById('empty-icon');
+        const titleEl = document.getElementById('empty-title');
+        const descEl = document.getElementById('empty-desc');
+        const formatsEl = document.getElementById('supported-formats');
+
+        if (allSynced) {
+            iconEl.className = 'w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 bg-green-50';
+            iconEl.innerHTML = `<svg class="w-12 h-12 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>`;
+            titleEl.textContent = '所有照片已同步完成';
+            descEl.textContent = 'U 盘中的照片已全部同步到相框，可以安全拔出 U 盘';
+            formatsEl.classList.add('hidden');
+        } else {
+            iconEl.className = 'w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 bg-gray-100';
+            iconEl.innerHTML = `<svg class="w-12 h-12 text-gray-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 12V4a2 2 0 00-2-2H8a2 2 0 00-2 2v8" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 12h12v7a3 3 0 01-3 3H9a3 3 0 01-3-3v-7z" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+            titleEl.textContent = '未检测到照片';
+            descEl.textContent = 'U 盘中没有找到可识别的照片文件';
+            formatsEl.classList.remove('hidden');
+        }
+
+        document.getElementById('backup-ui-empty').classList.remove('hidden');
+    }
+
+    function showPhotoBrowser() {
+        hideAllUsbPanels();
+        document.getElementById('photo-browser').classList.remove('hidden');
+        state.isSelectMode = false;
+        state.selectedIds.clear();
+        updateSelectUI();
+        renderPhotoGrid();
+    }
+
+    function hideAllUsbPanels() {
+        ['backup-ui-scanning', 'backup-ui-empty', 'photo-browser'].forEach(id => {
+            document.getElementById(id).classList.add('hidden');
+        });
+    }
+
+    // ==================== UI 切换逻辑 ====================
+    function toggleSettings(show) {
+        document.getElementById('settings-page').classList.toggle('hidden', !show);
+        if (show) switchTab(state.isUsbInserted ? 'usb' : 'other');
+        if (!show && state.isSelectMode) {
+            state.isSelectMode = false;
+            state.selectedIds.clear();
+            updateSelectUI();
+        }
+    }
+
+    function switchTab(tab) {
+        const isUsb = tab === 'usb';
+        document.getElementById('tab-usb-content').classList.toggle('hidden', !isUsb);
+        document.getElementById('tab-other-content').classList.toggle('hidden', isUsb);
+        document.getElementById('nav-usb').className = isUsb
+            ? 'p-5 rounded-2xl sidebar-item-active cursor-pointer flex items-center text-base'
+            : 'p-5 rounded-2xl text-gray-500 hover:bg-gray-50 cursor-pointer flex items-center text-base';
+        document.getElementById('nav-other').className = !isUsb
+            ? 'p-5 rounded-2xl sidebar-item-active cursor-pointer flex items-center text-base'
+            : 'p-5 rounded-2xl text-gray-500 hover:bg-gray-50 cursor-pointer flex items-center text-base';
+
+        if (isUsb) {
+            renderAccountBar();
+            if (state.scanComplete && state.photos.length > 0) {
+                showPhotoBrowser();
+            } else if (state.scanComplete && state.photos.length === 0) {
+                showEmptyState();
+            } else if (state.isScanning) {
+                showScanningUI();
+            }
+        }
+    }
+
+    function enterBackupFromGuide() {
+        if (usbGuideTimer) {
+            clearTimeout(usbGuideTimer);
+            usbGuideTimer = null;
+        }
+        document.getElementById('usb-guide').classList.add('hidden');
+        toggleSettings(true);
+        switchTab('usb');
+        if (state.isScanning) showScanningUI();
+        else if (state.scanComplete && state.photos.length > 0) showPhotoBrowser();
+        else if (state.scanComplete) showEmptyState();
+    }
+
+    function updateSidebarUI() {
+        if (state.isUsbInserted) document.getElementById('nav-usb').classList.remove('hidden');
+    }
+
+    // ==================== 通用工具函数 ====================
+    function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+    function dismissSyncNotice() { document.getElementById('sync-done-notice').classList.add('hidden'); }
+
+    function showToast(msg) {
+        const toast = document.getElementById('toast');
+        toast.textContent = msg;
+        toast.style.opacity = '1';
+        toast.style.transform = 'translate(-50%, 0)';
+        setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translate(-50%, -100px)'; }, 3000);
+    }
+
+    function simulateReset() {
+        if (backupTimer) clearInterval(backupTimer);
+        if (scanTimer) clearInterval(scanTimer);
+        if (usbGuideTimer) {
+            clearTimeout(usbGuideTimer);
+            usbGuideTimer = null;
+        }
+
+        scanProgress = 0;
+        state = {
+            isUsbInserted: false, isScanning: false, scanComplete: false,
+            selectedUser: null,
+            isBackingUp: false, isPaused: false, progress: 0,
+            pendingBackupOnSelect: false, isChangingAccount: false,
+            photos: [], groupBy: 'month', filter: 'all', sortOrder: 'desc',
+            isSelectMode: false,
+            selectedIds: new Set(), syncedIds: new Set(), syncingPhotoIds: [],
+            failedIds: [], retryCount: 0,
+        };
+
+        document.getElementById('usb-mock-btn').classList.remove('hidden');
+        document.getElementById('usb-empty-btn').classList.remove('hidden');
+        document.getElementById('usb-guide').classList.add('hidden');
+        document.getElementById('status-dot').classList.add('hidden');
+        document.getElementById('sync-done-notice').classList.add('hidden');
+        document.getElementById('sync-progress-bar').classList.add('hidden');
+        document.getElementById('sync-complete-bar').classList.add('hidden');
+        document.getElementById('nav-usb').classList.add('hidden');
+        document.getElementById('settings-page').classList.add('hidden');
+        document.getElementById('user-picker-modal').classList.add('hidden');
+        document.getElementById('bind-account-modal').classList.add('hidden');
+        document.getElementById('delete-confirm-modal').classList.add('hidden');
+        document.getElementById('photo-viewer-modal').classList.add('hidden');
+        document.getElementById('select-bottom-bar').classList.add('hidden');
+        document.getElementById('settings-red-dot').classList.add('hidden');
+        currentViewingId = null;
+        lastSyncResult = null;
+
+        showToast('已重置全部状态');
+    }
+
+    // ==================== 格式检测 ====================
+    (function() {
+        const match = navigator.userAgent.match(/Android\s+(\d+)/);
+        if (!match || parseInt(match[1]) >= 9) {
+            const el = document.getElementById('supported-formats');
+            if (el) el.textContent = '支持的格式：JPG、PNG、BMP、HEIC';
+        }
+    })();
+
+    // ==================== 背景轮播 ====================
+    let photoIndex = 0;
+    const bgPhotos = [
+        'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80',
+        'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1200&q=80'
+    ];
+    setInterval(() => {
+        photoIndex = (photoIndex + 1) % bgPhotos.length;
+        document.getElementById('current-photo').src = bgPhotos[photoIndex];
+    }, 5000);
+</script>
+</body>
+</html>
