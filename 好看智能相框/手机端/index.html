@@ -2077,13 +2077,6 @@
                         <span id="deviceMenuTitle" class="text-xl font-bold text-gray-900">相框设置</span>
                     </div>
                     <div>
-                        <div class="w-full py-3.5 flex items-center justify-center gap-2 text-blue-600 active:bg-gray-50 border-b border-gray-100 cursor-pointer" onclick="toggleAiRecommend()">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48 2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48 2.83-2.83"/></svg>
-                            <span class="text-sm font-medium">智能推荐</span>
-                            <div id="aiToggleBtn" class="relative w-[42px] h-[25px] rounded-full transition-colors duration-300 flex-shrink-0 bg-gray-200" role="switch" aria-checked="false">
-                                <span class="absolute top-[2px] left-[2px] w-[21px] h-[21px] bg-white rounded-full shadow-md transition-transform duration-300 translate-x-0"></span>
-                            </div>
-                        </div>
                         <button onclick="startRenameDevice()" class="w-full py-3.5 text-center text-sm font-medium text-blue-600 active:bg-gray-50 flex items-center justify-center gap-2 border-b border-gray-100">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
                             重命名相框
@@ -2406,13 +2399,6 @@
         <div class="agreement-card" style="max-width:340px">
             <h2>服务协议与隐私政策</h2>
             <p>感谢您信任并使用好看智能相框。为了更好地保障您的权益，请您在使用前仔细阅读并充分理解<a href="javascript:void(0)" onclick="showToast('查看协议详情');event.stopPropagation()">《用户协议》</a>和<a href="javascript:void(0)" onclick="showToast('查看协议详情');event.stopPropagation()">《隐私政策》</a>的全部条款，包括但不限于个人信息的收集、使用和保护。</p>
-            <div style="background:#F5F7FF;border-radius:12px;padding:14px 16px;margin-bottom:18px;border:1px solid rgba(99,102,241,0.1)">
-                <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48 2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48 2.83-2.83"/></svg>
-                    <span style="font-size:13px;font-weight:700;color:#1D1D1F">每日精选推荐</span>
-                </div>
-                <p style="font-size:12px;color:rgba(60,60,67,0.65);line-height:1.6;margin:0">相框会从已有照片中，根据季节、节日等场景每天自动挑选最合适的进行展示。推荐过程<strong style="color:rgba(60,60,67,0.85)">仅分析时间、场景等标签信息，不会读取照片内容</strong>。你可以随时在相框设置中关闭。</p>
-            </div>
             <button class="agreement-btn-primary" onclick="agreeAgreement()">同意并继续</button>
             <button class="agreement-btn-secondary" onclick="disagreeAgreement()">不同意</button>
         </div>
@@ -3676,7 +3662,6 @@
             const device = FRAME_DEVICES.find(d => d.id === currentDeviceId);
             if (!device) return;
             document.getElementById('deviceMenuTitle').textContent = device.name;
-            updateAiToggleUI(device);
             const mask = document.getElementById('deviceMenuMask');
             const sheet = document.getElementById('deviceMenuSheet');
             mask.classList.remove('hidden');
@@ -3808,40 +3793,6 @@
                     renderDeviceList();
                 }, 800);
             }, 350);
-        }
-
-        // ======================== AI Smart Recommend ========================
-        function updateAiToggleUI(device) {
-            const btn = document.getElementById('aiToggleBtn');
-            if (!btn) return;
-            const knob = btn.querySelector('span');
-            if (device && device.aiRecommend) {
-                btn.classList.remove('bg-gray-200');
-                btn.classList.add('bg-blue-500');
-                btn.setAttribute('aria-checked', 'true');
-                knob.style.transform = 'translateX(17px)';
-            } else {
-                btn.classList.remove('bg-blue-500');
-                btn.classList.add('bg-gray-200');
-                btn.setAttribute('aria-checked', 'false');
-                knob.style.transform = 'translateX(0)';
-            }
-        }
-
-        function toggleAiRecommend() {
-            const device = FRAME_DEVICES.find(d => d.id === currentDeviceId);
-            if (!device) return;
-            if (device.aiRecommend) {
-                device.aiRecommend = false;
-                device.aiConsented = false;
-                updateAiToggleUI(device);
-                showToast('已关闭智能推荐，推荐数据已清除');
-            } else {
-                device.aiRecommend = true;
-                device.aiConsented = true;
-                updateAiToggleUI(device);
-                showToast('已开启智能推荐');
-            }
         }
 
         // ======================== Person Actions ========================
@@ -5572,9 +5523,6 @@
             localStorage.setItem('privacy_agreed', 'true');
             document.getElementById('agreementOverlay').classList.remove('active');
 
-            MOCK_DISCOVERABLE_DEVICES.forEach(d => { d.aiConsented = true; d.aiRecommend = true; });
-            FRAME_DEVICES.forEach(d => { d.aiConsented = true; d.aiRecommend = true; });
-            
             const splash = document.getElementById('splashScreen');
             if (splash.style.display !== 'none') {
                 splash.classList.add('fade-out');
