@@ -3,19 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>翻盘操盘手 - 自我提升App</title>
+    <title>翻盘操盘手 · 认清现实，每日进化</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root {
-            --primary: #6366f1;
-            --bg-dark: #0f172a;
-            --card-bg: #1e293b;
-        }
-        
+        :root { --primary: #6366f1; --bg-dark: #0f172a; --card-bg: #1e293b; }
         html { background-color: #020617; }
-
         body {
             background-color: var(--bg-dark);
             color: #f8fafc;
@@ -26,18 +20,10 @@
             min-height: 100vh;
             position: relative;
             box-shadow: 0 0 100px rgba(0,0,0,0.8);
-            padding-bottom: 80px;
+            padding-bottom: 88px;
             overflow-x: hidden;
         }
-
-        header, nav {
-            width: 100%;
-            max-width: 500px;
-            margin: 0 auto;
-            left: 0;
-            right: 0;
-        }
-
+        header, nav { width: 100%; max-width: 500px; margin: 0 auto; left: 0; right: 0; }
         .glass-card {
             background: var(--card-bg);
             border-radius: 16px;
@@ -45,50 +31,20 @@
             padding: 16px;
             margin-bottom: 16px;
         }
-
         .nav-active { color: var(--primary) !important; }
-
-        .progress-bar {
-            height: 8px;
-            border-radius: 4px;
-            background: #334155;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #6366f1, #a855f7);
-            transition: width 0.5s ease-out;
-        }
-
         .tab-content { display: none; animation: fadeIn 0.3s ease-in-out; }
         .tab-content.active { display: block; }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Onboarding Overlay */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         #onboarding {
-            position: fixed;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 100%;
-            max-width: 500px;
-            height: 100%;
-            background: var(--bg-dark);
-            z-index: 100;
-            display: flex;
-            flex-direction: column;
-            padding: 24px;
+            position: fixed; top: 0; left: 50%; transform: translateX(-50%);
+            width: 100%; max-width: 500px; height: 100%;
+            background: var(--bg-dark); z-index: 100;
+            display: flex; flex-direction: column; padding: 24px;
         }
-
+        #onboarding.hidden { display: none !important; }
         .step-dot { width: 8px; height: 8px; border-radius: 50%; background: #334155; transition: 0.3s; }
         .step-dot.active { background: var(--primary); width: 24px; }
-
-        input, select {
+        input, select, textarea {
             background: rgba(255,255,255,0.05);
             border: 1px solid rgba(255,255,255,0.1);
             border-radius: 12px;
@@ -97,46 +53,37 @@
             width: 100%;
             outline: none;
         }
-        input:focus { border-color: var(--primary); }
-
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-
-        /* 覆盖 #onboarding 的 display:flex，否则 Tailwind .hidden 优先级不够，关不掉引导层 */
-        #onboarding.hidden {
-            display: none !important;
-        }
-
-        #edit-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(2, 6, 23, 0.75);
+        input:focus, textarea:focus { border-color: var(--primary); }
+        .sheet, #edit-overlay, #menu-overlay, #sub-overlay, #archive-overlay {
+            position: fixed; inset: 0;
+            background: rgba(2, 6, 23, 0.78);
             z-index: 200;
             display: none;
             align-items: flex-end;
             justify-content: center;
-            padding: 0;
         }
-        #edit-overlay.open {
-            display: flex;
-        }
-        #edit-panel {
-            width: 100%;
-            max-width: 500px;
-            max-height: 85vh;
-            overflow-y: auto;
+        .sheet.open, #edit-overlay.open, #menu-overlay.open, #sub-overlay.open, #archive-overlay.open { display: flex; }
+        .sheet-panel, #edit-panel {
+            width: 100%; max-width: 500px; max-height: 88vh; overflow-y: auto;
             background: #1e293b;
             border-radius: 20px 20px 0 0;
             border: 1px solid rgba(255,255,255,0.1);
             padding: 20px 20px 28px;
         }
+        .task-done { opacity: 0.55; }
+        .task-done .task-check { background: #6366f1; border-color: #6366f1; }
+        .task-done .task-check i { display: block !important; }
+        .pro-badge { background: linear-gradient(90deg, #f59e0b, #ea580c); }
     </style>
 </head>
 <body>
 
-    <!-- 新手引导界面 (Onboarding) -->
     <div id="onboarding">
-        <div class="flex justify-between items-center mb-8">
-            <h2 class="text-xl font-bold text-indigo-400">重塑人生计划</h2>
+        <div class="flex justify-between items-center mb-6">
+            <div>
+                <p class="text-[10px] text-slate-500 uppercase tracking-wider">Self-Improve OS</p>
+                <h2 class="text-xl font-bold text-indigo-400">翻盘操盘手</h2>
+            </div>
             <div class="flex space-x-2">
                 <div class="step-dot active" id="dot1"></div>
                 <div class="step-dot" id="dot2"></div>
@@ -144,776 +91,965 @@
             </div>
         </div>
 
-        <!-- Step 1 -->
-        <div id="step1" class="space-y-6">
-            <div class="text-center py-6">
-                <div class="w-20 h-20 bg-indigo-600/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i class="fas fa-search-dollar text-3xl text-indigo-400"></i>
+        <div id="step1" class="space-y-5 flex-1 overflow-y-auto">
+            <div class="text-center py-4">
+                <div class="w-16 h-16 bg-indigo-600/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i class="fas fa-compass text-2xl text-indigo-400"></i>
                 </div>
-                <h3 class="text-lg font-bold">第一步：盘点你的底盘</h3>
-                <p class="text-xs text-slate-400 mt-2">只有直面现状，才能开始翻盘</p>
+                <h3 class="text-lg font-bold">① 认清现实 · 底盘</h3>
+                <p class="text-xs text-slate-400 mt-1">先诚实记录现状，再谈目标与执行</p>
             </div>
-            <div class="space-y-4">
+            <div class="space-y-3">
                 <div>
-                    <label class="text-xs text-slate-400 mb-1 block">当前可支配存款 (CNY)</label>
-                    <input type="number" id="init-cash" placeholder="例如：50000">
+                    <label class="text-xs text-slate-400 mb-1 block">可支配存款 (CNY，可填 0)</label>
+                    <input type="number" id="init-cash" placeholder="例如 50000" min="0">
                 </div>
                 <div>
-                    <label class="text-xs text-slate-400 mb-1 block">你当前所处的领域（选最接近的即可）</label>
+                    <label class="text-xs text-slate-400 mb-1 block">领域</label>
                     <select id="init-field">
                         <option value="internet">互联网 / 软件 / 数据</option>
-                        <option value="product">实体产品 / 制造 / 工程</option>
-                        <option value="biz">商业 / 销售 / 运营 / 服务</option>
+                        <option value="product">制造 / 工程 / 实体</option>
+                        <option value="biz">商业 / 销售 / 运营</option>
                         <option value="edu">教育 / 培训 / 科研</option>
-                        <option value="health">医疗 / 健康 / 护理</option>
-                        <option value="creative">设计 / 内容 / 文艺 / 媒体</option>
-                        <option value="public">体制内 / 公共事务 / 非营利</option>
-                        <option value="freelance">自由职业 / 多份兼职</option>
+                        <option value="health">医疗 / 健康</option>
+                        <option value="creative">设计 / 内容 / 媒体</option>
+                        <option value="public">体制 / 公共事务</option>
+                        <option value="freelance">自由职业 / 多份工</option>
                         <option value="student">在读学生</option>
-                        <option value="home">全职照顾家庭</option>
-                        <option value="transition">待业 / 转行探索中</option>
-                        <option value="other" selected>其他（下面自填为主）</option>
+                        <option value="home">全职家庭</option>
+                        <option value="transition">待业 / 转型</option>
+                        <option value="other" selected>其他</option>
                     </select>
-                    <p class="text-[10px] text-slate-500 mt-1">不限定职业名称，具体角色在下一行自由写</p>
                 </div>
                 <div>
-                    <label class="text-xs text-slate-400 mb-1 block">你的角色 / 技能 / 正在做的事（可写多个）</label>
-                    <input type="text" id="init-skill" placeholder="例如：车间班组长、兼职插画、备考编制、带娃同时学剪辑…">
+                    <label class="text-xs text-slate-400 mb-1 block">角色 / 技能 / 正在做的事</label>
+                    <input type="text" id="init-skill" placeholder="自由描述，可多写">
                 </div>
                 <div>
-                    <label class="text-xs text-slate-400 mb-1 block">平均每日可投入的翻盘时间 (小时)</label>
+                    <label class="text-xs text-slate-400 mb-1 block">每日可投入时间 (小时)</label>
                     <select id="init-time">
-                        <option value="0.5">约 0.5 小时（碎片维持）</option>
-                        <option value="1">1 小时（生存模式）</option>
-                        <option value="2">2 小时（稳步提升）</option>
-                        <option value="3">3 小时</option>
-                        <option value="4" selected>4 小时（强力翻盘）</option>
-                        <option value="6">6 小时</option>
-                        <option value="8">8+ 小时（可当主业投入）</option>
+                        <option value="0.5">0.5</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4" selected>4</option>
+                        <option value="6">6</option>
+                        <option value="8">8+</option>
                     </select>
                 </div>
             </div>
-            <button onclick="nextStep(2)" class="w-full bg-indigo-600 py-4 rounded-xl font-bold mt-4 hover:bg-indigo-500 transition">继续下一步</button>
+            <button type="button" onclick="nextStep(2)" class="w-full bg-indigo-600 py-3.5 rounded-xl font-bold mt-2">下一步：定目标</button>
         </div>
 
-        <!-- Step 2 -->
-        <div id="step2" class="space-y-6 hidden">
-            <div class="text-center py-6">
-                <div class="w-20 h-20 bg-emerald-600/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i class="fas fa-flag-checkered text-3xl text-emerald-400"></i>
+        <div id="step2" class="space-y-5 hidden flex-1 overflow-y-auto">
+            <div class="text-center py-4">
+                <div class="w-16 h-16 bg-emerald-600/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i class="fas fa-bullseye text-2xl text-emerald-400"></i>
                 </div>
-                <h3 class="text-lg font-bold">第二步：设定翻盘目标</h3>
-                <p class="text-xs text-slate-400 mt-2">模糊的目标是执行的杀手</p>
+                <h3 class="text-lg font-bold">② 确定目标</h3>
+                <p class="text-xs text-slate-400 mt-1">一句话、可衡量；完成后可归档并开启新周期</p>
             </div>
-            <div class="space-y-4">
+            <div class="space-y-3">
                 <div>
-                    <label class="text-xs text-slate-400 mb-1 block">你希望在多久后实现翻盘？</label>
+                    <label class="text-xs text-slate-400 mb-1 block">翻盘周期</label>
                     <select id="target-period">
-                        <option value="6">6个月 (冲刺)</option>
-                        <option value="12" selected>12个月 (标准)</option>
-                        <option value="36">3年 (长期愿景)</option>
+                        <option value="6">6 个月</option>
+                        <option value="12" selected>12 个月</option>
+                        <option value="36">3 年</option>
                     </select>
                 </div>
                 <div>
-                    <label class="text-xs text-slate-400 mb-1 block">核心翻盘指标 (例如：副业月入2万)</label>
-                    <input type="text" id="target-kpi" placeholder="具体、可衡量的结果">
+                    <label class="text-xs text-slate-400 mb-1 block">核心指标 / 目标描述</label>
+                    <input type="text" id="target-kpi" placeholder="例如：副业稳定月入 1 万">
                 </div>
             </div>
-            <button onclick="nextStep(3)" class="w-full bg-indigo-600 py-4 rounded-xl font-bold mt-4">生成 AI 路线图</button>
+            <button type="button" onclick="nextStep(3)" class="w-full bg-indigo-600 py-3.5 rounded-xl font-bold">生成本期任务清单</button>
         </div>
 
-        <!-- Step 3 -->
-        <div id="step3" class="space-y-6 hidden text-center">
-            <div class="py-10">
-                <div class="relative w-24 h-24 mx-auto mb-6">
-                    <div class="absolute inset-0 border-4 border-indigo-500/20 rounded-full"></div>
-                    <div class="absolute inset-0 border-4 border-indigo-500 rounded-full border-t-transparent animate-spin"></div>
-                    <div class="absolute inset-0 flex items-center justify-center">
-                        <i class="fas fa-brain text-2xl text-indigo-400"></i>
-                    </div>
-                </div>
-                <h3 class="text-lg font-bold">AI 引擎正在计算...</h3>
-                <p class="text-xs text-slate-400 mt-2 px-6">系统正在基于您的底盘，逆向拆解 1,240 种翻盘路径，匹配最适合您的执行链路</p>
+        <div id="step3" class="space-y-6 hidden text-center flex-1 flex flex-col justify-center">
+            <div class="relative w-20 h-20 mx-auto">
+                <div class="absolute inset-0 border-4 border-indigo-500/20 rounded-full"></div>
+                <div class="absolute inset-0 border-4 border-indigo-500 rounded-full border-t-transparent animate-spin"></div>
+                <div class="absolute inset-0 flex items-center justify-center"><i class="fas fa-list-check text-xl text-indigo-400"></i></div>
             </div>
-            <div id="loading-tasks" class="space-y-2 text-left px-4">
-                <div class="flex items-center space-x-2 text-xs text-slate-500 animate-pulse">
-                    <i class="fas fa-check-circle"></i>
-                    <span>扫描技能缺口...完成</span>
-                </div>
-                <div class="flex items-center space-x-2 text-xs text-slate-500 animate-pulse" style="animation-delay: 0.5s">
-                    <i class="fas fa-check-circle"></i>
-                    <span>对标行业均值...完成</span>
-                </div>
-                <div class="flex items-center space-x-2 text-xs text-slate-500 animate-pulse" style="animation-delay: 1s">
-                    <i class="fas fa-spinner"></i>
-                    <span>正在生成阶段性里程碑...</span>
-                </div>
+            <div>
+                <h3 class="text-lg font-bold">正在生成本期任务</h3>
+                <p class="text-xs text-slate-400 mt-2 px-4">根据你的领域、时间与目标，在本地生成可编辑任务（非云端 AI）。</p>
             </div>
-            <button id="finish-btn" class="w-full bg-emerald-600 py-4 rounded-xl font-bold mt-4 opacity-50 cursor-not-allowed" disabled>正在就绪...</button>
+            <button type="button" id="finish-btn" class="w-full bg-emerald-600 py-3.5 rounded-xl font-bold opacity-50 cursor-not-allowed" disabled>准备中…</button>
         </div>
     </div>
 
-    <!-- 主界面内容 (与之前一致，但在初始化后显示) -->
     <div id="main-app" class="opacity-0">
-        <!-- Header -->
-        <header class="p-4 flex justify-between items-center fixed top-0 bg-[#0f172a]/90 backdrop-blur-lg z-50">
-            <div>
-                <h1 id="page-title" class="text-xl font-bold text-white">人生底盘</h1>
-                <p class="text-xs text-slate-400">正在重塑您的个人资产</p>
+        <header class="p-3 pl-4 pr-3 flex justify-between items-center fixed top-0 bg-[#0f172a]/92 backdrop-blur-lg z-50 border-b border-white/5">
+            <div class="min-w-0 flex-1">
+                <h1 id="page-title" class="text-lg font-bold text-white truncate">现实</h1>
+                <p id="page-sub" class="text-[10px] text-slate-500 truncate">本地数据 · 可迁移至 App</p>
             </div>
-            <div class="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center border-2 border-white/20">
-                <i class="fas fa-user text-sm"></i>
+            <div class="flex items-center gap-2 shrink-0">
+                <button type="button" id="header-tier-btn" onclick="openSubModal()" class="text-[10px] font-bold px-2.5 py-1 rounded-full border border-slate-600 text-slate-300">免费版</button>
+                <button type="button" onclick="openMenu()" class="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center border border-white/10" aria-label="菜单">
+                    <i class="fas fa-bars text-slate-300"></i>
+                </button>
             </div>
         </header>
 
-        <main class="px-4 pt-20">
-            <!-- Tab 1: 人生底盘 -->
+        <main class="px-4 pt-[4.5rem] pb-4">
             <section id="base" class="tab-content active">
-                <div class="flex justify-end mb-2">
-                    <button type="button" onclick="openEditModal('base')" class="text-xs text-indigo-400 font-medium px-3 py-1.5 rounded-lg border border-indigo-500/40 hover:bg-indigo-500/10">
-                        <i class="fas fa-pen mr-1"></i> 编辑底盘
-                    </button>
+                <div class="flex justify-end mb-1">
+                    <button type="button" onclick="openEditModal('base')" class="text-xs text-indigo-400 px-2 py-1 rounded-lg border border-indigo-500/30"><i class="fas fa-pen mr-1"></i>编辑现实</button>
                 </div>
                 <div class="glass-card">
-                    <h3 class="text-sm font-semibold mb-4 flex items-center">
-                        <i class="fas fa-chart-pie mr-2 text-indigo-400"></i> 个人资产负债表
-                    </h3>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="bg-slate-900/50 p-3 rounded-lg border-l-4 border-emerald-500">
-                            <p class="text-[10px] text-slate-400 uppercase">核心资产</p>
+                    <h3 class="text-sm font-semibold mb-3 flex items-center"><i class="fas fa-chart-pie mr-2 text-indigo-400"></i> 现状快照</h3>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="bg-slate-900/50 p-3 rounded-xl border-l-4 border-emerald-500">
+                            <p class="text-[10px] text-slate-500">存款</p>
                             <p id="display-cash" class="text-lg font-bold text-emerald-400">¥ 0</p>
-                            <p class="text-[10px] mt-1 text-slate-500">存款/技能价值</p>
                         </div>
-                        <div class="bg-slate-900/50 p-3 rounded-lg border-l-4 border-rose-500">
-                            <p class="text-[10px] text-slate-400 uppercase">精力负债</p>
+                        <div class="bg-slate-900/50 p-3 rounded-xl border-l-4 border-rose-500">
+                            <p class="text-[10px] text-slate-500">精力负债</p>
                             <p id="display-stress" class="text-lg font-bold text-rose-400">20%</p>
-                            <p class="text-[10px] mt-1 text-slate-500">压力 / 无效消耗（可编辑）</p>
                         </div>
                     </div>
-                    <div class="mt-4" style="height: 150px;">
-                        <canvas id="assetChart"></canvas>
-                    </div>
+                    <div class="mt-3 h-[140px]"><canvas id="assetChart"></canvas></div>
                 </div>
-
                 <div class="glass-card">
-                    <h3 class="text-sm font-semibold mb-4 flex items-center">
-                        <i class="fas fa-bolt mr-2 text-yellow-400"></i> 核心技能雷达
-                    </h3>
-                    <div style="height: 250px;">
-                        <canvas id="skillRadar"></canvas>
-                    </div>
+                    <h3 class="text-sm font-semibold mb-2"><i class="fas fa-bolt mr-2 text-amber-400"></i> 能力轮廓（示意）</h3>
+                    <div class="h-[220px]"><canvas id="skillRadar"></canvas></div>
                     <p id="display-field-hint" class="text-[10px] text-slate-500 mt-2"></p>
                 </div>
             </section>
 
-            <!-- 其他 Tab 保持结构，代码逻辑中使用 -->
             <section id="target" class="tab-content">
-                <div class="flex justify-end mb-2">
-                    <button type="button" onclick="openEditModal('target')" class="text-xs text-indigo-400 font-medium px-3 py-1.5 rounded-lg border border-indigo-500/40 hover:bg-indigo-500/10">
-                        <i class="fas fa-pen mr-1"></i> 编辑目标
-                    </button>
+                <div class="flex justify-end mb-1">
+                    <button type="button" onclick="openEditModal('target')" class="text-xs text-indigo-400 px-2 py-1 rounded-lg border border-indigo-500/30"><i class="fas fa-pen mr-1"></i>编辑目标</button>
                 </div>
-                <div class="glass-card bg-indigo-900/20 border-indigo-500/30">
-                    <h3 id="display-target" class="text-sm font-semibold mb-2 italic text-indigo-300">"目标生成中..."</h3>
-                    <p id="display-period" class="text-xs text-slate-500 mb-1"></p>
-                    <p class="text-xs text-slate-400">里程碑与执行任务会随目标与周期自动重排（本地规则生成，非云端 AI）</p>
+                <div class="glass-card bg-indigo-900/15 border-indigo-500/25">
+                    <p id="display-target" class="text-sm font-semibold text-indigo-200"></p>
+                    <p id="display-period" class="text-xs text-slate-500 mt-1"></p>
+                    <p id="display-goal-progress" class="text-xs text-emerald-400/90 mt-2"></p>
                 </div>
-                <div id="milestone-list" class="relative pl-8 space-y-6 before:content-[''] before:absolute before:left-3 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-700">
-                </div>
+                <div id="milestone-list" class="relative pl-7 space-y-4 before:content-[''] before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-700"></div>
             </section>
 
             <section id="action" class="tab-content">
-                <div class="glass-card bg-gradient-to-r from-indigo-900/40 to-transparent">
-                    <div class="flex justify-between items-center mb-4">
-                        <span class="text-xs font-bold text-indigo-300">当前任务 (黄金时段)</span>
-                        <i class="fas fa-fire text-orange-500 animate-pulse"></i>
+                <div class="glass-card bg-gradient-to-br from-indigo-900/30 to-transparent border-indigo-500/20">
+                    <div class="flex justify-between items-start gap-2 mb-3">
+                        <div>
+                            <p class="text-xs font-bold text-indigo-300">今日执行</p>
+                            <p id="today-date-label" class="text-[10px] text-slate-500"></p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-[10px] text-slate-500">今日完成</p>
+                            <p id="today-progress-label" class="text-sm font-bold text-white">0/0</p>
+                        </div>
                     </div>
-                    <div class="space-y-4" id="task-list">
-                        <!-- 动态生成任务 -->
+                    <div id="task-list" class="space-y-2"></div>
+                    <div class="flex gap-2 mt-3">
+                        <button type="button" onclick="openAddTask()" class="flex-1 py-2.5 rounded-xl border border-dashed border-slate-600 text-xs text-slate-400 hover:border-indigo-500 hover:text-indigo-300"><i class="fas fa-plus mr-1"></i>添加任务</button>
+                        <button type="button" onclick="dailyCheckIn()" id="btn-checkin" class="flex-1 py-2.5 rounded-xl bg-emerald-600 font-bold text-sm text-white">今日打卡</button>
                     </div>
+                    <p id="checkin-hint" class="text-[10px] text-slate-500 mt-2"></p>
                 </div>
             </section>
 
             <section id="stats" class="tab-content">
-                <div class="glass-card border-indigo-500/20">
-                    <h3 class="text-sm font-semibold text-indigo-300 mb-2">成长反馈是做什么的？</h3>
-                    <p class="text-xs text-slate-400 leading-relaxed">
-                        用来对照<strong class="text-slate-300">你从「起点」走了多远</strong>：下方可记录每日最小行动（打卡），折线表示相对 Day1 的示意进步系数——坚持行动，趋势应向上。后续若接入真实数据（任务完成、收入等），可替换为真实曲线。
-                    </p>
-                </div>
-                <div class="glass-card flex flex-wrap items-center justify-between gap-3">
-                    <div>
-                        <p class="text-[10px] text-slate-500 uppercase">连续打卡</p>
-                        <p class="text-2xl font-bold text-emerald-400"><span id="streak-count">0</span> <span class="text-sm font-normal text-slate-400">天</span></p>
+                <div class="grid grid-cols-3 gap-2 mb-3">
+                    <div class="glass-card !mb-0 !p-3 text-center">
+                        <p class="text-[9px] text-slate-500">连续打卡</p>
+                        <p id="kpi-streak" class="text-xl font-bold text-emerald-400">0</p>
                     </div>
-                    <button type="button" onclick="checkInToday()" id="checkin-btn" class="bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold px-4 py-2.5 rounded-xl shrink-0">
-                        今日已行动 · 打卡
-                    </button>
+                    <div class="glass-card !mb-0 !p-3 text-center">
+                        <p class="text-[9px] text-slate-500">近7日完成率</p>
+                        <p id="kpi-rate7" class="text-xl font-bold text-indigo-300">—</p>
+                    </div>
+                    <div class="glass-card !mb-0 !p-3 text-center">
+                        <p class="text-[9px] text-slate-500">周期进度</p>
+                        <p id="kpi-timeline" class="text-xl font-bold text-amber-300">—</p>
+                    </div>
                 </div>
-                <p id="checkin-hint" class="text-[10px] text-slate-500 px-1 -mt-2 mb-2"></p>
                 <div class="glass-card">
-                    <h3 class="text-sm font-semibold mb-2 text-slate-300 text-center">相对起点的变化（示意）</h3>
-                    <div style="height: 200px;">
-                        <canvas id="growthChart"></canvas>
-                    </div>
+                    <h3 class="text-xs font-semibold text-slate-300 mb-2">每日完成度（相对任务数）</h3>
+                    <div class="h-[200px]"><canvas id="growthChart"></canvas></div>
+                    <p class="text-[10px] text-slate-500 mt-2">横轴为日期，纵轴为当日任务完成比例。数据存于本机，后续可与移动端同步。</p>
+                </div>
+                <div class="glass-card border-amber-500/20">
+                    <h3 class="text-sm font-semibold text-amber-200 mb-2"><i class="fas fa-flag-checkered mr-1"></i> 达成本轮目标？</h3>
+                    <p class="text-xs text-slate-400 mb-3">归档后本轮打卡与任务历史会封存，你可设定新目标重新开始。</p>
+                    <button type="button" onclick="openArchiveModal()" class="w-full py-3 rounded-xl bg-slate-700 hover:bg-slate-600 font-semibold text-sm">归档并完成 · 开启新周期</button>
                 </div>
             </section>
         </main>
 
-        <!-- AI Floating Button -->
-        <button class="fixed right-4 bottom-24 w-14 h-14 bg-indigo-600 rounded-full shadow-lg shadow-indigo-500/40 flex items-center justify-center text-xl text-white z-50">
-            <i class="fas fa-robot"></i>
-        </button>
-
-        <!-- Bottom Navigation -->
-        <nav class="fixed bottom-0 flex justify-around items-center h-16 bg-[#1e293b]/95 backdrop-blur-md border-t border-white/10 z-50">
-            <button onclick="switchTab('base', '人生底盘')" class="flex flex-col items-center nav-item nav-active" data-page="base">
-                <i class="fas fa-layer-group text-lg"></i>
-                <span class="text-[10px] mt-1">底盘</span>
+        <nav class="fixed bottom-0 flex justify-around items-center h-16 bg-[#1e293b]/96 backdrop-blur-md border-t border-white/10 z-50 safe-pb">
+            <button type="button" onclick="switchTab('base','现实')" class="flex flex-col items-center nav-item nav-active text-slate-400 w-1/4" data-page="base">
+                <i class="fas fa-compass text-lg"></i><span class="text-[9px] mt-0.5">现实</span>
             </button>
-            <button onclick="switchTab('target', '目标设计')" class="flex flex-col items-center nav-item" data-page="target">
-                <i class="fas fa-bullseye text-lg"></i>
-                <span class="text-[10px] mt-1">目标</span>
+            <button type="button" onclick="switchTab('target','目标')" class="flex flex-col items-center nav-item text-slate-400 w-1/4" data-page="target">
+                <i class="fas fa-bullseye text-lg"></i><span class="text-[9px] mt-0.5">目标</span>
             </button>
-            <button onclick="switchTab('action', '行动执行')" class="flex flex-col items-center nav-item" data-page="action">
-                <i class="fas fa-calendar-check text-lg"></i>
-                <span class="text-[10px] mt-1">执行</span>
+            <button type="button" onclick="switchTab('action','今日')" class="flex flex-col items-center nav-item text-slate-400 w-1/4" data-page="action">
+                <i class="fas fa-sun text-lg"></i><span class="text-[9px] mt-0.5">今日</span>
             </button>
-            <button onclick="switchTab('stats', '成长反馈')" class="flex flex-col items-center nav-item" data-page="stats">
-                <i class="fas fa-chart-line text-lg"></i>
-                <span class="text-[10px] mt-1">反馈</span>
+            <button type="button" onclick="switchTab('stats','成长')" class="flex flex-col items-center nav-item text-slate-400 w-1/4" data-page="stats">
+                <i class="fas fa-chart-line text-lg"></i><span class="text-[9px] mt-0.5">成长</span>
             </button>
         </nav>
     </div>
 
-    <!-- 编辑底盘 / 目标 -->
     <div id="edit-overlay" onclick="if(event.target===this) closeEditModal()">
         <div id="edit-panel" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center mb-3">
+                <h3 id="edit-title" class="text-lg font-bold">编辑</h3>
+                <button type="button" onclick="closeEditModal()" class="text-slate-400 p-2"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="edit-fields-base" class="space-y-3 hidden">
+                <div><label class="text-xs text-slate-400">存款</label><input type="number" id="edit-cash" min="0"></div>
+                <div><label class="text-xs text-slate-400">领域</label><select id="edit-field"></select></div>
+                <div><label class="text-xs text-slate-400">角色 / 技能</label><input type="text" id="edit-skill"></div>
+                <div><label class="text-xs text-slate-400">每日时间 (h)</label><select id="edit-time"></select></div>
+                <div><label class="text-xs text-slate-400">精力负债 0–100</label><input type="number" id="edit-stress" min="0" max="100"></div>
+            </div>
+            <div id="edit-fields-target" class="space-y-3 hidden">
+                <div><label class="text-xs text-slate-400">周期</label><select id="edit-period"><option value="6">6 个月</option><option value="12">12 个月</option><option value="36">3 年</option></select></div>
+                <div><label class="text-xs text-slate-400">目标描述</label><input type="text" id="edit-target"></div>
+                <p class="text-[10px] text-slate-500">保存后会按新目标重新生成模板任务（自定义任务会保留）。</p>
+            </div>
+            <button type="button" onclick="saveEditModal()" class="w-full bg-indigo-600 py-3 rounded-xl font-bold mt-4">保存</button>
+        </div>
+    </div>
+
+    <div id="add-overlay" class="sheet" onclick="if(event.target===this) closeAddTask()">
+        <div class="sheet-panel" onclick="event.stopPropagation()">
+            <h3 class="text-lg font-bold mb-3">添加任务</h3>
+            <div class="space-y-3">
+                <div><label class="text-xs text-slate-400">标题</label><input type="text" id="add-task-title" placeholder="具体行动"></div>
+                <div><label class="text-xs text-slate-400">备注（可选）</label><input type="text" id="add-task-meta" placeholder="预计时长等"></div>
+            </div>
+            <p id="add-task-limit-hint" class="text-[10px] text-amber-400/90 mt-2 hidden"></p>
+            <button type="button" onclick="submitAddTask()" class="w-full bg-indigo-600 py-3 rounded-xl font-bold mt-4">加入今日清单</button>
+        </div>
+    </div>
+
+    <div id="menu-overlay" onclick="if(event.target===this) closeMenu()">
+        <div class="sheet-panel" onclick="event.stopPropagation()">
             <div class="flex justify-between items-center mb-4">
-                <h3 id="edit-title" class="text-lg font-bold text-white">编辑</h3>
-                <button type="button" onclick="closeEditModal()" class="text-slate-400 p-2" aria-label="关闭"><i class="fas fa-times"></i></button>
+                <h3 class="text-lg font-bold">我的</h3>
+                <button type="button" onclick="closeMenu()" class="text-slate-400"><i class="fas fa-times"></i></button>
             </div>
-            <div id="edit-fields-base" class="space-y-4 hidden">
-                <div>
-                    <label class="text-xs text-slate-400 mb-1 block">可支配存款 (CNY)</label>
-                    <input type="number" id="edit-cash" min="0" step="1">
-                </div>
-                <div>
-                    <label class="text-xs text-slate-400 mb-1 block">领域</label>
-                    <select id="edit-field"></select>
-                </div>
-                <div>
-                    <label class="text-xs text-slate-400 mb-1 block">角色 / 技能 / 正在做的事</label>
-                    <input type="text" id="edit-skill">
-                </div>
-                <div>
-                    <label class="text-xs text-slate-400 mb-1 block">每日可投入时间 (小时)</label>
-                    <select id="edit-time"></select>
-                </div>
-                <div>
-                    <label class="text-xs text-slate-400 mb-1 block">精力负债主观感受 (0–100，越高越累)</label>
-                    <input type="number" id="edit-stress" min="0" max="100" step="1">
-                </div>
+            <div class="space-y-2">
+                <button type="button" onclick="openSubModal(); closeMenu();" class="w-full text-left py-3 px-3 rounded-xl bg-slate-800/80 border border-white/5 flex justify-between items-center">
+                    <span><i class="fas fa-crown text-amber-400 mr-2"></i>订阅会员 PRO</span>
+                    <i class="fas fa-chevron-right text-slate-500 text-xs"></i>
+                </button>
+                <button type="button" onclick="exportData();" class="w-full text-left py-3 px-3 rounded-xl bg-slate-800/80 border border-white/5"><i class="fas fa-download mr-2 text-indigo-400"></i>导出 JSON（PRO）</button>
+                <button type="button" onclick="injectDemo(); closeMenu();" class="w-full text-left py-3 px-3 rounded-xl bg-slate-800/80 border border-white/5"><i class="fas fa-flask mr-2 text-purple-400"></i>注入演示数据（PRO）</button>
             </div>
-            <div id="edit-fields-target" class="space-y-4 hidden">
-                <div>
-                    <label class="text-xs text-slate-400 mb-1 block">翻盘周期</label>
-                    <select id="edit-period">
-                        <option value="6">6 个月（冲刺）</option>
-                        <option value="12">12 个月（标准）</option>
-                        <option value="36">3 年（长期）</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="text-xs text-slate-400 mb-1 block">核心翻盘指标（可衡量的一句话）</label>
-                    <input type="text" id="edit-target">
-                </div>
+            <div class="mt-4">
+                <p class="text-xs text-slate-500 mb-2">历史归档 <span id="archive-count-label" class="text-slate-400">0</span> 条</p>
+                <div id="archive-mini-list" class="max-h-40 overflow-y-auto space-y-2 text-xs text-slate-400"></div>
             </div>
-            <button type="button" onclick="saveEditModal()" class="w-full bg-indigo-600 py-3.5 rounded-xl font-bold mt-6 hover:bg-indigo-500">保存并同步执行清单</button>
+            <p class="text-[10px] text-slate-600 mt-4 leading-relaxed">商业模式：订阅制。当前为原型：PRO 为本地模拟开关，便于你演示与接支付。</p>
+        </div>
+    </div>
+
+    <div id="sub-overlay" onclick="if(event.target===this) closeSubModal()">
+        <div class="sheet-panel" onclick="event.stopPropagation()">
+            <h3 class="text-xl font-bold mb-1">翻盘操盘手 PRO</h3>
+            <p class="text-xs text-slate-400 mb-4">订阅制 · 全球分发时可对接 App Store / Play 内购</p>
+            <ul class="text-sm text-slate-300 space-y-2 mb-4">
+                <li><i class="fas fa-check text-emerald-400 mr-2"></i>完整归档库（免费版仅保留最近 2 条摘要）</li>
+                <li><i class="fas fa-check text-emerald-400 mr-2"></i>数据导出 JSON（便于迁移与备份）</li>
+                <li><i class="fas fa-check text-emerald-400 mr-2"></i>演示数据注入（路演 / 测试）</li>
+                <li><i class="fas fa-check text-emerald-400 mr-2"></i>自定义任务上限更高（免费 8 条 / PRO 30 条）</li>
+            </ul>
+            <p class="text-lg font-bold text-white mb-1">¥38 / 月 <span class="text-xs font-normal text-slate-500">（示意定价）</span></p>
+            <button type="button" onclick="activateProDemo()" class="w-full pro-badge py-3.5 rounded-xl font-bold text-white mb-2">模拟开通 PRO（开发用）</button>
+            <button type="button" onclick="setFreeTier()" class="w-full py-2 text-xs text-slate-500">切回免费版</button>
+        </div>
+    </div>
+
+    <div id="archive-overlay" onclick="if(event.target===this) closeArchiveModal()">
+        <div class="sheet-panel" onclick="event.stopPropagation()">
+            <h3 class="text-lg font-bold mb-2">归档本轮</h3>
+            <p class="text-xs text-slate-400 mb-3">将封存当前目标、任务与打卡记录。之后请设定新目标开启下一周期。</p>
+            <div class="space-y-2 mb-4">
+                <label class="text-xs text-slate-400">本轮一句话总结（可选）</label>
+                <textarea id="archive-note" rows="2" class="resize-none" placeholder="例如：跑通第一个付费客户"></textarea>
+            </div>
+            <button type="button" onclick="confirmArchive()" class="w-full bg-rose-600/90 py-3 rounded-xl font-bold">确认归档</button>
+            <button type="button" onclick="closeArchiveModal()" class="w-full mt-2 py-2 text-sm text-slate-500">取消</button>
         </div>
     </div>
 
     <script>
-        const FIELD_OPTIONS = [
-            { value: 'internet', label: '互联网 / 软件 / 数据' },
-            { value: 'product', label: '实体产品 / 制造 / 工程' },
-            { value: 'biz', label: '商业 / 销售 / 运营 / 服务' },
-            { value: 'edu', label: '教育 / 培训 / 科研' },
-            { value: 'health', label: '医疗 / 健康 / 护理' },
-            { value: 'creative', label: '设计 / 内容 / 文艺 / 媒体' },
-            { value: 'public', label: '体制内 / 公共事务 / 非营利' },
-            { value: 'freelance', label: '自由职业 / 多份兼职' },
-            { value: 'student', label: '在读学生' },
-            { value: 'home', label: '全职照顾家庭' },
-            { value: 'transition', label: '待业 / 转行探索中' },
-            { value: 'other', label: '其他' }
-        ];
+(function () {
+    const STORAGE_KEY = 'fanpan_app_v3';
+    const LEGACY_CHECKINS = 'fanpan_checkins';
 
-        const TIME_OPTIONS = [
-            { value: '0.5', label: '约 0.5 小时（碎片维持）' },
-            { value: '1', label: '1 小时（生存模式）' },
-            { value: '2', label: '2 小时（稳步提升）' },
-            { value: '3', label: '3 小时' },
-            { value: '4', label: '4 小时（强力翻盘）' },
-            { value: '6', label: '6 小时' },
-            { value: '8', label: '8+ 小时（可当主业投入）' }
-        ];
+    const FIELD_OPTIONS = [
+        { value: 'internet', label: '互联网 / 软件 / 数据' },
+        { value: 'product', label: '实体 / 制造 / 工程' },
+        { value: 'biz', label: '商业 / 销售 / 运营' },
+        { value: 'edu', label: '教育 / 培训 / 科研' },
+        { value: 'health', label: '医疗 / 健康' },
+        { value: 'creative', label: '设计 / 内容 / 媒体' },
+        { value: 'public', label: '体制 / 公共事务' },
+        { value: 'freelance', label: '自由职业' },
+        { value: 'student', label: '学生' },
+        { value: 'home', label: '全职家庭' },
+        { value: 'transition', label: '待业 / 转型' },
+        { value: 'other', label: '其他' }
+    ];
+    const TIME_OPTIONS = [
+        { value: '0.5', label: '0.5 h' }, { value: '1', label: '1 h' }, { value: '2', label: '2 h' },
+        { value: '3', label: '3 h' }, { value: '4', label: '4 h' }, { value: '6', label: '6 h' }, { value: '8', label: '8+ h' }
+    ];
+    const FIELD_LABELS = Object.fromEntries(FIELD_OPTIONS.map(o => [o.value, o.label]));
+    const RADAR_BY_FIELD = {
+        internet: [55,58,52,72,48,58], product: [58,62,55,58,50,52], biz: [52,55,68,60,62,56],
+        edu: [50,50,62,70,45,60], health: [56,65,58,62,48,55], creative: [48,52,55,68,42,62],
+        public: [54,60,58,58,55,58], freelance: [60,58,48,65,52,55], student: [48,45,58,72,38,54],
+        home: [52,62,60,55,40,52], transition: [50,55,45,68,35,58], other: [50,58,50,65,45,55]
+    };
 
-        const FIELD_LABELS = Object.fromEntries(FIELD_OPTIONS.map(o => [o.value, o.label]));
-
-        const RADAR_BY_FIELD = {
-            internet: [55, 58, 52, 72, 48, 58],
-            product: [58, 62, 55, 58, 50, 52],
-            biz: [52, 55, 68, 60, 62, 56],
-            edu: [50, 50, 62, 70, 45, 60],
-            health: [56, 65, 58, 62, 48, 55],
-            creative: [48, 52, 55, 68, 42, 62],
-            public: [54, 60, 58, 58, 55, 58],
-            freelance: [60, 58, 48, 65, 52, 55],
-            student: [48, 45, 58, 72, 38, 54],
-            home: [52, 62, 60, 55, 40, 52],
-            transition: [50, 55, 45, 68, 35, 58],
-            other: [50, 58, 50, 65, 45, 55]
+    function defaultState() {
+        return {
+            v: 3,
+            onboardingDone: false,
+            profile: { cash: 0, field: 'other', skill: '', time: '4', stress: 20 },
+            cycle: {
+                id: 'c_' + Date.now(),
+                goal: '',
+                targetPeriodMonths: 12,
+                startedAt: new Date().toISOString().slice(0, 10),
+                tasks: [],
+                days: {}
+            },
+            archives: [],
+            subscription: { tier: 'free' }
         };
+    }
 
-        let userData = {
-            cash: 0,
-            skill: '',
-            field: 'other',
-            target: '',
-            targetPeriodMonths: 12,
-            time: 4,
-            stress: 20
-        };
+    let state = defaultState();
+    let chartInstances = { asset: null, radar: null, growth: null };
+    let editModalMode = 'base';
 
-        let chartInstances = { asset: null, radar: null, growth: null };
-        let editModalMode = 'base';
+    function uid() { return 't_' + Math.random().toString(36).slice(2, 10); }
 
-        function escapeHtml(str) {
-            if (str == null) return '';
-            const d = document.createElement('div');
-            d.textContent = String(str);
-            return d.innerHTML;
-        }
-
-        function fillSelect(el, options, value) {
-            el.innerHTML = options.map(o => `<option value="${o.value}">${escapeHtml(o.label)}</option>`).join('');
-            const v = String(value);
-            if (options.some(o => o.value === v)) el.value = v;
-        }
-
-        function getCheckins() {
-            try {
-                const raw = localStorage.getItem('fanpan_checkins');
-                const a = raw ? JSON.parse(raw) : [];
-                return Array.isArray(a) ? a.filter(x => typeof x === 'string') : [];
-            } catch (e) {
-                return [];
-            }
-        }
-
-        function setCheckins(arr) {
-            localStorage.setItem('fanpan_checkins', JSON.stringify(arr));
-        }
-
-        function todayKey() {
-            const d = new Date();
-            const p = n => String(n).padStart(2, '0');
-            return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
-        }
-
-        function computeStreak() {
-            const days = new Set(getCheckins());
-            let streak = 0;
-            let cur = new Date();
-            const key = dt => {
-                const p = n => String(n).padStart(2, '0');
-                return `${dt.getFullYear()}-${p(dt.getMonth() + 1)}-${p(dt.getDate())}`;
-            };
-            if (!days.has(key(cur))) {
-                cur.setDate(cur.getDate() - 1);
-            }
-            while (days.has(key(cur))) {
-                streak++;
-                cur.setDate(cur.getDate() - 1);
-            }
-            return streak;
-        }
-
-        function growthSeries() {
-            const dates = [...new Set(getCheckins())].sort();
-            if (dates.length === 0) {
-                return {
-                    labels: ['Day1', '·', '·', '·', '今天'],
-                    data: [1, 1, 1, 1, 1]
-                };
-            }
-            const take = dates.slice(-5);
-            const labels = take.map(s => s.slice(5));
-            let acc = 1;
-            const data = take.map(() => {
-                acc = Math.min(2.2, Number((acc + 0.07).toFixed(2)));
-                return acc;
-            });
-            while (labels.length < 5) {
-                labels.unshift('…');
-                data.unshift(1);
-            }
-            return { labels: labels.slice(-5), data: data.slice(-5) };
-        }
-
-        function checkInToday() {
-            const t = todayKey();
-            const arr = getCheckins();
-            if (arr.includes(t)) {
-                document.getElementById('checkin-hint').textContent = '今天已打卡过了，明天再来～';
-                return;
-            }
-            arr.push(t);
-            setCheckins(arr);
-            document.getElementById('checkin-hint').textContent = '已记录。坚持最小行动，曲线会跟着抬升。';
-            refreshStreakUI();
-            updateGrowthChartOnly();
-        }
-
-        function refreshStreakUI() {
-            const el = document.getElementById('streak-count');
-            if (el) el.textContent = String(computeStreak());
-            const hint = document.getElementById('checkin-hint');
-            if (hint && !hint.textContent) {
-                hint.textContent = '每天点一次即可，代表你完成了「最小可行行动」。';
-            }
-        }
-
-        function destroyCharts() {
-            ['asset', 'radar', 'growth'].forEach(k => {
-                if (chartInstances[k]) {
-                    chartInstances[k].destroy();
-                    chartInstances[k] = null;
+    function loadState() {
+        try {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (raw) {
+                const o = JSON.parse(raw);
+                if (o && o.v === 3) {
+                    state = Object.assign(defaultState(), o);
+                    state.profile = Object.assign(defaultState().profile, o.profile || {});
+                    state.cycle = Object.assign(defaultState().cycle, o.cycle || {});
+                    state.cycle.days = o.cycle && o.cycle.days ? o.cycle.days : {};
+                    state.archives = Array.isArray(o.archives) ? o.archives : [];
+                    state.subscription = Object.assign({ tier: 'free' }, o.subscription || {});
+                    return;
                 }
-            });
+            }
+        } catch (e) {}
+        try {
+            const legacy = localStorage.getItem(LEGACY_CHECKINS);
+            if (legacy) {
+                const arr = JSON.parse(legacy);
+                if (Array.isArray(arr)) {
+                    const days = {};
+                    arr.forEach(d => { days[d] = { checkIn: true, doneIds: [] }; });
+                    state.cycle.days = days;
+                }
+            }
+        } catch (e) {}
+    }
+
+    function saveState() {
+        if (state.subscription.tier !== 'pro' && state.archives.length > 2) {
+            state.archives = state.archives.slice(-2);
         }
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
 
-        function updateGrowthChartOnly() {
-            if (!chartInstances.growth) return;
-            const { labels, data } = growthSeries();
-            chartInstances.growth.data.labels = labels;
-            chartInstances.growth.data.datasets[0].data = data;
-            chartInstances.growth.update();
+    function isPro() { return state.subscription.tier === 'pro'; }
+    function maxTasks() { return isPro() ? 30 : 8; }
+
+    function escapeHtml(str) {
+        if (str == null) return '';
+        const d = document.createElement('div');
+        d.textContent = String(str);
+        return d.innerHTML;
+    }
+
+    function fillSelect(el, options, value) {
+        el.innerHTML = options.map(o => `<option value="${o.value}">${escapeHtml(o.label)}</option>`).join('');
+        const v = String(value);
+        if (options.some(o => o.value === v)) el.value = v;
+    }
+
+    function todayKey() {
+        const d = new Date();
+        const p = n => String(n).padStart(2, '0');
+        return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+    }
+
+    function getDayEntry(date) {
+        if (!state.cycle.days[date]) state.cycle.days[date] = { checkIn: false, doneIds: [] };
+        return state.cycle.days[date];
+    }
+
+    function computeStreak() {
+        const days = state.cycle.days;
+        let streak = 0;
+        let cur = new Date();
+        const key = dt => {
+            const p = n => String(n).padStart(2, '0');
+            return `${dt.getFullYear()}-${p(dt.getMonth() + 1)}-${p(dt.getDate())}`;
+        };
+        if (!days[key(cur)] || !days[key(cur)].checkIn) cur.setDate(cur.getDate() - 1);
+        while (days[key(cur)] && days[key(cur)].checkIn) {
+            streak++;
+            cur.setDate(cur.getDate() - 1);
         }
+        return streak;
+    }
 
-        function buildTasks() {
-            const s = userData.skill || '当前方向';
-            const t = userData.target || '翻盘目标';
-            const hours = parseFloat(userData.time);
-            const h = Number.isFinite(hours) ? hours : 1;
-            const frag = h < 2 ? '拆成多个 15 分钟小段完成' : '安排一段连续时间';
-            const f = userData.field;
+    function taskCompletionRate(date) {
+        const tasks = state.cycle.tasks;
+        if (!tasks.length) return null;
+        const d = state.cycle.days[date];
+        if (!d) return null;
+        const n = d.doneIds.filter(id => tasks.some(t => t.id === id)).length;
+        return Math.round((n / tasks.length) * 100);
+    }
 
-            const task = (title, meta) => ({ title, meta });
+    function lastNDates(n) {
+        const out = [];
+        for (let i = n - 1; i >= 0; i--) {
+            const x = new Date();
+            x.setDate(x.getDate() - i);
+            const p = z => String(z).padStart(2, '0');
+            out.push(`${x.getFullYear()}-${p(x.getMonth() + 1)}-${p(x.getDate())}`);
+        }
+        return out;
+    }
 
-            const packs = {
-                student: [
-                    task(`梳理「${s}」与课程、实习或作品集的关系，写下 3 条可执行项`, `学业 / 求职联动 | ${frag}`),
-                    task(`为「${t}」定一个本学期或假期内的小里程碑`, `目标对齐 | 预计 25–40 min`)
-                ],
-                home: [
-                    task(`在「${s}」相关事项里，找出本周唯一一件非做不可的事`, `家庭场景下的优先级 | ${frag}`),
-                    task(`把「${t}」拆成「带娃/家务间隙」也能推进的一步`, `可嵌入日常 | 预计 20 min`)
-                ],
-                transition: [
-                    task(`针对「${s}」做信息盘点：渠道、作品集、可投递清单各写 5 条`, `转型摸底 | ${frag}`),
-                    task(`为「${t}」写一页「90 天试错计划」`, `降低不确定性 | 预计 35 min`)
-                ],
-                public: [
-                    task(`结合「${s}」列出本职可迁移的能力，对照「${t}」缺什么`, `能力迁移 | ${frag}`),
-                    task(`找 2 个与「${t}」相关的合规边界或资源，避免踩坑`, `风险与资源 | 预计 30 min`)
-                ],
-                health: [
-                    task(`围绕「${s}」记录一周节奏：高压时段与可插入学习的空档`, `节律盘点 | ${frag}`),
-                    task(`把「${t}」与健康作息绑定：写下一条不牺牲睡眠的执行方式`, `可持续 | 预计 25 min`)
-                ],
-                edu: [
-                    task(`用「${s}」设计一次微型教学或分享，验证表达与结构`, `输出倒逼输入 | ${frag}`),
-                    task(`把「${t}」翻译成学员/评委能听懂的 3 个成果指标`, `指标化 | 预计 30 min`)
-                ],
-                creative: [
-                    task(`为「${s}」整理作品集或代表作链接，标注每个作品的「解决的问题」`, `作品叙事 | ${frag}`),
-                    task(`为「${t}」定一个可发布的最小作品形态（文章/视频/案例）`, `最小发布 | 预计 40 min`)
-                ],
-                product: [
-                    task(`围绕「${s}」画一条价值流：从输入到交付谁受益`, `流程视角 | ${frag}`),
-                    task(`为「${t}」找一个可量化的现场指标（质量/效率/成本）`, `工程化指标 | 预计 30 min`)
-                ],
-                biz: [
-                    task(`就「${s}」列出 10 个潜在客户或渠道触点`, `获客清单 | ${frag}`),
-                    task(`把「${t}」写成「报价 / 转化 / 交付」三步里最先突破哪一步`, `商业闭环 | 预计 35 min`)
-                ],
-                internet: [
-                    task(`调研与「${s}」相关的 3 个竞品或对标对象，记下差异点`, `市场感知 | ${frag}`),
-                    task(`为「${t}」写技术或产品层面的首月里程碑（可勾选）`, `拆解 | 预计 30 min`)
-                ],
-                freelance: [
-                    task(`盘点「${s}」的获客渠道与单价，标出最低生存线`, `现金流意识 | ${frag}`),
-                    task(`把「${t}」关联到一份可签约的提案结构（大纲即可）`, `提案 | 预计 35 min`)
-                ],
-                other: [
-                    task(`用一段话说明「${s}」当前真实处境与约束（时间、金钱、家庭）`, `底盘诚实 | ${frag}`),
-                    task(`为「${t}」写「如果只能做三件事，会是哪三件」`, `聚焦 | 预计 30 min`)
-                ]
-            };
+    function avgCompletion7d() {
+        const dates = lastNDates(7);
+        const rates = dates.map(taskCompletionRate).filter(r => r !== null);
+        if (!rates.length) return null;
+        return Math.round(rates.reduce((a, b) => a + b, 0) / rates.length);
+    }
 
-            const pair = packs[f] || packs.other;
-            return [
-                pair[0],
-                pair[1],
-                task(`推进「${t}」的下一周行动清单（最多 5 条，可打勾）`, `执行对齐 | 日均可投 ${h}h`),
-                task('记录今日一条可复盘的行为或想法', '微习惯 | 约 5 min')
+    function chartRates14d() {
+        return lastNDates(14).map(d => {
+            const r = taskCompletionRate(d);
+            return r === null ? 0 : r;
+        });
+    }
+
+    function cycleProgressPercent() {
+        const start = new Date(state.cycle.startedAt + 'T12:00:00');
+        if (isNaN(start.getTime())) return 0;
+        const months = state.cycle.targetPeriodMonths || 12;
+        const end = new Date(start);
+        end.setMonth(end.getMonth() + months);
+        const now = new Date();
+        const p = (now - start) / (end - start);
+        return Math.min(100, Math.max(0, Math.round(p * 100)));
+    }
+
+    function buildTaskTemplates() {
+        const p = state.profile;
+        const g = state.cycle.goal || '翻盘目标';
+        const s = p.skill || '当前方向';
+        const h = parseFloat(p.time) || 1;
+        const frag = h < 2 ? '碎片' : '整块时间';
+        const f = p.field;
+        const task = (title, meta) => ({ title, meta });
+        const packs = {
+            student: [task(`把「${s}」与学业/实习写 3 条可执行项`, `学业 | ${frag}`), task(`为「${g}」定本学期小里程碑`, `目标`)],
+            home: [task(`在「${s}」里圈出本周唯一必做项`, `家庭节奏`), task(`把「${g}」拆进家务间隙的一步`, `嵌入`)],
+            transition: [task(`盘点「${s}」渠道与作品集各 5 条`, `摸底`), task(`「${g}」的 90 天试错大纲`, `计划`)],
+            public: [task(`「${s}」可迁移能力 vs「${g}」缺口`, `迁移`), task(`与「${g}」相关的合规与资源 2 条`, `风控`)],
+            health: [task(`围绕「${s}」记一周高压与空档`, `节律`), task(`「${g}」与不牺牲睡眠的结合方式`, `可持续`)],
+            edu: [task(`用「${s}」做一次 10 分钟微型输出`, `输出`), task(`把「${g}」译成 3 个可观察指标`, `指标`)],
+            creative: [task(`整理「${s}」作品各解决了什么问题`, `叙事`), task(`「${g}」的最小可发布形态`, `发布`)],
+            product: [task(`「${s}」价值流：谁因你受益`, `流程`), task(`「${g}」的现场量化指标`, `工程`)],
+            biz: [task(`列 10 个与「${s}」相关的触点`, `获客`), task(`「${g}」先破报价/转化/交付哪环`, `闭环`)],
+            internet: [task(`「${s}」3 个对标与差异点`, `竞品`), task(`「${g}」首月技术/产品里程碑`, `拆解`)],
+            freelance: [task(`「${s}」单价与生存线`, `现金流`), task(`「${g}」一页提案结构`, `提案`)],
+            other: [task(`诚实写下「${s}」的约束与资源`, `底盘`), task(`「${g}」若只能做三件事`, `聚焦`)]
+        };
+        const pair = packs[f] || packs.other;
+        return [
+            { id: uid(), title: pair[0].title, meta: pair[0].meta, source: 'template' },
+            { id: uid(), title: pair[1].title, meta: pair[1].meta, source: 'template' },
+            { id: uid(), title: `推进「${g}」的本周行动（≤5 条）`, meta: `对齐目标 · ${h}h/日`, source: 'template' },
+            { id: uid(), title: '记录今日一条可复盘笔记', meta: '微习惯 · 5 min', source: 'template' }
+        ];
+    }
+
+    function regenerateTemplateTasks() {
+        const custom = state.cycle.tasks.filter(t => t.source === 'custom');
+        const templates = buildTaskTemplates();
+        state.cycle.tasks = templates.concat(custom);
+        saveState();
+    }
+
+    function renderMilestones() {
+        const months = state.cycle.targetPeriodMonths;
+        const tgt = state.cycle.goal || '目标';
+        let phases;
+        if (months <= 6) {
+            phases = [
+                { n: '1', title: '验证闭环', desc: `围绕「${tgt}」最小试点` },
+                { n: '2', title: '固定节奏', desc: '周复盘，砍低杠杆' },
+                { n: '3', title: '冲刺', desc: '对齐周期末硬指标' }
+            ];
+        } else if (months <= 12) {
+            phases = [
+                { n: '1', title: '最小可行路径', desc: '跑通一条路' },
+                { n: '2', title: '系统化', desc: `「${tgt}」相关能力成体系` },
+                { n: '3', title: '放大', desc: '习惯化执行' }
+            ];
+        } else {
+            phases = [
+                { n: '1', title: '探索定位', desc: '试错与沉淀' },
+                { n: '2', title: '深耕', desc: `锚定「${tgt}」` },
+                { n: '3', title: '复利', desc: '工具与协作减负' }
             ];
         }
+        const el = document.getElementById('milestone-list');
+        el.innerHTML = phases.map(p => `
+            <div class="glass-card !mb-0 relative !pl-1">
+                <div class="absolute -left-6 top-3 w-5 h-5 rounded-full bg-indigo-600 border-2 border-slate-900 text-[9px] flex items-center justify-center">${escapeHtml(p.n)}</div>
+                <h4 class="font-bold text-sm">${escapeHtml(p.title)}</h4>
+                <p class="text-xs text-slate-400 mt-1">${escapeHtml(p.desc)}</p>
+            </div>`).join('');
+    }
 
-        function renderTasks() {
-            const taskList = document.getElementById('task-list');
-            const tasks = buildTasks();
-            taskList.innerHTML = tasks.map(t => `
-                <div class="flex items-center space-x-3 p-3 bg-white/5 rounded-xl border border-white/10" onclick="this.classList.toggle('opacity-50')">
-                    <div class="w-6 h-6 border-2 border-indigo-500 rounded flex items-center justify-center">
-                        <i class="fas fa-check text-indigo-500 hidden"></i>
-                    </div>
-                    <div class="flex-1">
-                        <p class="text-sm font-medium">${escapeHtml(t.title)}</p>
-                        <p class="text-[10px] text-slate-400">${escapeHtml(t.meta)}</p>
-                    </div>
+    function renderTaskList() {
+        const list = document.getElementById('task-list');
+        const tk = todayKey();
+        const day = getDayEntry(tk);
+        const tasks = state.cycle.tasks;
+        document.getElementById('today-date-label').textContent = tk + ' · 点任务打勾，再打卡';
+        if (!tasks.length) {
+            list.innerHTML = '<p class="text-xs text-slate-500 text-center py-6">暂无任务，可在上一步完成后自动生成，或手动添加。</p>';
+            document.getElementById('today-progress-label').textContent = '0/0';
+            return;
+        }
+        let done = 0;
+        list.innerHTML = tasks.map(t => {
+            const checked = day.doneIds.includes(t.id);
+            if (checked) done++;
+            return `
+            <div class="flex items-center gap-3 p-3 rounded-xl border border-white/10 bg-white/5 ${checked ? 'task-done' : ''}" data-task-id="${escapeHtml(t.id)}">
+                <button type="button" class="task-check w-7 h-7 shrink-0 rounded-lg border-2 border-indigo-500 flex items-center justify-center" aria-label="完成" onclick="window.__FP.toggleTask('${t.id}')">
+                    <i class="fas fa-check text-white text-xs hidden"></i>
+                </button>
+                <div class="flex-1 min-w-0 text-left" onclick="window.__FP.toggleTask('${t.id}')">
+                    <p class="text-sm font-medium">${escapeHtml(t.title)}</p>
+                    <p class="text-[10px] text-slate-500">${escapeHtml(t.meta || '')}</p>
                 </div>
-            `).join('');
-        }
+                ${t.source === 'custom' ? `<button type="button" class="text-slate-500 px-2" onclick="window.__FP.removeTask('${t.id}')"><i class="fas fa-trash-alt text-xs"></i></button>` : ''}
+            </div>`;
+        }).join('');
+        document.getElementById('today-progress-label').textContent = done + '/' + tasks.length;
+    }
 
-        function renderMilestones() {
-            const months = userData.targetPeriodMonths;
-            const tgt = userData.target || '翻盘目标';
-            let phases;
-            if (months <= 6) {
-                phases = [
-                    { n: '01', title: '阶段一：验证与试点', desc: `围绕「${tgt}」做最小闭环，先验证可行性与时间是否扛得住` },
-                    { n: '02', title: '阶段二：固定节奏', desc: '每周复盘一次，只保留高杠杆动作' },
-                    { n: '03', title: '阶段三：冲刺收口', desc: '对齐周期末尾的硬指标，砍掉干扰项' }
-                ];
-            } else if (months <= 12) {
-                phases = [
-                    { n: '01', title: '阶段一：最小可行路径', desc: '跑通一条路，接受粗糙版本' },
-                    { n: '02', title: '阶段二：系统化', desc: `把与「${tgt}」相关的技能、资源串成可重复流程` },
-                    { n: '03', title: '阶段三：放大与巩固', desc: '在验证有效的事上加码，形成习惯' }
-                ];
-            } else {
-                phases = [
-                    { n: '01', title: '阶段一：探索与定位（约 1 年）', desc: '允许试错，沉淀可复用能力与方向感' },
-                    { n: '02', title: '阶段二：深耕主线', desc: `长期锚定「${tgt}」，稳定产出而非频繁换题` },
-                    { n: '03', title: '阶段三：复利', desc: '用制度、工具或协作减负，扩大影响面' }
-                ];
-            }
-            const el = document.getElementById('milestone-list');
-            el.innerHTML = phases.map(p => `
-                <div class="glass-card !mb-0 relative">
-                    <div class="absolute -left-11 top-4 w-6 h-6 rounded-full bg-indigo-600 border-4 border-slate-900 flex items-center justify-center text-[10px]">${escapeHtml(p.n)}</div>
-                    <h4 class="font-bold text-sm">${escapeHtml(p.title)}</h4>
-                    <p class="text-xs text-slate-400 mt-1">${escapeHtml(p.desc)}</p>
-                </div>
-            `).join('');
-        }
+    function destroyCharts() {
+        ['asset', 'radar', 'growth'].forEach(k => {
+            if (chartInstances[k]) { chartInstances[k].destroy(); chartInstances[k] = null; }
+        });
+    }
 
-        function periodLabel(m) {
-            if (m <= 6) return '周期：6 个月（冲刺）';
-            if (m <= 12) return '周期：12 个月（标准）';
-            return '周期：3 年（长期愿景）';
-        }
+    function initCharts() {
+        const p = state.profile;
+        const t = parseFloat(p.time);
+        const timeBar = Number.isFinite(t) ? Math.min(95, Math.max(8, t * 12)) : 40;
+        const cashBar = parseInt(p.cash, 10) > 0 ? 62 : 12;
+        const st = Math.min(100, Math.max(0, parseInt(p.stress, 10) || 0));
+        const energyBar = Math.min(95, Math.max(8, 100 - st));
 
-        function applyDashboardFromUserData() {
-            const cashNum = parseInt(userData.cash, 10);
-            const cashSafe = Number.isFinite(cashNum) ? cashNum : 0;
-            document.getElementById('display-cash').innerText = '¥ ' + cashSafe.toLocaleString();
-            document.getElementById('display-stress').innerText = Math.min(100, Math.max(0, parseInt(userData.stress, 10) || 0)) + '%';
-            document.getElementById('display-target').innerText = '目标: ' + (userData.target || '未设定');
-            const dp = document.getElementById('display-period');
-            if (dp) dp.innerText = periodLabel(userData.targetPeriodMonths);
-
-            const hint = document.getElementById('display-field-hint');
-            if (hint) {
-                hint.textContent = '当前领域：' + (FIELD_LABELS[userData.field] || FIELD_LABELS.other) + ' · 可随时点「编辑底盘」调整';
-            }
-
-            renderTasks();
-            renderMilestones();
-            refreshStreakUI();
-            destroyCharts();
-            initCharts();
-        }
-
-        function openEditModal(mode) {
-            editModalMode = mode;
-            const overlay = document.getElementById('edit-overlay');
-            const fb = document.getElementById('edit-fields-base');
-            const ft = document.getElementById('edit-fields-target');
-            document.getElementById('edit-title').innerText = mode === 'base' ? '编辑底盘' : '编辑目标';
-            fb.classList.toggle('hidden', mode !== 'base');
-            ft.classList.toggle('hidden', mode !== 'target');
-
-            if (mode === 'base') {
-                document.getElementById('edit-cash').value = userData.cash || '';
-                document.getElementById('edit-skill').value = userData.skill || '';
-                document.getElementById('edit-stress').value = userData.stress != null ? userData.stress : 20;
-                fillSelect(document.getElementById('edit-field'), FIELD_OPTIONS, userData.field);
-                fillSelect(document.getElementById('edit-time'), TIME_OPTIONS, String(userData.time));
-            } else {
-                document.getElementById('edit-target').value = userData.target || '';
-                document.getElementById('edit-period').value = String(userData.targetPeriodMonths);
-            }
-            overlay.classList.add('open');
-        }
-
-        function closeEditModal() {
-            document.getElementById('edit-overlay').classList.remove('open');
-        }
-
-        function saveEditModal() {
-            if (editModalMode === 'base') {
-                const c = document.getElementById('edit-cash').value;
-                userData.cash = c === '' ? 0 : c;
-                userData.skill = document.getElementById('edit-skill').value.trim() || '未设定';
-                userData.field = document.getElementById('edit-field').value;
-                userData.time = document.getElementById('edit-time').value;
-                let st = parseInt(document.getElementById('edit-stress').value, 10);
-                if (!Number.isFinite(st)) st = 20;
-                userData.stress = Math.min(100, Math.max(0, st));
-            } else {
-                userData.target = document.getElementById('edit-target').value.trim() || '完成翻盘目标';
-                userData.targetPeriodMonths = parseInt(document.getElementById('edit-period').value, 10) || 12;
-            }
-            closeEditModal();
-            applyDashboardFromUserData();
-        }
-
-        document.addEventListener('keydown', e => {
-            if (e.key === 'Escape') closeEditModal();
+        const ctxA = document.getElementById('assetChart').getContext('2d');
+        chartInstances.asset = new Chart(ctxA, {
+            type: 'bar',
+            data: {
+                labels: ['财务', '时间', '技能', '可用精力'],
+                datasets: [{ data: [cashBar, timeBar, 42, energyBar], backgroundColor: ['#10b981','#6366f1','#f59e0b','#38bdf8'], borderRadius: 6 }]
+            },
+            options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { ticks: { color: '#94a3b8', font: { size: 10 } } } } }
         });
 
-        function nextStep(step) {
-            if (step === 2) {
-                userData.cash = document.getElementById('init-cash').value || 0;
-                userData.skill = document.getElementById('init-skill').value.trim() || '未设定';
-                userData.field = document.getElementById('init-field').value;
-                userData.time = document.getElementById('init-time').value;
+        const radar = RADAR_BY_FIELD[p.field] || RADAR_BY_FIELD.other;
+        const ctxR = document.getElementById('skillRadar').getContext('2d');
+        chartInstances.radar = new Chart(ctxR, {
+            type: 'radar',
+            data: {
+                labels: ['执行力','抗压','协作','学习','资源','认知'],
+                datasets: [{ data: radar, borderColor: '#6366f1', backgroundColor: 'rgba(99,102,241,0.2)', pointBackgroundColor: '#6366f1' }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { r: { grid: { color: 'rgba(255,255,255,0.1)' }, pointLabels: { color: '#94a3b8' }, ticks: { display: false } } } }
+        });
 
-                document.getElementById('step1').classList.add('hidden');
-                document.getElementById('step2').classList.remove('hidden');
-                document.getElementById('dot2').classList.add('active');
-            } else if (step === 3) {
-                userData.target = document.getElementById('target-kpi').value.trim() || '完成翻盘目标';
-                userData.targetPeriodMonths = parseInt(document.getElementById('target-period').value, 10) || 12;
-
-                document.getElementById('step2').classList.add('hidden');
-                document.getElementById('step3').classList.remove('hidden');
-                document.getElementById('dot3').classList.add('active');
-
-                setTimeout(() => {
-                    const btn = document.getElementById('finish-btn');
-                    btn.innerText = '进入我的仪表盘';
-                    btn.classList.remove('opacity-50', 'cursor-not-allowed');
-                    btn.classList.add('bg-indigo-600');
-                    btn.disabled = false;
-                    btn.onclick = finishOnboarding;
-                }, 3000);
+        const dates = lastNDates(14);
+        const rates = chartRates14d();
+        const labels = dates.map(d => d.slice(5));
+        const ctxG = document.getElementById('growthChart').getContext('2d');
+        chartInstances.growth = new Chart(ctxG, {
+            type: 'line',
+            data: {
+                labels,
+                datasets: [{
+                    label: '完成度%',
+                    data: rates,
+                    borderColor: '#34d399',
+                    tension: 0.35,
+                    fill: true,
+                    backgroundColor: 'rgba(52,211,153,0.12)'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { x: { ticks: { color: '#64748b', maxRotation: 45, font: { size: 9 } } }, y: { min: 0, max: 100, ticks: { color: '#64748b', stepSize: 25 } } }
             }
-        }
+        });
+    }
 
-        function finishOnboarding() {
-            userData.stress = 20;
+    function refreshKpis() {
+        document.getElementById('kpi-streak').textContent = String(computeStreak());
+        const a7 = avgCompletion7d();
+        document.getElementById('kpi-rate7').textContent = a7 === null ? '—' : a7 + '%';
+        document.getElementById('kpi-timeline').textContent = cycleProgressPercent() + '%';
+    }
+
+    function applyDashboard() {
+        const p = state.profile;
+        const cashNum = parseInt(p.cash, 10);
+        document.getElementById('display-cash').textContent = '¥ ' + (Number.isFinite(cashNum) ? cashNum : 0).toLocaleString();
+        document.getElementById('display-stress').textContent = Math.min(100, Math.max(0, parseInt(p.stress, 10) || 0)) + '%';
+        document.getElementById('display-target').textContent = state.cycle.goal || '未设定目标';
+        const pm = state.cycle.targetPeriodMonths;
+        document.getElementById('display-period').textContent = pm <= 6 ? '周期：6 个月' : pm <= 12 ? '周期：12 个月' : '周期：3 年';
+        document.getElementById('display-goal-progress').textContent = '时间进度（示意）：' + cycleProgressPercent() + '% · 自 ' + (state.cycle.startedAt || '—');
+        document.getElementById('display-field-hint').textContent = '领域：' + (FIELD_LABELS[p.field] || '其他');
+        document.getElementById('header-tier-btn').textContent = isPro() ? 'PRO' : '免费版';
+        document.getElementById('header-tier-btn').className = isPro()
+            ? 'text-[10px] font-bold px-2.5 py-1 rounded-full pro-badge text-white border-0'
+            : 'text-[10px] font-bold px-2.5 py-1 rounded-full border border-slate-600 text-slate-300';
+
+        renderMilestones();
+        renderTaskList();
+        refreshKpis();
+        updateArchiveMini();
+        destroyCharts();
+        initCharts();
+        saveState();
+    }
+
+    function updateArchiveMini() {
+        const n = state.archives.length;
+        document.getElementById('archive-count-label').textContent = String(n);
+        const box = document.getElementById('archive-mini-list');
+        if (!n) { box.innerHTML = '<p class="text-slate-600">暂无归档</p>'; return; }
+        const show = isPro() ? state.archives.slice().reverse() : state.archives.slice(-2).reverse();
+        box.innerHTML = show.map(a => `<div class="p-2 rounded-lg bg-slate-900/50 border border-white/5">${escapeHtml(a.goal)}<br><span class="text-slate-600">${escapeHtml(a.archivedAt)}</span></div>`).join('');
+        if (!isPro() && n > 2) box.innerHTML += '<p class="text-amber-500/90 text-[10px]">免费版仅展示最近 2 条，开通 PRO 查看全部</p>';
+    }
+
+    window.__FP = {
+        toggleTask(id) {
+            const tk = todayKey();
+            const day = getDayEntry(tk);
+            const i = day.doneIds.indexOf(id);
+            if (i >= 0) day.doneIds.splice(i, 1);
+            else day.doneIds.push(id);
+            saveState();
+            renderTaskList();
+            refreshKpis();
+            if (chartInstances.growth) {
+                chartInstances.growth.data.datasets[0].data = chartRates14d();
+                chartInstances.growth.update();
+            }
+        },
+        removeTask(id) {
+            state.cycle.tasks = state.cycle.tasks.filter(t => t.id !== id);
+            Object.keys(state.cycle.days).forEach(d => {
+                state.cycle.days[d].doneIds = state.cycle.days[d].doneIds.filter(x => x !== id);
+            });
+            saveState();
+            renderTaskList();
+            refreshKpis();
+        }
+    };
+
+    window.nextStep = function (step) {
+        if (step === 2) {
+            state.profile.cash = document.getElementById('init-cash').value || 0;
+            state.profile.skill = document.getElementById('init-skill').value.trim() || '未设定';
+            state.profile.field = document.getElementById('init-field').value;
+            state.profile.time = document.getElementById('init-time').value;
+            document.getElementById('step1').classList.add('hidden');
+            document.getElementById('step2').classList.remove('hidden');
+            document.getElementById('dot2').classList.add('active');
+        } else if (step === 3) {
+            state.cycle.goal = document.getElementById('target-kpi').value.trim() || '我的翻盘目标';
+            state.cycle.targetPeriodMonths = parseInt(document.getElementById('target-period').value, 10) || 12;
+            state.cycle.startedAt = todayKey();
+            document.getElementById('step2').classList.add('hidden');
+            document.getElementById('step3').classList.remove('hidden');
+            document.getElementById('dot3').classList.add('active');
+            const btn = document.getElementById('finish-btn');
+            btn.disabled = true;
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
+            setTimeout(() => {
+                btn.textContent = '进入应用';
+                btn.disabled = false;
+                btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                btn.onclick = window.finishOnboarding;
+            }, 1200);
+        }
+    };
+
+    window.finishOnboarding = function () {
+        state.profile.stress = 20;
+        state.onboardingDone = true;
+        state.cycle.id = 'c_' + Date.now();
+        state.cycle.tasks = buildTaskTemplates();
+        state.cycle.days = {};
+        document.getElementById('onboarding').classList.add('hidden');
+        document.getElementById('main-app').classList.remove('opacity-0');
+        document.getElementById('main-app').style.opacity = '1';
+        document.getElementById('checkin-hint').textContent = '建议先完成至少 1 项任务，再点「今日打卡」。';
+        saveState();
+        applyDashboard();
+    };
+
+    window.switchTab = function (tabId, title) {
+        document.getElementById('page-title').textContent = title;
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('nav-active'));
+        const nav = document.querySelector(`[data-page="${tabId}"]`);
+        if (nav) nav.classList.add('nav-active');
+    };
+
+    window.openEditModal = function (mode) {
+        editModalMode = mode;
+        document.getElementById('edit-fields-base').classList.toggle('hidden', mode !== 'base');
+        document.getElementById('edit-fields-target').classList.toggle('hidden', mode !== 'target');
+        document.getElementById('edit-title').textContent = mode === 'base' ? '编辑现实' : '编辑目标';
+        if (mode === 'base') {
+            document.getElementById('edit-cash').value = state.profile.cash || '';
+            document.getElementById('edit-skill').value = state.profile.skill || '';
+            document.getElementById('edit-stress').value = state.profile.stress;
+            fillSelect(document.getElementById('edit-field'), FIELD_OPTIONS, state.profile.field);
+            fillSelect(document.getElementById('edit-time'), TIME_OPTIONS, String(state.profile.time));
+        } else {
+            document.getElementById('edit-target').value = state.cycle.goal || '';
+            document.getElementById('edit-period').value = String(state.cycle.targetPeriodMonths);
+        }
+        document.getElementById('edit-overlay').classList.add('open');
+    };
+
+    window.closeEditModal = function () { document.getElementById('edit-overlay').classList.remove('open'); };
+
+    window.saveEditModal = function () {
+        if (editModalMode === 'base') {
+            state.profile.cash = document.getElementById('edit-cash').value || 0;
+            state.profile.skill = document.getElementById('edit-skill').value.trim() || '未设定';
+            state.profile.field = document.getElementById('edit-field').value;
+            state.profile.time = document.getElementById('edit-time').value;
+            let st = parseInt(document.getElementById('edit-stress').value, 10);
+            state.profile.stress = Number.isFinite(st) ? Math.min(100, Math.max(0, st)) : 20;
+        } else {
+            state.cycle.goal = document.getElementById('edit-target').value.trim() || state.cycle.goal;
+            state.cycle.targetPeriodMonths = parseInt(document.getElementById('edit-period').value, 10) || 12;
+            regenerateTemplateTasks();
+        }
+        closeEditModal();
+        applyDashboard();
+    };
+
+    window.openAddTask = function () {
+        const lim = maxTasks();
+        if (state.cycle.tasks.length >= lim) {
+            document.getElementById('add-task-limit-hint').classList.remove('hidden');
+            document.getElementById('add-task-limit-hint').textContent = '已达任务上限（免费 8 / PRO 30）。升级 PRO 或删除部分任务。';
+        } else {
+            document.getElementById('add-task-limit-hint').classList.add('hidden');
+        }
+        document.getElementById('add-task-title').value = '';
+        document.getElementById('add-task-meta').value = '';
+        document.getElementById('add-overlay').classList.add('open');
+    };
+
+    window.closeAddTask = function () { document.getElementById('add-overlay').classList.remove('open'); };
+
+    window.submitAddTask = function () {
+        if (state.cycle.tasks.length >= maxTasks()) { closeAddTask(); return; }
+        const title = document.getElementById('add-task-title').value.trim();
+        if (!title) return;
+        const meta = document.getElementById('add-task-meta').value.trim() || '自定义';
+        state.cycle.tasks.push({ id: uid(), title, meta, source: 'custom' });
+        saveState();
+        closeAddTask();
+        renderTaskList();
+        refreshKpis();
+    };
+
+    window.dailyCheckIn = function () {
+        const tk = todayKey();
+        const day = getDayEntry(tk);
+        const tasks = state.cycle.tasks;
+        const done = tasks.filter(t => day.doneIds.includes(t.id)).length;
+        if (tasks.length && done === 0) {
+            document.getElementById('checkin-hint').textContent = '先完成至少一项任务再打卡，或直接去完成任务～';
+            return;
+        }
+        if (day.checkIn) {
+            document.getElementById('checkin-hint').textContent = '今日已打卡';
+            return;
+        }
+        day.checkIn = true;
+        saveState();
+        document.getElementById('checkin-hint').textContent = '打卡成功。明天继续。';
+        refreshKpis();
+    };
+
+    window.openMenu = function () { updateArchiveMini(); document.getElementById('menu-overlay').classList.add('open'); };
+    window.closeMenu = function () { document.getElementById('menu-overlay').classList.remove('open'); };
+
+    window.openSubModal = function () { document.getElementById('sub-overlay').classList.add('open'); };
+    window.closeSubModal = function () { document.getElementById('sub-overlay').classList.remove('open'); };
+
+    window.activateProDemo = function () {
+        state.subscription.tier = 'pro';
+        saveState();
+        closeSubModal();
+        applyDashboard();
+    };
+
+    window.setFreeTier = function () {
+        state.subscription.tier = 'free';
+        saveState();
+        closeSubModal();
+        applyDashboard();
+    };
+
+    window.exportData = function () {
+        if (!isPro()) { alert('导出为 PRO 功能，请先模拟开通。'); return; }
+        const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'fanpan_backup_' + todayKey() + '.json';
+        a.click();
+        URL.revokeObjectURL(a.href);
+    };
+
+    window.injectDemo = function () {
+        if (!isPro()) { alert('演示数据注入为 PRO 功能。'); return; }
+        const dates = lastNDates(14);
+        const tasks = state.cycle.tasks;
+        if (!tasks.length) state.cycle.tasks = buildTaskTemplates();
+        dates.forEach((d, idx) => {
+            const en = getDayEntry(d);
+            en.checkIn = Math.random() > 0.15;
+            en.doneIds = [];
+            tasks.forEach((t, ti) => {
+                if (ti < tasks.length - 1 && (idx + ti) % 3 !== 0) en.doneIds.push(t.id);
+            });
+        });
+        saveState();
+        applyDashboard();
+        alert('已注入近 14 天模拟完成与打卡数据。');
+    };
+
+    window.openArchiveModal = function () { document.getElementById('archive-note').value = ''; document.getElementById('archive-overlay').classList.add('open'); };
+    window.closeArchiveModal = function () { document.getElementById('archive-overlay').classList.remove('open'); };
+
+    window.confirmArchive = function () {
+        const note = document.getElementById('archive-note').value.trim();
+        const arch = {
+            id: 'a_' + Date.now(),
+            goal: state.cycle.goal,
+            archivedAt: todayKey(),
+            startedAt: state.cycle.startedAt,
+            targetPeriodMonths: state.cycle.targetPeriodMonths,
+            note,
+            stats: {
+                streakEnd: computeStreak(),
+                checkInDays: Object.keys(state.cycle.days).filter(d => state.cycle.days[d].checkIn).length,
+                taskCount: state.cycle.tasks.length
+            },
+            snapshotProfile: { ...state.profile }
+        };
+        state.archives.push(arch);
+        state.cycle = {
+            id: 'c_' + Date.now(),
+            goal: '',
+            targetPeriodMonths: 12,
+            startedAt: todayKey(),
+            tasks: [],
+            days: {}
+        };
+        state.onboardingDone = false;
+        saveState();
+        closeArchiveModal();
+        document.getElementById('init-cash').value = state.profile.cash != null ? state.profile.cash : '';
+        document.getElementById('init-skill').value = state.profile.skill || '';
+        document.getElementById('init-field').value = state.profile.field || 'other';
+        document.getElementById('init-time').value = String(state.profile.time || '4');
+        document.getElementById('target-kpi').value = '';
+        document.getElementById('target-period').value = '12';
+        document.getElementById('main-app').classList.add('opacity-0');
+        document.getElementById('main-app').style.opacity = '0';
+        document.getElementById('onboarding').classList.remove('hidden');
+        document.getElementById('step1').classList.remove('hidden');
+        document.getElementById('step2').classList.add('hidden');
+        document.getElementById('step3').classList.add('hidden');
+        document.getElementById('dot1').classList.add('active');
+        document.getElementById('dot2').classList.remove('active');
+        document.getElementById('dot3').classList.remove('active');
+        const fbtn = document.getElementById('finish-btn');
+        fbtn.textContent = '准备中…';
+        fbtn.disabled = true;
+        fbtn.classList.add('opacity-50', 'cursor-not-allowed');
+        fbtn.onclick = null;
+        alert('已归档。已保留你的「现实」档案；请确认第一步后设定新目标以开启下一周期。');
+    };
+
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') {
+            closeEditModal();
+            closeAddTask();
+            closeMenu();
+            closeSubModal();
+            closeArchiveModal();
+        }
+    });
+
+    function boot() {
+        loadState();
+        if (state.onboardingDone) {
             document.getElementById('onboarding').classList.add('hidden');
             document.getElementById('main-app').classList.remove('opacity-0');
             document.getElementById('main-app').style.opacity = '1';
-            document.getElementById('checkin-hint').textContent = '每天点一次即可，代表你完成了「最小可行行动」。';
-            applyDashboardFromUserData();
+            if (!state.cycle.tasks.length) state.cycle.tasks = buildTaskTemplates();
+            applyDashboard();
+        } else {
+            document.getElementById('onboarding').classList.remove('hidden');
         }
+    }
 
-        function switchTab(tabId, title) {
-            document.getElementById('page-title').innerText = title;
-            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-            document.getElementById(tabId).classList.add('active');
-            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('nav-active'));
-            const activeNav = document.querySelector(`[data-page="${tabId}"]`);
-            if (activeNav) activeNav.classList.add('nav-active');
-        }
-
-        function initCharts() {
-            const t = parseFloat(userData.time);
-            const timeBar = Number.isFinite(t) ? Math.min(95, Math.max(8, t * 12)) : 40;
-            const cashBar = parseInt(userData.cash, 10) > 0 ? 60 : 10;
-            const stress = parseInt(userData.stress, 10);
-            const stressClamped = Number.isFinite(stress) ? Math.min(100, Math.max(0, stress)) : 20;
-            const energyBar = Math.min(95, Math.max(8, 100 - stressClamped));
-
-            const ctxAsset = document.getElementById('assetChart').getContext('2d');
-            chartInstances.asset = new Chart(ctxAsset, {
-                type: 'bar',
-                data: {
-                    labels: ['财务资产', '时间资产', '技能价值', '可用精力'],
-                    datasets: [{
-                        data: [cashBar, timeBar, 42, energyBar],
-                        backgroundColor: ['#10b981', '#6366f1', '#f59e0b', '#38bdf8'],
-                        borderRadius: 6
-                    }]
-                },
-                options: {
-                    indexAxis: 'y',
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: { x: { display: false }, y: { ticks: { color: '#94a3b8', font: { size: 10 } } } }
-                }
-            });
-
-            const radar = RADAR_BY_FIELD[userData.field] || RADAR_BY_FIELD.other;
-            const ctxRadar = document.getElementById('skillRadar').getContext('2d');
-            chartInstances.radar = new Chart(ctxRadar, {
-                type: 'radar',
-                data: {
-                    labels: ['执行力', '抗压性', '协作力', '学习力', '资源力', '认知度'],
-                    datasets: [{
-                        data: radar,
-                        borderColor: '#6366f1',
-                        backgroundColor: 'rgba(99, 102, 241, 0.2)',
-                        pointBackgroundColor: '#6366f1'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: { r: { grid: { color: 'rgba(255,255,255,0.1)' }, pointLabels: { color: '#94a3b8' }, ticks: { display: false } } },
-                    plugins: { legend: { display: false } }
-                }
-            });
-
-            const g = growthSeries();
-            const ctxGrowth = document.getElementById('growthChart').getContext('2d');
-            chartInstances.growth = new Chart(ctxGrowth, {
-                type: 'line',
-                data: {
-                    labels: g.labels,
-                    datasets: [{
-                        data: g.data,
-                        borderColor: '#10b981',
-                        tension: 0.4,
-                        fill: true,
-                        backgroundColor: 'rgba(16, 185, 129, 0.1)'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: { x: { ticks: { color: '#64748b' } }, y: { display: false } }
-                }
-            });
-        }
+    boot();
+})();
     </script>
 </body>
-</html> 
+</html>
