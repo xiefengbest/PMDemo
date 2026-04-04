@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RealityCheck - 认清现实，成就自我</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        .glass-card { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); }
+        .tab-active { color: #2563eb; border-bottom: 2px solid #2563eb; }
+        .hidden-section { display: none; }
+        .modal-hidden { display: none !important; }
+    </style>
+</head>
+<body class="pb-24">
+
+    <!-- 首次启动 / 未完成设定 -->
+    <div id="onboarding-root" class="fixed inset-0 z-[100] bg-slate-50 flex flex-col hidden">
+        <div class="flex-1 overflow-y-auto p-6 max-w-md mx-auto w-full">
+            <div id="onb-step-welcome" class="onb-step space-y-6 pt-8">
+                <p class="text-sm font-semibold text-blue-600">欢迎使用</p>
+                <h2 class="text-2xl font-bold text-slate-800">认清现实，再出发</h2>
+                <p class="text-slate-600 text-sm leading-relaxed">先写下你当前最想达成的<strong>一个主目标</strong>，后续可在设定里随时修改。</p>
+                <label class="block">
+                    <span class="text-xs text-slate-500">主目标</span>
+                    <input id="onb-goal" type="text" placeholder="例如：成为全栈工程师" class="mt-1 w-full px-4 py-3 rounded-2xl border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                </label>
+                <button type="button" onclick="onboardingNext(1)" class="w-full py-3.5 bg-blue-600 text-white rounded-2xl font-semibold">下一步</button>
+            </div>
+            <div id="onb-step-radar" class="onb-step space-y-4 pt-6 hidden">
+                <p class="text-sm font-semibold text-blue-600">摸摸现状</p>
+                <h2 class="text-xl font-bold text-slate-800">六个方面，凭感觉选一句</h2>
+                <p class="text-slate-500 text-xs leading-relaxed">不用打分、也不用和任何人比「水平」。只要选<strong>最近这段时间</strong>最贴近你感受的一项；雷达图只是帮你看见大致轮廓。</p>
+                <div id="onb-radar-inputs" class="space-y-5"></div>
+                <div class="flex gap-3 pt-2">
+                    <button type="button" onclick="onboardingNext(0)" class="flex-1 py-3 border border-slate-200 rounded-2xl font-medium text-slate-700">上一步</button>
+                    <button type="button" onclick="onboardingNext(2)" class="flex-1 py-3 bg-blue-600 text-white rounded-2xl font-semibold">下一步</button>
+                </div>
+            </div>
+            <div id="onb-step-finish" class="onb-step space-y-4 pt-6 hidden">
+                <p class="text-sm font-semibold text-blue-600">开始坚持</p>
+                <h2 class="text-xl font-bold text-slate-800">起始日与任务</h2>
+                <label class="block">
+                    <span class="text-xs text-slate-500">坚持计数起始日</span>
+                    <input id="onb-start" type="date" class="mt-1 w-full px-4 py-3 rounded-2xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none">
+                </label>
+                <p class="text-xs text-slate-500">可选：添加一条今日任务（之后随时可增删改）</p>
+                <label class="block">
+                    <span class="text-xs text-slate-500">任务标题</span>
+                    <input id="onb-task-title" type="text" placeholder="例如：晨跑 30 分钟" class="mt-1 w-full px-4 py-3 rounded-2xl border border-slate-200 outline-none">
+                </label>
+                <label class="block">
+                    <span class="text-xs text-slate-500">预估时长（分钟）</span>
+                    <input id="onb-task-min" type="number" min="1" value="30" class="mt-1 w-full px-4 py-3 rounded-2xl border border-slate-200 outline-none">
+                </label>
+                <div class="flex gap-3 pt-2">
+                    <button type="button" onclick="onboardingNext(1)" class="flex-1 py-3 border border-slate-200 rounded-2xl font-medium text-slate-700">上一步</button>
+                    <button type="button" onclick="finishOnboarding()" class="flex-1 py-3 bg-blue-600 text-white rounded-2xl font-semibold">完成并开始</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="sticky top-0 z-50 bg-white shadow-sm px-4 py-4 flex justify-between items-center">
+        <div>
+            <h1 class="text-xl font-bold text-slate-800">RealityCheck</h1>
+            <p class="text-xs text-slate-500">Stay Real, Get Better</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <button type="button" onclick="openSettingsModal()" class="p-2 rounded-full text-slate-600 hover:bg-slate-100" title="设定">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+            </button>
+            <button type="button" onclick="toggleModal('subscription-modal')" class="bg-gradient-to-r from-amber-400 to-orange-500 text-white px-4 py-1.5 rounded-full text-sm font-semibold shadow-lg shadow-orange-200">
+                PRO 会员
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main id="app-main" class="max-w-md mx-auto p-4 space-y-6">
+
+        <section id="reality-section" class="section">
+            <div class="bg-white p-6 rounded-3xl shadow-sm space-y-4">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-lg font-bold text-slate-800">当前现实评估</h2>
+                    <button type="button" class="text-blue-600 text-sm" onclick="openReassessFlow()">重新评估</button>
+                </div>
+                <div class="relative h-64">
+                    <canvas id="realityChart"></canvas>
+                </div>
+                <p class="text-[11px] text-slate-400 text-center -mt-1">上图是感受轮廓，不是考试分数；重评估时可随时改。</p>
+                <div class="grid grid-cols-2 gap-3 mt-4">
+                    <div class="p-3 bg-blue-50 rounded-2xl">
+                        <p class="text-xs text-blue-600 font-medium">当前目标</p>
+                        <p id="display-goal" class="text-sm font-bold text-slate-800">—</p>
+                    </div>
+                    <div class="p-3 bg-green-50 rounded-2xl">
+                        <p class="text-xs text-green-600 font-medium">坚持天数</p>
+                        <p id="display-streak" class="text-sm font-bold text-slate-800">0 天</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="tasks-section" class="section hidden-section">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-bold text-slate-800">今日任务打卡</h2>
+                <button type="button" onclick="openTaskModal()" class="text-sm font-semibold text-blue-600">+ 添加任务</button>
+            </div>
+            <div id="task-list" class="space-y-3"></div>
+            <p id="task-empty-hint" class="text-center text-sm text-slate-400 py-8 hidden">暂无任务，点击右上角添加</p>
+        </section>
+
+        <section id="analytics-section" class="section hidden-section">
+            <h2 class="text-lg font-bold text-slate-800 mb-4">成长轨迹</h2>
+            <div class="bg-white p-6 rounded-3xl shadow-sm">
+                <canvas id="growthChart"></canvas>
+                <div class="mt-6 space-y-4">
+                    <div class="flex justify-between items-center text-sm">
+                        <span class="text-slate-500">目标完成进度</span>
+                        <span id="analytics-progress-label" class="font-bold text-blue-600">0%</span>
+                    </div>
+                    <div class="w-full bg-slate-100 rounded-full h-2">
+                        <div id="analytics-progress-bar" class="bg-blue-600 h-2 rounded-full transition-all" style="width: 0%"></div>
+                    </div>
+                    <button type="button" onclick="archiveGoal()" class="w-full py-3 bg-slate-800 text-white rounded-xl font-semibold mt-4">
+                        达成并归档此目标
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 px-8 py-3 flex justify-between items-center z-40 max-w-md mx-auto">
+        <button type="button" onclick="switchTab('reality')" id="tab-reality" class="flex flex-col items-center space-y-1 tab-active">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+            <span class="text-[10px]">现实</span>
+        </button>
+        <button type="button" onclick="switchTab('tasks')" id="tab-tasks" class="flex flex-col items-center space-y-1 text-slate-400">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012-2" />
+            </svg>
+            <span class="text-[10px]">任务</span>
+        </button>
+        <button type="button" onclick="switchTab('analytics')" id="tab-analytics" class="flex flex-col items-center space-y-1 text-slate-400">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+            </svg>
+            <span class="text-[10px]">数据</span>
+        </button>
+    </nav>
+
+    <!-- 设定 -->
+    <div id="settings-modal" class="fixed inset-0 z-[70] flex items-end justify-center modal-hidden">
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeSettingsModal()"></div>
+        <div class="relative bg-white w-full max-w-md rounded-t-[40px] p-6 max-h-[90vh] overflow-y-auto">
+            <div class="w-12 h-1 bg-slate-200 rounded-full mx-auto mb-4"></div>
+            <h3 class="text-xl font-bold text-slate-800">设定</h3>
+            <p class="text-xs text-slate-500 mt-1">修改目标、现状感受与起始日</p>
+            <div class="mt-4 space-y-3">
+                <label class="block text-xs text-slate-500">主目标</label>
+                <input id="set-goal" type="text" class="w-full px-4 py-3 rounded-2xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500">
+                <label class="block text-xs text-slate-500 mt-2">坚持起始日</label>
+                <input id="set-start" type="date" class="w-full px-4 py-3 rounded-2xl border border-slate-200 outline-none">
+                <p class="text-xs font-medium text-slate-600 pt-2">现状轮廓（凭感觉重选即可）</p>
+                <div id="settings-radar-inputs" class="space-y-4"></div>
+            </div>
+            <button type="button" onclick="saveSettingsFromModal()" class="w-full py-3.5 bg-blue-600 text-white rounded-2xl font-semibold mt-6">保存设定</button>
+            <button type="button" onclick="openResetConfirm()" class="w-full py-3 mt-3 text-red-600 text-sm font-medium border border-red-100 rounded-2xl hover:bg-red-50">重置全部数据…</button>
+            <button type="button" onclick="closeSettingsModal()" class="w-full py-3 mt-2 text-slate-500 text-sm">关闭</button>
+        </div>
+    </div>
+
+    <!-- 重置确认 -->
+    <div id="reset-modal" class="fixed inset-0 z-[80] flex items-center justify-center p-4 modal-hidden">
+        <div class="absolute inset-0 bg-black/50" onclick="closeResetModal()"></div>
+        <div class="relative bg-white rounded-3xl p-6 max-w-sm w-full shadow-xl">
+            <h3 class="text-lg font-bold text-slate-800">确认重置？</h3>
+            <p class="text-sm text-slate-600 mt-2">将清除本机保存的目标、雷达、任务与打卡记录，并重新进入首次设定流程。此操作不可撤销。</p>
+            <div class="flex gap-3 mt-6">
+                <button type="button" onclick="closeResetModal()" class="flex-1 py-3 border border-slate-200 rounded-xl font-medium">取消</button>
+                <button type="button" onclick="performFullReset()" class="flex-1 py-3 bg-red-600 text-white rounded-xl font-semibold">确认重置</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 任务 添加/编辑 -->
+    <div id="task-modal" class="fixed inset-0 z-[75] flex items-end justify-center modal-hidden">
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeTaskModal()"></div>
+        <div class="relative bg-white w-full max-w-md rounded-t-[40px] p-6">
+            <div class="w-12 h-1 bg-slate-200 rounded-full mx-auto mb-4"></div>
+            <h3 id="task-modal-title" class="text-xl font-bold text-slate-800">添加任务</h3>
+            <input type="hidden" id="task-edit-id" value="">
+            <label class="block mt-4">
+                <span class="text-xs text-slate-500">任务内容</span>
+                <input id="task-form-title" type="text" class="mt-1 w-full px-4 py-3 rounded-2xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500" placeholder="要做什么">
+            </label>
+            <label class="block mt-3">
+                <span class="text-xs text-slate-500">预估时长（分钟）</span>
+                <input id="task-form-min" type="number" min="1" value="30" class="mt-1 w-full px-4 py-3 rounded-2xl border border-slate-200 outline-none">
+            </label>
+            <button type="button" onclick="submitTaskForm()" class="w-full py-3.5 bg-blue-600 text-white rounded-2xl font-semibold mt-6">保存</button>
+            <button type="button" onclick="closeTaskModal()" class="w-full py-3 mt-2 text-slate-500 text-sm">取消</button>
+        </div>
+    </div>
+
+    <!-- 重新评估（仅雷达） -->
+    <div id="reassess-modal" class="fixed inset-0 z-[72] flex items-end justify-center modal-hidden">
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeReassessModal()"></div>
+        <div class="relative bg-white w-full max-w-md rounded-t-[40px] p-6 max-h-[85vh] overflow-y-auto">
+            <div class="w-12 h-1 bg-slate-200 rounded-full mx-auto mb-4"></div>
+            <h3 class="text-xl font-bold text-slate-800">重新摸摸现状</h3>
+            <p class="text-xs text-slate-500 mt-1 leading-relaxed">过一阵子感受会变很正常，按现在的心情重选即可。</p>
+            <div id="reassess-radar-inputs" class="space-y-4 mt-4"></div>
+            <button type="button" onclick="saveReassess()" class="w-full py-3.5 bg-blue-600 text-white rounded-2xl font-semibold mt-6">更新轮廓图</button>
+            <button type="button" onclick="closeReassessModal()" class="w-full py-3 mt-2 text-slate-500 text-sm">取消</button>
+        </div>
+    </div>
+
+    <div id="subscription-modal" class="fixed inset-0 z-[60] flex items-end justify-center modal-hidden">
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="toggleModal('subscription-modal')"></div>
+        <div class="relative bg-white w-full max-w-md rounded-t-[40px] p-8">
+            <div class="w-12 h-1 bg-slate-200 rounded-full mx-auto mb-6"></div>
+            <h3 class="text-2xl font-bold text-center text-slate-800">解锁 RealityCheck PRO</h3>
+            <p class="text-slate-500 text-center mt-2 text-sm px-6">开启无限目标设定、深度成长数据分析及跨设备同步。</p>
+            <div class="mt-8 space-y-4">
+                <div class="p-4 border-2 border-blue-600 bg-blue-50 rounded-2xl flex justify-between items-center">
+                    <div>
+                        <p class="font-bold text-slate-800">年度订阅 <span class="bg-blue-100 text-blue-600 text-[10px] px-2 py-0.5 rounded ml-2">节省 50%</span></p>
+                        <p class="text-xs text-slate-500">¥198.00 / 年</p>
+                    </div>
+                    <span class="text-blue-600 font-bold">¥16.5/月</span>
+                </div>
+                <div class="p-4 border border-slate-200 rounded-2xl flex justify-between items-center">
+                    <div>
+                        <p class="font-bold text-slate-800">月度订阅</p>
+                        <p class="text-xs text-slate-500">随时取消</p>
+                    </div>
+                    <span class="text-slate-800 font-bold">¥32.00/月</span>
+                </div>
+            </div>
+            <button type="button" class="w-full py-4 bg-blue-600 text-white rounded-2xl font-bold mt-8 shadow-xl shadow-blue-200 active:scale-[0.98] transition-transform">
+                立即订阅
+            </button>
+            <p class="text-center text-[10px] text-slate-400 mt-4 underline">恢复购买 | 服务协议</p>
+        </div>
+    </div>
+
+    <script>
+        const RADAR_LABELS = ['专业技能', '身心健康', '人际关系', '财务状况', '情绪控制', '意志力'];
+        const RADAR_PROMPTS = [
+            '对照你的主目标：相关能力、知识或练习量，最近整体感觉？',
+            '睡眠、运动、精力——身体这条线最近怎样？',
+            '能说心里话的人多吗？关系里滋养多还是心累多？',
+            '收入、开销、存款——心里踏实程度？',
+            '烦心事来了，大概多久能缓过来？',
+            '定了的小计划，跟下来容易吗？',
+        ];
+        const FEELING_TIERS = [
+            { score: 3, text: '挺吃力的', sub: '常常觉得跟不上或很想躲' },
+            { score: 4.5, text: '不太满意', sub: '短板明显，还在硬撑' },
+            { score: 6, text: '马马虎虎', sub: '不好不坏，时好时坏' },
+            { score: 7.5, text: '大体还行', sub: '多数时候接得住' },
+            { score: 9, text: '相对省心', sub: '这块算比较稳当' },
+        ];
+        const DEFAULT_RADAR = [6, 6, 6, 6, 6, 6];
+        const STORAGE_CONFIG = 'rc_v1_config';
+        const STORAGE_TASKS = 'rc_v1_tasks';
+        const STORAGE_COMPLETION = 'rc_v1_completion';
+
+        let realityChartInstance = null;
+        let growthChartInstance = null;
+        let onboardingDraftRadar = DEFAULT_RADAR.slice();
+
+        function uid() {
+            return 't' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+        }
+
+        function todayKey() {
+            const d = new Date();
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${y}-${m}-${day}`;
+        }
+
+        function loadConfig() {
+            try {
+                const raw = localStorage.getItem(STORAGE_CONFIG);
+                if (!raw) return null;
+                const c = JSON.parse(raw);
+                if (!c || !c.initialized) return null;
+                if (!Array.isArray(c.radar) || c.radar.length !== 6) c.radar = DEFAULT_RADAR.slice();
+                return c;
+            } catch (e) { return null; }
+        }
+
+        function saveConfig(c) {
+            localStorage.setItem(STORAGE_CONFIG, JSON.stringify(c));
+        }
+
+        function loadTasks() {
+            try {
+                const raw = localStorage.getItem(STORAGE_TASKS);
+                if (!raw) return [];
+                const arr = JSON.parse(raw);
+                return Array.isArray(arr) ? arr : [];
+            } catch (e) { return []; }
+        }
+
+        function saveTasks(list) {
+            localStorage.setItem(STORAGE_TASKS, JSON.stringify(list));
+        }
+
+        function loadCompletion() {
+            try {
+                const raw = localStorage.getItem(STORAGE_COMPLETION);
+                if (!raw) return { date: todayKey(), ids: [] };
+                const o = JSON.parse(raw);
+                const tk = todayKey();
+                if (o.date !== tk) return { date: tk, ids: [] };
+                return { date: tk, ids: Array.isArray(o.ids) ? o.ids : [] };
+            } catch (e) {
+                return { date: todayKey(), ids: [] };
+            }
+        }
+
+        function saveCompletion(comp) {
+            localStorage.setItem(STORAGE_COMPLETION, JSON.stringify(comp));
+        }
+
+        function clampRadar(arr) {
+            return arr.map(v => {
+                const n = Number(v);
+                if (Number.isNaN(n)) return 5;
+                return Math.min(10, Math.max(1, Math.round(n)));
+            });
+        }
+
+        function nearestTierScore(v) {
+            const n = Number(v);
+            if (Number.isNaN(n)) return FEELING_TIERS[2].score;
+            let best = FEELING_TIERS[2].score;
+            let dmin = Infinity;
+            FEELING_TIERS.forEach(t => {
+                const d = Math.abs(t.score - n);
+                if (d < dmin) { dmin = d; best = t.score; }
+            });
+            return best;
+        }
+
+        function buildQualitativeRadar(containerId, values, namePrefix) {
+            const el = document.getElementById(containerId);
+            const safePrefix = String(namePrefix).replace(/"/g, '');
+            el.innerHTML = RADAR_LABELS.map((label, i) => {
+                const picked = nearestTierScore(values[i]);
+                return `
+                <div class="rounded-2xl border border-slate-100 bg-slate-50/90 p-3 space-y-2">
+                    <div>
+                        <p class="text-sm font-semibold text-slate-800">${label}</p>
+                        <p class="text-xs text-slate-500 mt-0.5 leading-relaxed">${RADAR_PROMPTS[i]}</p>
+                    </div>
+                    <div class="flex flex-wrap gap-1.5">
+                        ${FEELING_TIERS.map(t => {
+                            const checked = Math.abs(picked - t.score) < 0.01 ? 'checked' : '';
+                            return `<label class="cursor-pointer shrink-0 max-w-[48%] sm:max-w-none">
+                                <input type="radio" name="${safePrefix}-row-${i}" value="${t.score}" class="peer sr-only" ${checked}>
+                                <span class="block px-2.5 py-1.5 rounded-xl text-xs border border-slate-200 bg-white text-slate-600 peer-checked:border-blue-500 peer-checked:bg-blue-50 peer-checked:text-blue-900 peer-focus-visible:ring-2 peer-focus-visible:ring-blue-300">
+                                    <span class="font-medium">${t.text}</span>
+                                    <span class="block text-[10px] text-slate-400 font-normal mt-0.5 leading-snug">${t.sub}</span>
+                                </span>
+                            </label>`;
+                        }).join('')}
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function readQualitativeRadar(namePrefix) {
+            const safePrefix = String(namePrefix).replace(/"/g, '');
+            const out = [];
+            for (let i = 0; i < 6; i++) {
+                const sel = document.querySelector(`input[name="${safePrefix}-row-${i}"]:checked`);
+                out.push(sel ? parseFloat(sel.value, 10) : FEELING_TIERS[2].score);
+            }
+            return clampRadar(out);
+        }
+
+        function daysSinceStart(startDateStr) {
+            if (!startDateStr) return 0;
+            const start = new Date(startDateStr + 'T12:00:00');
+            const now = new Date();
+            const t0 = new Date(todayKey() + 'T12:00:00');
+            if (start > t0) return 0;
+            const diff = Math.floor((t0 - start) / 86400000);
+            return diff + 1;
+        }
+
+        function taskProgressPercent() {
+            const tasks = loadTasks();
+            const comp = loadCompletion();
+            if (tasks.length === 0) return 0;
+            const done = tasks.filter(t => comp.ids.includes(t.id)).length;
+            return Math.round((done / tasks.length) * 100);
+        }
+
+        function renderRealityChart(radarData) {
+            const canvas = document.getElementById('realityChart');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            if (realityChartInstance) realityChartInstance.destroy();
+            realityChartInstance = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: RADAR_LABELS,
+                    datasets: [{
+                        label: '当前现状',
+                        data: radarData,
+                        fill: true,
+                        backgroundColor: 'rgba(37, 99, 235, 0.2)',
+                        borderColor: 'rgb(37, 99, 235)',
+                        pointBackgroundColor: 'rgb(37, 99, 235)',
+                    }]
+                },
+                options: {
+                    scales: {
+                        r: {
+                            angleLines: { display: false },
+                            suggestedMin: 0,
+                            suggestedMax: 10,
+                            ticks: { display: false, stepSize: 2 }
+                        }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        function initGrowthChart() {
+            const canvas = document.getElementById('growthChart');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            if (growthChartInstance) growthChartInstance.destroy();
+            growthChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
+                    datasets: [{
+                        label: '专注时长',
+                        data: [120, 150, 80, 200, 180, 240, 210],
+                        borderColor: '#2563eb',
+                        tension: 0.4,
+                        fill: false
+                    }]
+                },
+                options: {
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, display: false },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        function refreshDashboard() {
+            const cfg = loadConfig();
+            if (!cfg) return;
+            document.getElementById('display-goal').textContent = cfg.goal || '—';
+            document.getElementById('display-streak').textContent = daysSinceStart(cfg.startDate) + ' 天';
+            renderRealityChart(cfg.radar);
+            const pct = taskProgressPercent();
+            document.getElementById('analytics-progress-label').textContent = pct + '%';
+            document.getElementById('analytics-progress-bar').style.width = pct + '%';
+            renderTaskList();
+        }
+
+        function renderTaskList() {
+            const tasks = loadTasks();
+            const comp = loadCompletion();
+            const listEl = document.getElementById('task-list');
+            const emptyEl = document.getElementById('task-empty-hint');
+            if (tasks.length === 0) {
+                listEl.innerHTML = '';
+                emptyEl.classList.remove('hidden');
+                return;
+            }
+            emptyEl.classList.add('hidden');
+            listEl.innerHTML = tasks.map(t => {
+                const done = comp.ids.includes(t.id);
+                const min = t.minutes != null ? t.minutes : 30;
+                return `
+                <div class="flex items-center justify-between p-4 bg-white rounded-2xl border border-slate-100 gap-2">
+                    <div class="flex items-center space-x-3 min-w-0 flex-1">
+                        <input type="checkbox" ${done ? 'checked' : ''} class="w-6 h-6 rounded-full border-slate-300 text-blue-600 shrink-0"
+                            data-task-id="${t.id}" onchange="toggleTaskDone('${t.id}', this.checked)">
+                        <span class="text-slate-700 font-medium truncate ${done ? 'line-through text-slate-400' : ''}">${escapeHtml(t.title)}</span>
+                    </div>
+                    <span class="text-xs text-slate-400 shrink-0">${min} min</span>
+                    <div class="flex shrink-0 gap-1">
+                        <button type="button" onclick="openTaskModal('${t.id}')" class="p-2 text-blue-600 hover:bg-blue-50 rounded-xl" title="编辑">✎</button>
+                        <button type="button" onclick="deleteTask('${t.id}')" class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl" title="删除">✕</button>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function escapeHtml(s) {
+            const d = document.createElement('div');
+            d.textContent = s;
+            return d.innerHTML;
+        }
+
+        function toggleTaskDone(id, checked) {
+            let comp = loadCompletion();
+            const tk = todayKey();
+            if (comp.date !== tk) comp = { date: tk, ids: [] };
+            if (checked) {
+                if (!comp.ids.includes(id)) comp.ids.push(id);
+            } else {
+                comp.ids = comp.ids.filter(x => x !== id);
+            }
+            saveCompletion(comp);
+            refreshDashboard();
+        }
+
+        function deleteTask(id) {
+            if (!confirm('确定删除该任务？')) return;
+            let tasks = loadTasks().filter(t => t.id !== id);
+            saveTasks(tasks);
+            let comp = loadCompletion();
+            comp.ids = comp.ids.filter(x => x !== id);
+            saveCompletion(comp);
+            refreshDashboard();
+        }
+
+        function openTaskModal(editId) {
+            document.getElementById('task-modal').classList.remove('modal-hidden');
+            const titleEl = document.getElementById('task-modal-title');
+            document.getElementById('task-edit-id').value = editId || '';
+            if (editId) {
+                titleEl.textContent = '修改任务';
+                const t = loadTasks().find(x => x.id === editId);
+                document.getElementById('task-form-title').value = t ? t.title : '';
+                document.getElementById('task-form-min').value = t && t.minutes != null ? t.minutes : 30;
+            } else {
+                titleEl.textContent = '添加任务';
+                document.getElementById('task-form-title').value = '';
+                document.getElementById('task-form-min').value = 30;
+            }
+        }
+
+        function closeTaskModal() {
+            document.getElementById('task-modal').classList.add('modal-hidden');
+        }
+
+        function submitTaskForm() {
+            const editId = document.getElementById('task-edit-id').value;
+            const title = document.getElementById('task-form-title').value.trim();
+            const minutes = parseInt(document.getElementById('task-form-min').value, 10) || 30;
+            if (!title) {
+                alert('请填写任务内容');
+                return;
+            }
+            let tasks = loadTasks();
+            if (editId) {
+                tasks = tasks.map(t => t.id === editId ? { ...t, title, minutes } : t);
+            } else {
+                tasks.push({ id: uid(), title, minutes });
+            }
+            saveTasks(tasks);
+            closeTaskModal();
+            refreshDashboard();
+        }
+
+        function showOnboarding(step) {
+            document.getElementById('onboarding-root').classList.remove('hidden');
+            document.querySelectorAll('.onb-step').forEach(s => s.classList.add('hidden'));
+            if (step === 0) {
+                document.getElementById('onb-step-welcome').classList.remove('hidden');
+            } else if (step === 1) {
+                buildQualitativeRadar('onb-radar-inputs', onboardingDraftRadar, 'onb');
+                document.getElementById('onb-step-radar').classList.remove('hidden');
+            } else {
+                const startInp = document.getElementById('onb-start');
+                if (startInp && !startInp.value) startInp.value = todayKey();
+                document.getElementById('onb-step-finish').classList.remove('hidden');
+            }
+        }
+
+        function onboardingNext(step) {
+            if (step === 0) {
+                showOnboarding(0);
+                return;
+            }
+            if (step === 1) {
+                const finishVisible = !document.getElementById('onb-step-finish').classList.contains('hidden');
+                if (finishVisible) {
+                    showOnboarding(1);
+                    buildQualitativeRadar('onb-radar-inputs', onboardingDraftRadar, 'onb');
+                    return;
+                }
+                const g = document.getElementById('onb-goal').value.trim();
+                if (!g) {
+                    alert('请填写主目标');
+                    return;
+                }
+                showOnboarding(1);
+                buildQualitativeRadar('onb-radar-inputs', onboardingDraftRadar, 'onb');
+                return;
+            }
+            if (step === 2) {
+                onboardingDraftRadar = readQualitativeRadar('onb');
+                showOnboarding(2);
+            }
+        }
+
+        function finishOnboarding() {
+            const goal = document.getElementById('onb-goal').value.trim();
+            if (!goal) {
+                alert('请填写主目标');
+                showOnboarding(0);
+                return;
+            }
+            const startDate = document.getElementById('onb-start').value || todayKey();
+            const radar = clampRadar(readQualitativeRadar('onb'));
+            const cfg = {
+                initialized: true,
+                goal,
+                startDate,
+                radar
+            };
+            saveConfig(cfg);
+            let tasks = [];
+            const tt = document.getElementById('onb-task-title').value.trim();
+            const tm = parseInt(document.getElementById('onb-task-min').value, 10) || 30;
+            if (tt) tasks.push({ id: uid(), title: tt, minutes: tm });
+            saveTasks(tasks);
+            saveCompletion({ date: todayKey(), ids: [] });
+            document.getElementById('onboarding-root').classList.add('hidden');
+            bootAppAfterConfig();
+        }
+
+        function bootAppAfterConfig() {
+            initGrowthChart();
+            refreshDashboard();
+        }
+
+        function openSettingsModal() {
+            const cfg = loadConfig();
+            if (!cfg) {
+                showOnboarding(0);
+                return;
+            }
+            document.getElementById('set-goal').value = cfg.goal || '';
+            document.getElementById('set-start').value = cfg.startDate || todayKey();
+            buildQualitativeRadar('settings-radar-inputs', cfg.radar, 'set');
+            document.getElementById('settings-modal').classList.remove('modal-hidden');
+        }
+
+        function closeSettingsModal() {
+            document.getElementById('settings-modal').classList.add('modal-hidden');
+        }
+
+        function saveSettingsFromModal() {
+            const cfg = loadConfig();
+            if (!cfg) return;
+            cfg.goal = document.getElementById('set-goal').value.trim() || cfg.goal;
+            cfg.startDate = document.getElementById('set-start').value || cfg.startDate;
+            cfg.radar = readQualitativeRadar('set');
+            saveConfig(cfg);
+            closeSettingsModal();
+            refreshDashboard();
+        }
+
+        function openReassessFlow() {
+            const cfg = loadConfig();
+            if (!cfg) {
+                alert('请先完成首次设定');
+                showOnboarding(0);
+                return;
+            }
+            buildQualitativeRadar('reassess-radar-inputs', cfg.radar, 'reas');
+            document.getElementById('reassess-modal').classList.remove('modal-hidden');
+        }
+
+        function closeReassessModal() {
+            document.getElementById('reassess-modal').classList.add('modal-hidden');
+        }
+
+        function saveReassess() {
+            const cfg = loadConfig();
+            if (!cfg) return;
+            cfg.radar = readQualitativeRadar('reas');
+            saveConfig(cfg);
+            closeReassessModal();
+            refreshDashboard();
+        }
+
+        function openResetConfirm() {
+            document.getElementById('reset-modal').classList.remove('modal-hidden');
+        }
+
+        function closeResetModal() {
+            document.getElementById('reset-modal').classList.add('modal-hidden');
+        }
+
+        function performFullReset() {
+            localStorage.removeItem(STORAGE_CONFIG);
+            localStorage.removeItem(STORAGE_TASKS);
+            localStorage.removeItem(STORAGE_COMPLETION);
+            closeResetModal();
+            closeSettingsModal();
+            if (realityChartInstance) { realityChartInstance.destroy(); realityChartInstance = null; }
+            onboardingDraftRadar = DEFAULT_RADAR.slice();
+            document.getElementById('onb-goal').value = '';
+            document.getElementById('onb-task-title').value = '';
+            showOnboarding(0);
+        }
+
+        window.onload = function() {
+            const cfg = loadConfig();
+            if (!cfg) {
+                document.getElementById('onb-goal').value = '';
+                onboardingDraftRadar = DEFAULT_RADAR.slice();
+                showOnboarding(0);
+                initGrowthChart();
+                document.getElementById('display-goal').textContent = '—';
+                document.getElementById('display-streak').textContent = '0 天';
+                return;
+            }
+            document.getElementById('onboarding-root').classList.add('hidden');
+            bootAppAfterConfig();
+        };
+
+        function switchTab(tab) {
+            document.querySelectorAll('.section').forEach(s => s.classList.add('hidden-section'));
+            document.querySelectorAll('nav button').forEach(b => {
+                b.classList.remove('tab-active');
+                b.classList.add('text-slate-400');
+            });
+            document.getElementById(`${tab}-section`).classList.remove('hidden-section');
+            document.getElementById(`tab-${tab}`).classList.add('tab-active');
+            document.getElementById(`tab-${tab}`).classList.remove('text-slate-400');
+        }
+
+        function toggleModal(id) {
+            document.getElementById(id).classList.toggle('modal-hidden');
+        }
+
+        function updateProgress() {
+            refreshDashboard();
+        }
+
+        function archiveGoal() {
+            const confirmArchive = confirm('恭喜！你已完成当前阶段目标。归档后将保存数据快照并开启新一轮的现实评估。是否继续？');
+            if (!confirmArchive) return;
+            performFullReset();
+            alert('已归档并清空本机数据，请重新完成设定以开始新目标。');
+        }
+    </script>
+</body>
+</html>
