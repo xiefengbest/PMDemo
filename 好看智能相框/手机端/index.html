@@ -1630,8 +1630,11 @@
             <div class="flex justify-between items-center mb-4">
                 <div class="w-10"></div>
                 <h1 class="text-lg font-bold tracking-tight text-gray-900" id="headerTitle">待发送照片</h1>
-                <button onclick="openScanPage()" class="p-2 text-blue-600 active:scale-90 transition-transform">
+                <button onclick="openScanPage()" id="headerScanBtn" class="p-2 text-blue-600 active:scale-90 transition-transform">
                     <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><line x1="7" y1="12" x2="17" y2="12"/></svg>
+                </button>
+                <button onclick="profileLogout()" id="headerLogoutBtn" class="hidden p-2 text-gray-400 active:text-gray-600 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
                 </button>
             </div>
 
@@ -1904,14 +1907,101 @@
                 </div>
             </div>
 
-            <!-- ========== Profile View (placeholder) ========== -->
+            <!-- ========== Profile View ========== -->
             <div id="profileView" class="hidden animate__animated animate__fadeIn">
-                <div class="flex flex-col items-center justify-center pt-20 px-8 text-center">
-                    <div class="w-20 h-20 bg-gray-50 rounded-3xl flex items-center justify-center mb-4">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="1.5"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <div class="px-4 pb-20">
+                    <!-- Avatar & Name -->
+                    <div class="flex flex-col items-center pt-8 pb-4">
+                        <div class="w-24 h-24 rounded-full overflow-hidden mb-3 ring-4 ring-gray-100 shadow-sm">
+                            <img src="https://picsum.photos/seed/lego-avatar-hk/200/200" class="w-full h-full object-cover" alt="avatar">
+                        </div>
+                        <h2 class="text-xl font-bold text-gray-900">北冰洋</h2>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-1">个人中心</h3>
-                    <p class="text-sm text-gray-400">账号设置与帮助，敬请期待</p>
+                    <!-- Edit Profile -->
+                    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm mb-4 overflow-hidden">
+                        <button class="w-full flex items-center justify-center gap-2 py-3.5 active:bg-gray-50 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                            <span class="text-sm text-gray-500 font-medium">查看并修改资料</span>
+                        </button>
+                    </div>
+                    <!-- Card Group 1: Features -->
+                    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm mb-4 overflow-hidden">
+                        <!-- 其他云端照片 -->
+                        <button onclick="openCloudPhotosPage()" class="w-full flex items-center gap-3.5 px-4 py-3.5 active:bg-gray-50 transition-colors border-b border-gray-100">
+                            <div class="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+                            </div>
+                            <div class="flex-1 text-left">
+                                <div class="text-[15px] font-semibold text-gray-900">其他云端照片</div>
+                                <div class="text-xs text-gray-400 mt-0.5" id="cloudPhotoSubtitle">不在任何相框展示的照片</div>
+                            </div>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
+                        </button>
+                        <!-- 已绑定的相框 -->
+                        <button onclick="switchPage('frame')" class="w-full flex items-center gap-3.5 px-4 py-3.5 active:bg-gray-50 transition-colors border-b border-gray-100">
+                            <div class="w-9 h-9 rounded-xl bg-gray-50 flex items-center justify-center flex-shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2"><path d="M7 3v4h10V3"/><path d="M3 7h18v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/><rect x="1" y="3" width="22" height="4" rx="1"/></svg>
+                            </div>
+                            <div class="flex-1 text-left">
+                                <div class="text-[15px] font-semibold text-gray-900">已绑定的相框</div>
+                                <div class="text-xs text-gray-400 mt-0.5" id="profileFrameCount">共绑定 0 个相框</div>
+                            </div>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
+                        </button>
+                        <!-- 重新分析本地照片 -->
+                        <button onclick="profileReAnalyze()" class="w-full flex items-center gap-3.5 px-4 py-3.5 active:bg-gray-50 transition-colors border-b border-gray-100">
+                            <div class="w-9 h-9 rounded-xl bg-gray-50 flex items-center justify-center flex-shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+                            </div>
+                            <div class="flex-1 text-left">
+                                <div class="text-[15px] font-semibold text-gray-900">重新分析本地照片</div>
+                                <div class="text-xs text-gray-400 mt-0.5">清除整理记录，重新扫描所有照片</div>
+                            </div>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
+                        </button>
+                        <!-- 重置人物建议 -->
+                        <button onclick="profileResetPersons()" class="w-full flex items-center gap-3.5 px-4 py-3.5 active:bg-gray-50 transition-colors">
+                            <div class="w-9 h-9 rounded-xl bg-gray-50 flex items-center justify-center flex-shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                            </div>
+                            <div class="flex-1 text-left">
+                                <div class="text-[15px] font-semibold text-gray-900">重置人物建议</div>
+                                <div class="text-xs text-gray-400 mt-0.5">恢复隐藏人物并重新生成建议</div>
+                            </div>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
+                        </button>
+                    </div>
+                    <!-- Card Group 2: Account & Legal -->
+                    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                        <button class="w-full flex items-center gap-3.5 px-4 py-3.5 active:bg-gray-50 transition-colors border-b border-gray-100">
+                            <div class="w-9 h-9 rounded-xl bg-gray-50 flex items-center justify-center flex-shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                            </div>
+                            <div class="flex-1 text-left"><div class="text-[15px] font-semibold text-gray-900">账户详情</div></div>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
+                        </button>
+                        <button class="w-full flex items-center gap-3.5 px-4 py-3.5 active:bg-gray-50 transition-colors border-b border-gray-100">
+                            <div class="w-9 h-9 rounded-xl bg-gray-50 flex items-center justify-center flex-shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                            </div>
+                            <div class="flex-1 text-left"><div class="text-[15px] font-semibold text-gray-900">用户协议</div></div>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
+                        </button>
+                        <button class="w-full flex items-center gap-3.5 px-4 py-3.5 active:bg-gray-50 transition-colors border-b border-gray-100">
+                            <div class="w-9 h-9 rounded-xl bg-gray-50 flex items-center justify-center flex-shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                            </div>
+                            <div class="flex-1 text-left"><div class="text-[15px] font-semibold text-gray-900">隐私政策</div></div>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
+                        </button>
+                        <button class="w-full flex items-center gap-3.5 px-4 py-3.5 active:bg-gray-50 transition-colors">
+                            <div class="w-9 h-9 rounded-xl bg-gray-50 flex items-center justify-center flex-shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                            </div>
+                            <div class="flex-1 text-left"><div class="text-[15px] font-semibold text-gray-900">关于我们</div></div>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
+                        </button>
+                    </div>
                 </div>
             </div>
         </main>
@@ -2001,6 +2091,51 @@
                     <button onclick="albumSendSelected()" id="albumSendBtn" class="flex-[2.5] bg-blue-600 hover:bg-blue-500 text-white h-11 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-blue-900/40 active:scale-95 transition-all">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
                         <span class="text-xs font-black" id="albumSendBtnText">发送到相框 (<span id="albumSelCount">0</span>)</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cloud Photos Page -->
+        <div id="cloudPhotosPage" class="absolute inset-0 bg-white z-[42] translate-x-full transition-transform duration-300 flex flex-col">
+            <!-- Nav bar -->
+            <div class="bg-white/90 backdrop-blur-md sticky top-0 z-10 border-b border-gray-100">
+                <div class="px-4 pt-4 pb-1 flex items-center gap-2">
+                    <button onclick="closeCloudPhotosPage()" class="p-1 text-blue-600"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m15 18-6-6 6-6"/></svg></button>
+                    <h2 class="text-xl font-bold flex-1">其他云端照片</h2>
+                </div>
+                <div class="px-4 pb-2 flex items-center gap-1.5">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>
+                    <span id="cloudPhotosCount" class="text-xs text-gray-400">共 0 张照片</span>
+                </div>
+            </div>
+            <!-- Scrollable content -->
+            <div id="cloudPhotosScroll" class="flex-1 overflow-y-auto">
+                <div class="px-4">
+                    <div class="flex justify-between items-center sticky top-0 z-[9] bg-white py-2" id="cloudPhotoHeader">
+                        <h3 class="text-base font-bold">所有未分配照片</h3>
+                        <div class="flex bg-gray-100 p-0.5 rounded-lg" id="cloudGroupSwitcher">
+                            <button onclick="switchCloudGroup('year')" data-group="year" class="px-3 py-1 text-[11px] font-bold rounded-md transition-all bg-white text-gray-900 shadow-sm">年</button>
+                            <button onclick="switchCloudGroup('month')" data-group="month" class="px-3 py-1 text-[11px] font-bold rounded-md transition-all text-gray-400">月</button>
+                            <button onclick="switchCloudGroup('day')" data-group="day" class="px-3 py-1 text-[11px] font-bold rounded-md transition-all text-gray-400">日</button>
+                        </div>
+                    </div>
+                    <div id="cloudPhotosGrid"></div>
+                </div>
+            </div>
+            <!-- Cloud photos selection bar -->
+            <div id="cloudSelectionBar" class="hidden p-3">
+                <div class="action-blur rounded-2xl p-2.5 flex gap-2 shadow-2xl items-center border border-white/10">
+                    <button onclick="cancelCloudSelection()" class="bg-white/10 text-white/70 h-11 w-11 rounded-xl flex items-center justify-center transition-all active:scale-95 flex-shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                    </button>
+                    <button onclick="handleCloudDelete()" class="flex-1 bg-white/5 hover:bg-red-500/20 text-white h-11 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95">
+                        <svg class="text-red-400" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                        <span class="text-xs font-bold">删除</span>
+                    </button>
+                    <button onclick="handleCloudSendToFrame()" id="cloudSendBtn" class="flex-[2.5] bg-blue-600 hover:bg-blue-500 text-white h-11 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-blue-900/40 active:scale-95 transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+                        <span class="text-xs font-black">发送到相框 (<span id="cloudSelectedCount">0</span>)</span>
                     </button>
                 </div>
             </div>
@@ -2737,6 +2872,11 @@
             const header = document.getElementById('mainHeader');
             const libraryTabs = document.getElementById('libraryTabs');
             const headerTitle = document.getElementById('headerTitle');
+            const scanBtn = document.getElementById('headerScanBtn');
+            const logoutBtn = document.getElementById('headerLogoutBtn');
+
+            scanBtn.classList.add('hidden');
+            logoutBtn.classList.add('hidden');
 
             if (page === 'library') {
                 document.getElementById('localView').classList.remove('hidden');
@@ -2745,6 +2885,7 @@
                 libraryTabs.classList.remove('hidden');
                 headerTitle.textContent = '待发送照片';
                 header.classList.remove('hidden');
+                scanBtn.classList.remove('hidden');
             } else if (page === 'frame') {
                 document.getElementById('frameView').classList.remove('hidden');
                 document.getElementById('navFrame').classList.remove('text-gray-400');
@@ -2752,6 +2893,7 @@
                 libraryTabs.classList.add('hidden');
                 headerTitle.textContent = '相框设备';
                 header.classList.remove('hidden');
+                scanBtn.classList.remove('hidden');
             } else if (page === 'mall') {
                 document.getElementById('mallView').classList.remove('hidden');
                 document.getElementById('navMall').classList.remove('text-gray-400');
@@ -2766,6 +2908,8 @@
                 libraryTabs.classList.add('hidden');
                 headerTitle.textContent = '我的';
                 header.classList.remove('hidden');
+                logoutBtn.classList.remove('hidden');
+                updateProfileInfo();
             }
 
             document.getElementById('mainScroll').scrollTop = 0;
@@ -3575,9 +3719,15 @@
                     refreshLocalSections();
                     showToast(alsoCamera ? '已删除照片，相机照片已同步删除' : '已删除照片');
                 } else if (action === 'viewerDeleteCloud') {
-                    // no-op: cloud view removed
-                    renderGalleries();
-                    showToast('已从所有相框中删除照片');
+                    const photo = viewerPhotos[viewerIndex];
+                    CLOUD_PHOTOS.splice(0, CLOUD_PHOTOS.length, ...CLOUD_PHOTOS.filter(p => p.id !== photo.id));
+                    viewerPhotos.splice(viewerIndex, 1);
+                    if (viewerIndex >= viewerPhotos.length) viewerIndex = viewerPhotos.length - 1;
+                    if (viewerPhotos.length === 0) closeViewer();
+                    else updateViewerDisplay();
+                    renderCloudPhotos();
+                    updateProfileInfo();
+                    showToast('已删除云端照片');
                 } else if (action === 'viewerDeleteAlbum') {
                     const photo = viewerPhotos[viewerIndex];
                     const alsoCamera = document.getElementById('viewerDeleteCamera')?.checked;
@@ -3653,6 +3803,20 @@
                     refreshDevicePhotos();
                     renderDeviceList();
                     showToast('已从所有相框中删除照片');
+                } else if (action === 'cloudDelete') {
+                    const count = cloudSelectedIds.length;
+                    const idsToDelete = new Set(cloudSelectedIds);
+                    CLOUD_PHOTOS.splice(0, CLOUD_PHOTOS.length, ...CLOUD_PHOTOS.filter(p => !idsToDelete.has(p.id)));
+                    cloudSelectedIds = [];
+                    renderCloudPhotos();
+                    updateProfileInfo();
+                    showToast(`已删除 ${count} 张照片`);
+                } else if (action === 'profileReAnalyze') {
+                    showToast('已开始重新分析本地照片');
+                } else if (action === 'profileResetPersons') {
+                    showToast('已重置人物建议');
+                } else if (action === 'profileLogout') {
+                    showToast('已退出登录');
                 }
             }, 350);
         }
@@ -4171,6 +4335,7 @@
         }
 
         let albumPendingSend = false;
+        let cloudPendingSend = false;
 
         // ======================== Multi-Task Send Queue ========================
         let sendTasks = [];
@@ -4184,10 +4349,13 @@
             const frameLabel = getPickedFrameLabel();
             const isDeviceSend = devicePendingSendIds.length > 0;
             const isAlbumSend = albumPendingSend;
-            const photoIds = isAlbumSend ? [...albumSelectedIds] : isDeviceSend ? [...devicePendingSendIds] : [...selectedIds];
+            const isCloudSend = cloudPendingSend;
+            const photoIds = isCloudSend ? [...cloudSelectedIds] : isAlbumSend ? [...albumSelectedIds] : isDeviceSend ? [...devicePendingSendIds] : [...selectedIds];
             closeFramePicker();
 
-            if (isAlbumSend) {
+            if (isCloudSend) {
+                cloudSelectedIds = []; cloudPendingSend = false; renderCloudPhotos();
+            } else if (isAlbumSend) {
                 const idSet = new Set(albumSelectedIds);
                 albumPhotos.forEach(p => { if (idSet.has(String(p.id))) p.sending = true; });
                 albumSelectedIds = []; albumPendingSend = false; updateAlbumSelBar(); renderAlbumPhotos();
@@ -4672,6 +4840,8 @@
                 return (typeof albumSource !== 'undefined' && albumSource === 'local')
                     ? albumPhotos.filter(p => !p.sent && !p.sending)
                     : albumPhotos;
+            } else if (context === 'cloud') {
+                return CLOUD_PHOTOS;
             }
             return [];
         }
@@ -4738,6 +4908,9 @@
                 deviceSelectedIds = [photo.id];
                 devicePendingSendIds = [photo.id];
                 openDeviceFramePicker();
+            } else if (viewerContext === 'cloud') {
+                cloudSelectedIds = [photo.id];
+                handleCloudSendToFrame();
             }
         }
 
@@ -4765,6 +4938,9 @@
                     { label: '仅从当前相框删除', action: 'viewerDeleteDeviceCurrent', bold: false },
                     { label: '从所有相框中删除', action: 'viewerDeleteDeviceAll', bold: true }
                 ]);
+            } else if (viewerContext === 'cloud') {
+                showDeleteDialog('删除云端照片', '确定要删除这张照片吗？删除后无法恢复。',
+                    [{ label: '确认删除', action: 'viewerDeleteCloud', bold: true }]);
             }
         }
 
@@ -5133,6 +5309,218 @@
             setTimeout(() => t.style.opacity = '0', 2000);
         }
         function mockAddPhotos() { showToast("选择照片中..."); }
+
+        // ======================== Profile Page ========================
+        function updateProfileInfo() {
+            const countEl = document.getElementById('profileFrameCount');
+            if (countEl) countEl.textContent = `共绑定 ${FRAME_DEVICES.length} 个相框`;
+            const subEl = document.getElementById('cloudPhotoSubtitle');
+            if (subEl) subEl.textContent = `不在任何相框展示的照片 · ${CLOUD_PHOTOS.length} 张`;
+        }
+        function profileLogout() {
+            showDeleteDialog(
+                '退出登录',
+                '退出后需要重新登录才能使用。',
+                [{ label: '确认退出', action: 'profileLogout', bold: true }]
+            );
+        }
+        function profileReAnalyze() {
+            showDeleteDialog(
+                '重新分析本地照片',
+                '将清除所有整理记录并重新扫描本地照片，此操作可能需要几分钟。',
+                [{ label: '开始重新分析', action: 'profileReAnalyze', bold: true }]
+            );
+        }
+        function profileResetPersons() {
+            showDeleteDialog(
+                '重置人物建议',
+                '重置后，所有已隐藏的人物将重新显示，手动合并的人物也将恢复为初始状态。此操作无法撤销。',
+                [{ label: '重置', action: 'profileResetPersons', bold: true }]
+            );
+        }
+
+        // ======================== Cloud Photos ========================
+        const CLOUD_PHOTO_SEEDS = [
+            'cloud-sunset','cloud-garden','cloud-beach','cloud-mountain','cloud-cafe',
+            'cloud-city','cloud-park','cloud-lake','cloud-snow','cloud-autumn',
+            'cloud-flower','cloud-pet','cloud-food','cloud-night','cloud-rain',
+            'cloud-bridge','cloud-temple','cloud-market','cloud-river','cloud-forest',
+            'cloud-bird','cloud-cat','cloud-sky','cloud-street'
+        ];
+        const CLOUD_PHOTOS = (() => {
+            const data = [];
+            const dates = [
+                { y: '2025', m: '03', days: ['27','20','14','08','02'] },
+                { y: '2025', m: '02', days: ['25','18','12','05'] },
+                { y: '2025', m: '01', days: ['28','19','11','03'] },
+                { y: '2024', m: '12', days: ['26','18','10','02'] },
+                { y: '2024', m: '11', days: ['22','14','06'] },
+                { y: '2024', m: '09', days: ['28','15','05'] }
+            ];
+            const sources = ['从客厅相框移除', '从卧室相框移除', '云壁纸上传', '云壁纸上传', '从奶奶家相框移除'];
+            let di = 0, dj = 0;
+            for (let i = 0; i < 24; i++) {
+                const id = 50000 + i;
+                const seed = CLOUD_PHOTO_SEEDS[i % CLOUD_PHOTO_SEEDS.length] + '-' + id;
+                const d = dates[di];
+                data.push({
+                    id,
+                    year: d.y + '年',
+                    month: d.y + '年' + d.m + '月',
+                    day: d.y + '年' + d.m + '月' + d.days[dj] + '日',
+                    url: `https://picsum.photos/seed/${seed}/300/300`,
+                    source: sources[i % sources.length]
+                });
+                dj++;
+                if (dj >= dates[di].days.length) { dj = 0; di = Math.min(di + 1, dates.length - 1); }
+            }
+            return data;
+        })();
+
+        let cloudGroupBy = 'year';
+        let cloudSelectedIds = [];
+
+        function openCloudPhotosPage() {
+            const page = document.getElementById('cloudPhotosPage');
+            page.classList.remove('translate-x-full');
+            cloudSelectedIds = [];
+            cloudGroupBy = 'year';
+            updateCloudGroupSwitcher();
+            renderCloudPhotos();
+        }
+        function closeCloudPhotosPage() {
+            document.getElementById('cloudPhotosPage').classList.add('translate-x-full');
+            cloudSelectedIds = [];
+        }
+        function switchCloudGroup(g) {
+            cloudGroupBy = g;
+            updateCloudGroupSwitcher();
+            renderCloudPhotos();
+        }
+        function updateCloudGroupSwitcher() {
+            document.querySelectorAll('#cloudGroupSwitcher button').forEach(b => {
+                if (b.dataset.group === cloudGroupBy) {
+                    b.className = 'px-3 py-1 text-[11px] font-bold rounded-md transition-all bg-white text-gray-900 shadow-sm';
+                } else {
+                    b.className = 'px-3 py-1 text-[11px] font-bold rounded-md transition-all text-gray-400';
+                }
+            });
+        }
+        function renderCloudPhotos() {
+            const container = document.getElementById('cloudPhotosGrid');
+            const countEl = document.getElementById('cloudPhotosCount');
+            const headerEl = document.getElementById('cloudPhotoHeader');
+            countEl.textContent = `共 ${CLOUD_PHOTOS.length} 张照片`;
+
+            if (CLOUD_PHOTOS.length === 0) {
+                if (headerEl) headerEl.classList.add('hidden');
+                container.innerHTML = `
+                    <div class="flex flex-col items-center justify-center pt-16 pb-10 text-center">
+                        <div class="w-20 h-20 bg-gray-50 rounded-3xl flex items-center justify-center mb-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="1.5"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-700 mb-1">暂无其他照片</h3>
+                        <p class="text-sm text-gray-400">从相框移除或通过云壁纸上传的照片将显示在这里</p>
+                    </div>`;
+                return;
+            }
+            if (headerEl) headerEl.classList.remove('hidden');
+
+            const groupKey = cloudGroupBy === 'year' ? 'year' : cloudGroupBy === 'month' ? 'month' : 'day';
+            const groups = [...new Set(CLOUD_PHOTOS.map(p => p[groupKey]))];
+            const cols = cloudGroupBy === 'year' ? 4 : 3;
+
+            container.innerHTML = groups.map(group => {
+                const gPhotos = CLOUD_PHOTOS.filter(p => p[groupKey] === group);
+                const countText = gPhotos.length + ' 张';
+                return `
+                <div class="mb-6 gallery-group" data-group-label="${group}">
+                    <div class="flex justify-between items-center mb-2 sticky top-[36px] z-[8] bg-white py-1.5">
+                        <div class="flex items-baseline gap-2">
+                            <span class="text-sm font-black text-gray-800">${group}</span>
+                            <span class="text-[11px] text-gray-400">${countText}</span>
+                        </div>
+                        <div class="flex gap-1.5">
+                            <button onclick="toggleCloudGroupSelect('${group}','${groupKey}')" class="text-[10px] font-bold text-gray-500 bg-gray-100 px-2.5 py-1 rounded-full active:opacity-60 transition-opacity">${isCloudGroupAllSelected(group, groupKey) ? '取消全选' : '全选'}</button>
+                        </div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:repeat(${cols},1fr);gap:2px;">
+                        ${gPhotos.map(p => renderCloudPhotoItem(p)).join('')}
+                    </div>
+                </div>`;
+            }).join('');
+            updateCloudSelectionBar();
+        }
+
+        function renderCloudPhotoItem(p) {
+            const active = cloudSelectedIds.includes(p.id);
+            const order = active ? cloudSelectedIds.indexOf(p.id) + 1 : 0;
+            return `
+                <div class="photo-item ${active ? 'selected' : ''}" onclick="openViewer(${p.id},'cloud')">
+                    <img src="${p.url}" loading="lazy">
+                    <div class="select-overlay"></div>
+                    <div class="absolute bottom-[3px] left-[3px] flex items-center bg-black/40 backdrop-blur-sm rounded-full z-[1] pointer-events-none" style="gap:2px;padding:1px 5px 1px 3px;">
+                        <span class="text-white font-medium leading-none" style="font-size:7px;">${p.source}</span>
+                    </div>
+                    <div class="check-zone" onclick="event.stopPropagation();toggleCloudSelect(${p.id})"></div>
+                    <div class="check-circle ${active ? 'check-pop' : ''}">
+                        ${active ? `<span class="check-number">${order}</span>` : ''}
+                    </div>
+                </div>`;
+        }
+
+        function isCloudGroupAllSelected(group, groupKey) {
+            const gps = CLOUD_PHOTOS.filter(p => p[groupKey] === group);
+            return gps.length > 0 && gps.every(p => cloudSelectedIds.includes(p.id));
+        }
+
+        function toggleCloudGroupSelect(group, groupKey) {
+            const gps = CLOUD_PHOTOS.filter(p => p[groupKey] === group);
+            if (isCloudGroupAllSelected(group, groupKey)) {
+                cloudSelectedIds = cloudSelectedIds.filter(id => !gps.some(p => p.id === id));
+            } else {
+                gps.forEach(p => { if (!cloudSelectedIds.includes(p.id)) cloudSelectedIds.push(p.id); });
+            }
+            renderCloudPhotos();
+        }
+
+        function toggleCloudSelect(id) {
+            const idx = cloudSelectedIds.indexOf(id);
+            if (idx >= 0) cloudSelectedIds.splice(idx, 1);
+            else cloudSelectedIds.push(id);
+            renderCloudPhotos();
+        }
+        function cancelCloudSelection() {
+            cloudSelectedIds = [];
+            renderCloudPhotos();
+        }
+        function updateCloudSelectionBar() {
+            const bar = document.getElementById('cloudSelectionBar');
+            const countEl = document.getElementById('cloudSelectedCount');
+            if (cloudSelectedIds.length > 0) {
+                bar.classList.remove('hidden');
+                countEl.textContent = cloudSelectedIds.length;
+            } else {
+                bar.classList.add('hidden');
+            }
+        }
+        function handleCloudDelete() {
+            const count = cloudSelectedIds.length;
+            showDeleteDialog(
+                `删除 ${count} 张照片`,
+                '删除后照片将无法恢复',
+                [{ label: '确认删除', action: 'cloudDelete', bold: true }]
+            );
+        }
+        function handleCloudSendToFrame() {
+            if (FRAME_DEVICES.length === 0) {
+                showToast('请先绑定相框');
+                return;
+            }
+            pendingSendCount = cloudSelectedIds.length;
+            cloudPendingSend = true;
+            openFramePicker();
+        }
 
         // ======================== Photo Permission ========================
         let localAnalysisRanForPerm = false;
