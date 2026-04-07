@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="好看智能相框用户协议 - 无限向量（北京）科技有限公司">
+    <title>好看智能相框用户协议</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #2563eb;
+            --text-color: #1f2937;
+            --text-secondary: #6b7280;
+            --border-color: #e5e7eb;
+            --background: #ffffff;
+            --background-secondary: #f9fafb;
+            --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 
+                         'Microsoft YaHei', sans-serif;
+            line-height: 1.8;
+            color: var(--text-color);
+            background: var(--background-secondary);
+            font-size: 16px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            padding-bottom: 20px;
+        }
+
+        .header .meta {
+            font-size: 0.95rem;
+            opacity: 0.95;
+            margin-bottom: 10px;
+            
+        }
+
+        .content {
+            background: var(--background);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+        }
+
+        h2 {
+            color: var(--primary-color);
+            font-size: 1.75rem;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 3px solid var(--primary-color);
+            font-weight: 700;
+        }
+
+        h2:first-child {
+            margin-top: 0;
+        }
+
+        h3 {
+            color: var(--text-color);
+            font-size: 1.35rem;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        h4 {
+            color: var(--text-color);
+            font-size: 1.1rem;
+            margin-top: 20px;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        p {
+            margin-bottom: 16px;
+            color: var(--text-color);
+        }
+
+        strong {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        ul, ol {
+            margin-left: 24px;
+            margin-bottom: 16px;
+        }
+
+        li {
+            margin-bottom: 10px;
+            line-height: 1.8;
+        }
+
+        .intro-list {
+            background: var(--background-secondary);
+            padding: 24px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .intro-list ol {
+            margin-left: 20px;
+        }
+
+        .important-notice {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .important-notice strong {
+            color: #92400e;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            overflow-x: auto;
+            display: block;
+            box-shadow: var(--shadow);
+            border-radius: 8px;
+        }
+
+        thead {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        th, td {
+            padding: 14px 16px;
+            text-align: left;
+            border: 1px solid var(--border-color);
+        }
+
+        tbody tr:nth-child(even) {
+            background: var(--background-secondary);
+        }
+
+        tbody tr:hover {
+            background: #dbeafe;
+        }
+
+        a {
+            color: var(--primary-color);
+            text-decoration: none;
+            word-break: break-all;
+            transition: color 0.2s;
+        }
+
+        a:hover {
+            color: #1d4ed8;
+            text-decoration: underline;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+            background: var(--background);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+        }
+
+        .footer p {
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+        }
+
+        .contact-info {
+            background: var(--background-secondary);
+            padding: 24px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .contact-info p {
+            margin-bottom: 10px;
+        }
+
+        .section-intro {
+            background: linear-gradient(135deg, #e0e7ff 0%, #f3e8ff 100%);
+            padding: 24px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.75rem;
+            }
+
+            .header {
+                padding: 40px 20px 20px;
+                border-radius: 0;
+            }
+
+            .content {
+                padding: 24px 20px;
+                border-radius: 8px;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+
+            h3 {
+                font-size: 1.2rem;
+            }
+
+            h4 {
+                font-size: 1.05rem;
+            }
+
+            body {
+                font-size: 15px;
+            }
+
+            .container {
+                padding: 10px;
+            }
+
+            table {
+                font-size: 14px;
+            }
+
+            th, td {
+                padding: 10px 8px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .header .meta {
+                font-size: 0.85rem;
+            }
+
+            h2 {
+                font-size: 1.3rem;
+            }
+
+            h3 {
+                font-size: 1.1rem;
+            }
+
+            body {
+                font-size: 14px;
+            }
+
+            .content {
+                padding: 20px 16px;
+            }
+
+            .intro-list,
+            .important-notice,
+            .contact-info,
+            .section-intro {
+                padding: 16px;
+            }
+
+            ul, ol {
+                margin-left: 20px;
+            }
+        }
+
+        /* 打印样式 */
+        @media print {
+            .header {
+                background: none;
+                color: var(--text-color);
+                box-shadow: none;
+            }
+
+            .content {
+                box-shadow: none;
+            }
+
+            body {
+                background: white;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header container">
+        <h1>好看智能相框用户协议</h1>
+        <div class="meta">更新日期：2025年12月</div>
+        <div class="meta">生效日期：2025年12月</div>
+    </div>
+
+    <div class="container">
+        <div class="content">
+            <h2>重要提示</h2>
+            <p>欢迎您使用好看智能相框及相关服务！</p>
+            
+            <p>在使用我们的产品和服务前，请您务必审慎阅读、充分理解本协议各条款内容，特别是<strong>免除或限制责任的条款</strong>、<strong>法律适用和争议解决条款</strong>。限制、免责条款或者其他涉及您重大权益的条款可能以<strong>加粗</strong>、<strong>加下划线</strong>等形式提示您重点注意。</p>
+
+            <p class="important-notice"><strong>如您不同意本协议的任何内容，或无法准确理解条款的含义，请不要进行后续操作。您通过网络页面点击确认或以其他方式选择接受本协议，即表示您已充分阅读、理解并接受本协议的全部内容，并与我们达成一致。</strong></p>
+
+            <h2>一、协议的范围与变更</h2>
+
+            <h3>1.1 协议主体</h3>
+            <p>本协议是您与无限向量（北京）科技有限公司（以下简称"我们"或"运营方"）之间关于使用好看智能相框移动应用程序（以下简称"本应用"或"好看相框"）及相关服务所订立的协议。</p>
+
+            <h3>1.2 协议范围</h3>
+            <p>本协议适用于：</p>
+            <ul>
+                <li>好看智能相框移动应用程序（iOS 和 Android 版本）</li>
+                <li>好看智能相框硬件设备</li>
+                <li>好看智能相框提供的所有相关服务</li>
+            </ul>
+
+            <h3>1.3 协议变更</h3>
+            <p>我们有权根据需要不时修改本协议条款。协议变更后，我们会通过以下一种或多种方式通知您：</p>
+            <ul>
+                <li>在应用内发布公告</li>
+                <li>向您的注册手机号发送短信</li>
+                <li>在应用启动时弹窗提示</li>
+            </ul>
+
+            <p class="important-notice"><strong>如果您不同意修改后的协议，您应当立即停止使用本服务；如果您继续使用本服务，将视为您已接受修改后的协议。</strong></p>
+
+            <h2>二、账号注册与使用</h2>
+
+            <h3>2.1 注册资格</h3>
+            <ul>
+                <li>您应当具备完全民事权利能力和完全民事行为能力</li>
+                <li>如果您是未成年人，请在监护人的陪同下阅读本协议，并在取得监护人的同意后使用本服务</li>
+            </ul>
+
+            <h3>2.2 注册方式</h3>
+            <p>您可以通过以下方式注册账号：</p>
+            <ul>
+                <li>手机号验证码登录/注册</li>
+                <li>微信授权登录（国内版本）</li>
+                <li>Apple ID 登录（iOS 版本）</li>
+                <li>其他我们提供的第三方授权登录方式</li>
+            </ul>
+
+            <h3>2.3 账号安全</h3>
+            <ul>
+                <li>您应当妥善保管您的账号和密码，对通过您的账号进行的所有活动负责</li>
+                <li>如发现他人未经许可使用您的账号，您应立即通知我们</li>
+                <li><strong>因您个人原因导致的账号信息泄露以及由此产生的任何损失，由您自行承担</strong></li>
+            </ul>
+
+            <h3>2.4 账号使用规范</h3>
+            <p>您承诺：</p>
+            <ul>
+                <li>不使用他人的手机号或身份信息注册账号</li>
+                <li>不恶意注册多个账号</li>
+                <li>不买卖、租借、转让账号</li>
+                <li>不利用账号从事违法违规活动</li>
+            </ul>
+
+            <p class="important-notice"><strong>如发现您违反上述规定，我们有权采取警告、限制功能、暂停使用、注销账号等措施。</strong></p>
+
+            <h2>三、服务内容与使用规范</h2>
+
+            <h3>3.1 服务内容</h3>
+            <p>我们向您提供以下服务：</p>
+
+            <h4>（1）照片管理服务</h4>
+            <ul>
+                <li>本地照片分析和管理</li>
+                <li>照片智能分类（人物识别、场景识别等）</li>
+                <li>照片质量评分</li>
+                <li>照片存储和同步</li>
+            </ul>
+
+            <h4>（2）相框设备管理</h4>
+            <ul>
+                <li>智能相框设备绑定</li>
+                <li>设备在线状态查看</li>
+                <li>设备配置和控制</li>
+                <li>多设备管理</li>
+            </ul>
+
+            <h4>（3）照片推送服务</h4>
+            <ul>
+                <li>快速发送照片到相框</li>
+                <li>批量照片推送</li>
+                <li>人物精选自动推送</li>
+                <li>月份回顾自动推送</li>
+            </ul>
+
+            <h4>（4）订阅服务</h4>
+            <ul>
+                <li>每日一花自动推送</li>
+                <li>日历时钟服务</li>
+                <li>天气预报服务</li>
+                <li>其他增值订阅服务</li>
+            </ul>
+
+            <h3>3.2 服务使用规范</h3>
+
+            <h4>（1）照片内容规范</h4>
+            <p>您承诺上传的照片不包含以下内容：</p>
+            <ul>
+                <li>违反宪法确定的基本原则的</li>
+                <li>危害国家安全，泄露国家秘密，颠覆国家政权，破坏国家统一的</li>
+                <li>损害国家荣誉和利益的</li>
+                <li>煽动民族仇恨、民族歧视，破坏民族团结的</li>
+                <li>破坏国家宗教政策，宣扬邪教和封建迷信的</li>
+                <li>散布谣言，扰乱社会秩序，破坏社会稳定的</li>
+                <li>散布淫秽、色情、赌博、暴力、恐怖或者教唆犯罪的</li>
+                <li>侮辱或者诽谤他人，侵害他人合法权益的</li>
+                <li>含有法律、行政法规禁止的其他内容的</li>
+            </ul>
+
+            <h4>（2）设备使用规范</h4>
+            <ul>
+                <li>不得利用设备传播违法违规内容</li>
+                <li>不得破解、修改设备系统</li>
+                <li>不得将设备用于商业用途（除非获得授权）</li>
+                <li>不得干扰设备正常运行</li>
+            </ul>
+
+            <h4>（3）服务使用限制</h4>
+            <ul>
+                <li>不得利用技术手段干扰服务正常运行</li>
+                <li>不得对服务进行反向工程、反编译或反汇编</li>
+                <li>不得批量注册账号或使用自动化程序使用服务</li>
+                <li>不得利用服务从事任何违法违规活动</li>
+            </ul>
+
+            <p class="important-notice"><strong>如发现您违反上述规定，我们有权采取删除内容、限制功能、暂停服务、终止服务等措施，并保留追究法律责任的权利。</strong></p>
+
+            <h2>四、知识产权</h2>
+
+            <h3>4.1 服务知识产权</h3>
+            <p>本应用及服务中包含的所有内容（包括但不限于软件、技术、程序、网页、文字、图片、图像、音频、视频、图表、版面设计、电子文档等）的知识产权均归我们或相关权利人所有。</p>
+
+            <h3>4.2 用户内容授权</h3>
+            <ul>
+                <li>您上传到本服务的照片，其知识产权归您所有</li>
+                <li>为了向您提供服务，您授权我们在服务期间使用、存储、备份、传输您的照片</li>
+                <li><strong>我们承诺不会将您的照片用于服务以外的其他目的，除非获得您的明确同意</strong></li>
+            </ul>
+
+            <h3>4.3 商标权</h3>
+            <p>"好看智能相框"及相关商标、标识的所有权及相关权益归我们所有，未经书面许可，任何人不得使用。</p>
+
+            <h2>五、订阅服务与支付</h2>
+
+            <h3>5.1 订阅服务说明</h3>
+            <ul>
+                <li>部分服务为付费订阅服务，您需要支付相应费用才能使用</li>
+                <li>订阅服务包括但不限于：每日一花、日历时钟、天气预报等增值服务</li>
+                <li>订阅周期包括：月度订阅、季度订阅、年度订阅等</li>
+            </ul>
+
+            <h3>5.2 支付方式</h3>
+            <p>您可以通过以下方式支付订阅费用：</p>
+            <ul>
+                <li>Apple In-App Purchase（iOS 版本）</li>
+                <li>微信支付（Android 版本）</li>
+                <li>支付宝（Android 版本）</li>
+                <li>其他我们支持的支付方式</li>
+            </ul>
+
+            <h3>5.3 订阅规则</h3>
+            <ul>
+                <li>订阅服务按周期自动续费，除非您在续费前取消订阅</li>
+                <li>订阅费用将在每个订阅周期开始时自动从您的账户中扣除</li>
+                <li>您可以随时在账户设置中取消订阅，取消后将在当前订阅周期结束后生效</li>
+                <li><strong>订阅服务一经购买，除法律明确规定外，费用不予退还</strong></li>
+            </ul>
+
+            <h3>5.4 价格调整</h3>
+            <ul>
+                <li>我们保留随时调整服务价格的权利</li>
+                <li>价格调整将提前通知您，调整后的价格将适用于新的订阅周期</li>
+                <li>如果您不接受新的价格，可以选择取消订阅</li>
+            </ul>
+
+            <h2>六、隐私保护</h2>
+
+            <h3>6.1 隐私政策</h3>
+            <p>我们非常重视您的隐私保护。关于我们如何收集、使用、存储、共享和保护您的个人信息，请详细阅读《好看智能相框隐私政策》。</p>
+
+            <h3>6.2 数据安全</h3>
+            <ul>
+                <li>我们采用业界标准的安全技术和措施保护您的数据</li>
+                <li>我们对员工进行数据安全培训，严格限制数据访问权限</li>
+                <li><strong>尽管我们采取了上述措施，但我们无法保证数据的绝对安全，您应当知晓并理解这一点</strong></li>
+            </ul>
+
+            <h2>七、免责声明</h2>
+
+            <h3>7.1 服务中断或故障</h3>
+            <p class="important-notice"><strong>因以下情况导致的服务中断或故障，我们不承担责任：</strong></p>
+            <ul>
+                <li>系统维护或升级</li>
+                <li>不可抗力因素（如自然灾害、战争、罢工、暴乱、政府行为等）</li>
+                <li>您的设备、网络或操作系统问题</li>
+                <li>第三方服务（如云存储、支付服务等）故障</li>
+                <li>黑客攻击、病毒侵入等网络安全事件</li>
+            </ul>
+
+            <h3>7.2 用户行为责任</h3>
+            <ul>
+                <li><strong>您对通过本服务上传的内容负全部责任</strong></li>
+                <li><strong>因您的违法违规行为导致的任何法律责任，由您自行承担</strong></li>
+                <li><strong>因您的行为给我们或第三方造成损失的，您应当承担赔偿责任</strong></li>
+            </ul>
+
+            <h3>7.3 第三方服务</h3>
+            <ul>
+                <li>本服务可能包含第三方提供的服务或链接</li>
+                <li><strong>第三方服务由第三方负责，我们不对第三方服务的安全性、准确性、可靠性做出保证</strong></li>
+                <li><strong>因使用第三方服务产生的任何纠纷，由您与第三方自行解决</strong></li>
+            </ul>
+
+            <h3>7.4 设备问题</h3>
+            <ul>
+                <li><strong>我们不对智能相框硬件设备的质量、性能、安全性做出保证</strong></li>
+                <li><strong>设备的保修和售后服务按照单独的保修协议执行</strong></li>
+            </ul>
+
+            <h2>八、服务的变更、中断与终止</h2>
+
+            <h3>8.1 服务变更</h3>
+            <ul>
+                <li>我们有权随时变更、暂停或终止部分或全部服务</li>
+                <li>服务变更、暂停或终止前，我们将尽可能提前通知您</li>
+                <li><strong>因服务变更、暂停或终止给您造成的损失，我们不承担责任</strong></li>
+            </ul>
+
+            <h3>8.2 账号终止</h3>
+            <p>在以下情况下，我们有权终止向您提供服务并注销您的账号：</p>
+            <ul>
+                <li>您违反本协议的任何规定</li>
+                <li>您从事违法违规活动</li>
+                <li>您的账号存在安全风险</li>
+                <li>您长期（连续12个月）未使用账号</li>
+                <li>法律法规或政府部门要求</li>
+            </ul>
+
+            <h3>8.3 数据导出</h3>
+            <ul>
+                <li>在账号终止前，您有权导出您的个人数据</li>
+                <li>账号终止后，<strong>我们有权删除您的所有数据，且不承担任何责任</strong></li>
+            </ul>
+
+            <h2>九、通知与送达</h2>
+
+            <h3>9.1 通知方式</h3>
+            <p>我们通过以下一种或多种方式向您发送通知：</p>
+            <ul>
+                <li>应用内消息推送</li>
+                <li>注册手机号短信</li>
+                <li>注册邮箱邮件</li>
+                <li>应用内公告</li>
+                <li>官方网站公告</li>
+            </ul>
+
+            <h3>9.2 通知送达</h3>
+            <p>通知自发出之日起，按以下方式视为送达：</p>
+            <ul>
+                <li>应用内消息：发送成功即视为送达</li>
+                <li>短信：发送后 24 小时视为送达</li>
+                <li>邮件：发送后 48 小时视为送达</li>
+                <li>公告：发布之日即视为送达</li>
+            </ul>
+
+            <h2>十、法律适用与争议解决</h2>
+
+            <h3>10.1 法律适用</h3>
+            <p class="important-notice"><strong>本协议的订立、执行、解释及争议解决均适用中华人民共和国大陆地区法律（不含冲突法）。</strong></p>
+
+            <h3>10.2 争议解决</h3>
+            <p>因本协议产生的任何争议，双方应首先友好协商解决。协商不成的，<strong>任何一方均可向我们所在地有管辖权的人民法院提起诉讼。</strong></p>
+
+            <h3>10.3 条款可分性</h3>
+            <p>如本协议的任何条款被认定为无效或不可执行，该条款应被视为可分割，其余条款仍具有完全效力。</p>
+
+            <h2>十一、其他条款</h2>
+
+            <h3>11.1 完整协议</h3>
+            <p>本协议构成您与我们之间关于使用本服务的完整协议，并取代此前就相关事宜达成的所有书面或口头协议。</p>
+
+            <h3>11.2 协议语言</h3>
+            <p>本协议以中文书写。如有其他语言版本，以中文版本为准。</p>
+
+            <h3>11.3 标题说明</h3>
+            <p>本协议的标题仅为方便阅读而设，不影响协议条款的含义或解释。</p>
+
+            <h2>十二、联系我们</h2>
+            <p>如果您对本协议有任何疑问、意见或建议，请通过以下方式联系我们：</p>
+
+            <div class="contact-info">
+                <p><strong>客服邮箱</strong>：haokan@levect.com</p>
+                <p><strong>客服电话</strong>：010-85794868（工作时间：9:00-18:00）</p>
+                <p><strong>公司名称</strong>：无限向量（北京）科技有限公司</p>
+                <p><strong>纳税人识别号</strong>：91110228306386970X</p>
+                <p><strong>公司地址</strong>：北京市密云区鼓楼东大街3号山水大厦3层313室-494</p>
+            </div>
+
+            <p>我们将在收到您的反馈后 15 个工作日内给予回复。</p>
+        </div>
+
+        <div class="footer">
+            <p><strong>再次感谢您选择好看智能相框！</strong></p>
+            <p><strong>本协议最终解释权归无限向量（北京）科技有限公司所有。</strong></p>
+        </div>
+    </div>
+</body>
+</html>
