@@ -1350,26 +1350,8 @@
                     </div>
                 </div>
 
-                <!-- 照片网格（已授权后显示） -->
+                <!-- 照片网格（已授权后显示）；个人照片轮播开关仅在「我的」- 功能设置 -->
                 <div id="photo-grid-section" class="mb-8 hidden">
-                    <!-- 照片轮播开关 -->
-                    <div id="photo-carousel-switch-bar" class="flex items-center justify-between p-4 bg-white rounded-[1.5rem] mb-4 shadow-sm border border-slate-100">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 bg-emerald-50 text-emerald-500 rounded-xl flex items-center justify-center">
-                                <i class="fa-solid fa-rotate"></i>
-                            </div>
-                            <div>
-                                <div class="text-sm font-bold text-slate-700">照片轮播</div>
-                                <div class="text-[10px] text-slate-500">关闭后照片将不在壁纸队列中展示</div>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <span class="photo-carousel-status text-xs font-bold text-emerald-600">轮播中</span>
-                            <div class="photo-carousel-switch w-11 h-[26px] rounded-full bg-emerald-500 relative cursor-pointer transition-colors" onclick="togglePhotoCarousel()">
-                                <div class="absolute top-[3px] left-[3px] w-5 h-5 rounded-full bg-white shadow-sm transition-transform" style="transform:translateX(18px);"></div>
-                            </div>
-                        </div>
-                    </div>
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-lg font-black text-slate-800 tracking-tight">我的照片</h3>
                         <span id="photoManageTrigger" class="text-xs text-indigo-600 font-bold cursor-pointer" onclick="togglePhotoManageMode()">管理</span>
@@ -1475,6 +1457,32 @@
                             </div>
                             <i class="fa-solid fa-chevron-right text-slate-400 text-xs"></i>
                         </button>
+                        <!-- 订阅更新推送通知 -->
+                        <div id="push-notify-switch-row" class="w-full flex items-center justify-between p-4">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 bg-blue-50 text-blue-500 rounded-xl flex items-center justify-center"><i class="fa-solid fa-bell"></i></div>
+                                <div class="text-left">
+                                    <span class="text-sm font-bold text-slate-700 block">订阅更新提醒</span>
+                                    <span class="text-[10px] text-slate-500">推送通知订阅壁纸更新时间</span>
+                                </div>
+                            </div>
+                            <div id="push-notify-switch" class="w-11 h-[26px] rounded-full bg-slate-900 relative cursor-pointer transition-colors" onclick="togglePushNotifySwitch(this)">
+                                <div class="absolute top-[3px] left-[3px] w-5 h-5 rounded-full bg-white shadow-sm transition-transform" style="transform:translateX(18px);"></div>
+                            </div>
+                        </div>
+                        <!-- 智能展示开关 -->
+                        <div id="smart-display-switch-row" class="w-full flex items-center justify-between p-4">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 bg-emerald-50 text-emerald-500 rounded-xl flex items-center justify-center"><i class="fa-solid fa-expand"></i></div>
+                                <div class="text-left">
+                                    <span class="text-sm font-bold text-slate-700 block">智能展示</span>
+                                    <span class="text-[10px] text-slate-500">根据照片尺寸自动智能充满</span>
+                                </div>
+                            </div>
+                            <div id="smart-display-switch" class="w-11 h-[26px] rounded-full bg-slate-900 relative cursor-pointer transition-colors" onclick="toggleSmartDisplaySwitch(this)">
+                                <div class="absolute top-[3px] left-[3px] w-5 h-5 rounded-full bg-white shadow-sm transition-transform" style="transform:translateX(18px);"></div>
+                            </div>
+                        </div>
                         <div id="profile-lock-switch-row" class="profile-android-only w-full flex items-center justify-between p-4">
                             <div class="flex items-center gap-4">
                                 <div class="w-10 h-10 bg-violet-50 text-violet-500 rounded-xl flex items-center justify-center"><i class="fa-solid fa-lock"></i></div>
@@ -1494,42 +1502,16 @@
                             </div>
                             <i class="fa-solid fa-chevron-right text-slate-400 text-xs"></i>
                         </button>
-                        <!-- 智能展示开关 -->
-                        <div id="smart-display-switch-row" class="w-full flex items-center justify-between p-4">
+                        <!-- 个人照片轮播（关闭后个人照片不参与锁屏轮播，订阅壁纸不受影响） -->
+                        <div id="profile-photo-carousel-switch-row" class="w-full flex items-center justify-between p-4">
                             <div class="flex items-center gap-4">
-                                <div class="w-10 h-10 bg-emerald-50 text-emerald-500 rounded-xl flex items-center justify-center"><i class="fa-solid fa-expand"></i></div>
+                                <div class="w-10 h-10 bg-teal-50 text-teal-500 rounded-xl flex items-center justify-center"><i class="fa-solid fa-images"></i></div>
                                 <div class="text-left">
-                                    <span class="text-sm font-bold text-slate-700 block">智能展示</span>
-                                    <span class="text-[10px] text-slate-500">根据照片尺寸自动智能充满</span>
+                                    <span class="text-sm font-bold text-slate-700 block">个人照片轮播</span>
+                                    <span class="text-[10px] text-slate-500">关闭后个人照片不参与锁屏轮播</span>
                                 </div>
                             </div>
-                            <div id="smart-display-switch" class="w-11 h-[26px] rounded-full bg-slate-900 relative cursor-pointer transition-colors" onclick="toggleSmartDisplaySwitch(this)">
-                                <div class="absolute top-[3px] left-[3px] w-5 h-5 rounded-full bg-white shadow-sm transition-transform" style="transform:translateX(18px);"></div>
-                            </div>
-                        </div>
-                        <!-- 桌面壁纸高斯模糊开关 -->
-                        <div id="home-blur-switch-row" class="profile-android-only w-full flex items-center justify-between p-4">
-                            <div class="flex items-center gap-4">
-                                <div class="w-10 h-10 bg-pink-50 text-pink-500 rounded-xl flex items-center justify-center"><i class="fa-solid fa-droplet"></i></div>
-                                <div class="text-left">
-                                    <span class="text-sm font-bold text-slate-700 block">桌面壁纸模糊</span>
-                                    <span class="text-[10px] text-slate-500">桌面壁纸使用高斯模糊效果</span>
-                                </div>
-                            </div>
-                            <div id="home-blur-switch" class="w-11 h-[26px] rounded-full bg-slate-200 relative cursor-pointer transition-colors" onclick="toggleHomeBlurSwitch(this)">
-                                <div class="absolute top-[3px] left-[3px] w-5 h-5 rounded-full bg-white shadow-sm transition-transform" style="transform:translateX(0);"></div>
-                            </div>
-                        </div>
-                        <!-- 订阅更新推送通知 -->
-                        <div id="push-notify-switch-row" class="w-full flex items-center justify-between p-4">
-                            <div class="flex items-center gap-4">
-                                <div class="w-10 h-10 bg-blue-50 text-blue-500 rounded-xl flex items-center justify-center"><i class="fa-solid fa-bell"></i></div>
-                                <div class="text-left">
-                                    <span class="text-sm font-bold text-slate-700 block">订阅更新提醒</span>
-                                    <span class="text-[10px] text-slate-500">推送通知订阅壁纸更新时间</span>
-                                </div>
-                            </div>
-                            <div id="push-notify-switch" class="w-11 h-[26px] rounded-full bg-slate-900 relative cursor-pointer transition-colors" onclick="togglePushNotifySwitch(this)">
+                            <div id="profile-photo-carousel-switch" class="w-11 h-[26px] rounded-full bg-slate-900 relative cursor-pointer transition-colors" onclick="toggleProfilePhotoCarouselSwitch()">
                                 <div class="absolute top-[3px] left-[3px] w-5 h-5 rounded-full bg-white shadow-sm transition-transform" style="transform:translateX(18px);"></div>
                             </div>
                         </div>
@@ -2156,6 +2138,8 @@
         // 照片管理多选状态
         let photoManageMode = false;
         const photoSelectedIndices = new Set();
+        /** 添加新照片且需先弹「开启个人照片轮播」时，关闭该弹窗后再打开锁屏设置引导 */
+        let pendingLockScreenGuideAfterPhotoCarousel = false;
 
         // ========== 订阅/评价状态（仅订阅与取消订阅，订阅成功后可写评价） ==========
         const subscribedProductIds = new Set();
@@ -2186,17 +2170,12 @@
         function getSmartDisplayEnabled() { return localStorage.getItem(SMART_DISPLAY_KEY) !== '0'; }
         function setSmartDisplayEnabled(on) { localStorage.setItem(SMART_DISPLAY_KEY, on ? '1' : '0'); }
 
-        // 桌面壁纸高斯模糊开关（默认关）
-        const HOME_BLUR_KEY = 'home_blur_enabled';
-        function getHomeBlurEnabled() { return localStorage.getItem(HOME_BLUR_KEY) === '1'; }
-        function setHomeBlurEnabled(on) { localStorage.setItem(HOME_BLUR_KEY, on ? '1' : '0'); }
-
         // 推送通知开关（默认开）
         const PUSH_NOTIFY_KEY = 'push_notify_enabled';
         function getPushNotifyEnabled() { return localStorage.getItem(PUSH_NOTIFY_KEY) !== '0'; }
         function setPushNotifyEnabled(on) { localStorage.setItem(PUSH_NOTIFY_KEY, on ? '1' : '0'); }
 
-        // 照片轮播开关：控制所有照片是否参与壁纸轮播（默认开）
+        // 个人照片轮播开关：仅控制用户上传的照片是否进入锁屏轮播，不影响订阅壁纸（默认开）
         const PHOTO_CAROUSEL_KEY = 'photo_carousel_enabled';
         function getPhotoCarouselEnabled() { return localStorage.getItem(PHOTO_CAROUSEL_KEY) !== '0'; }
         function setPhotoCarouselEnabled(on) { localStorage.setItem(PHOTO_CAROUSEL_KEY, on ? '1' : '0'); }
@@ -2379,9 +2358,9 @@
             if (introSub) {
                 if (photos.length > 0) {
                     if (carouselEnabled) {
-                        introSub.textContent = `你的 ${photos.length} 张照片将在锁屏自动轮播，每次亮屏都是回忆`;
+                        introSub.textContent = `你的 ${photos.length} 张个人照片将在锁屏自动轮播，每次亮屏都是回忆`;
                     } else {
-                        introSub.textContent = '照片轮播已关闭，开启后照片将在锁屏自动轮播';
+                        introSub.textContent = '个人照片轮播已关闭，可在「我的」- 功能设置中开启';
                     }
                 } else if (hasAccess) {
                     introSub.textContent = '添加照片后将在锁屏自动轮播，每次亮屏都是回忆';
@@ -2515,9 +2494,10 @@
             if (newPhotos.length > 0) {
                 showToast('已添加 ' + newPhotos.length + ' 张新照片');
                 preloadNewPhotos(newPhotos);
-                
                 if (!getPhotoCarouselEnabled()) {
-                    setTimeout(() => showPhotoCarouselGuide(), 800);
+                    pendingLockScreenGuideAfterPhotoCarousel = true;
+                    requestAnimationFrame(() => showPhotoCarouselGuide());
+                    return;
                 }
             } else {
                 showToast('照片列表已更新');
@@ -2555,46 +2535,27 @@
             const photos = photoModuleState.photos;
             const carouselEnabled = getPhotoCarouselEnabled();
             const introSub = document.getElementById('photo-intro-bar-sub');
-            const carouselSwitch = document.getElementById('photo-carousel-switch-bar');
             
             if (introSub && photos.length > 0) {
                 if (carouselEnabled) {
-                    introSub.textContent = `你的 ${photos.length} 张照片将在锁屏自动轮播，每次亮屏都是回忆`;
+                    introSub.textContent = `你的 ${photos.length} 张个人照片将在锁屏自动轮播，每次亮屏都是回忆`;
                 } else {
-                    introSub.textContent = '照片轮播已关闭，开启后照片将在锁屏自动轮播';
+                    introSub.textContent = '个人照片轮播已关闭，可在「我的」- 功能设置中开启';
                 }
             }
-            
-            if (carouselSwitch) {
-                const switchEl = carouselSwitch.querySelector('.photo-carousel-switch');
-                const statusText = carouselSwitch.querySelector('.photo-carousel-status');
-                if (switchEl) {
-                    const dot = switchEl.querySelector('div');
-                    if (carouselEnabled) {
-                        switchEl.classList.remove('bg-slate-200');
-                        switchEl.classList.add('bg-emerald-500');
-                        if (dot) dot.style.transform = 'translateX(18px)';
-                    } else {
-                        switchEl.classList.remove('bg-emerald-500');
-                        switchEl.classList.add('bg-slate-200');
-                        if (dot) dot.style.transform = 'translateX(0)';
-                    }
-                }
-                if (statusText) {
-                    statusText.textContent = carouselEnabled ? '轮播中' : '已关闭';
-                    statusText.className = `photo-carousel-status text-xs font-bold ${carouselEnabled ? 'text-emerald-600' : 'text-slate-400'}`;
-                }
-            }
-        }
 
-        function togglePhotoCarousel() {
-            const currentState = getPhotoCarouselEnabled();
-            setPhotoCarouselEnabled(!currentState);
-            updatePhotoCarouselStatus();
-            if (!currentState) {
-                showToast('照片轮播已开启');
-            } else {
-                showToast('照片轮播已关闭，照片将不在壁纸队列中展示');
+            const profilePhotoSwitch = document.getElementById('profile-photo-carousel-switch');
+            if (profilePhotoSwitch) {
+                const dot = profilePhotoSwitch.querySelector('div');
+                if (carouselEnabled) {
+                    profilePhotoSwitch.classList.remove('bg-slate-200');
+                    profilePhotoSwitch.classList.add('bg-slate-900');
+                    if (dot) dot.style.transform = 'translateX(18px)';
+                } else {
+                    profilePhotoSwitch.classList.remove('bg-slate-900');
+                    profilePhotoSwitch.classList.add('bg-slate-200');
+                    if (dot) dot.style.transform = 'translateX(0)';
+                }
             }
         }
 
@@ -2607,10 +2568,10 @@
                     <div class="w-14 h-14 bg-emerald-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
                         <i class="fa-solid fa-images text-emerald-500 text-2xl"></i>
                     </div>
-                    <h3 class="text-lg font-black text-slate-800 text-center mb-2">开启照片轮播</h3>
-                    <p class="text-sm text-slate-500 text-center mb-6">你已添加新照片！开启照片轮播后，这些照片将在锁屏自动展示。</p>
+                    <h3 class="text-lg font-black text-slate-800 text-center mb-2">开启个人照片轮播</h3>
+                    <p class="text-sm text-slate-500 text-center mb-6">你已添加新照片！开启后这些个人照片将在锁屏自动展示（可随时在设置中关闭）。</p>
                     <div class="space-y-3">
-                        <button onclick="enablePhotoCarouselFromGuide()" class="w-full py-3.5 bg-emerald-500 text-white text-sm font-bold rounded-2xl active:scale-[0.98] transition-transform">开启照片轮播</button>
+                        <button onclick="enablePhotoCarouselFromGuide()" class="w-full py-3.5 bg-emerald-500 text-white text-sm font-bold rounded-2xl active:scale-[0.98] transition-transform">开启个人照片轮播</button>
                         <button onclick="closePhotoCarouselGuide()" class="w-full py-3 text-slate-500 text-sm font-bold">稍后再说</button>
                     </div>
                 </div>
@@ -2622,13 +2583,19 @@
         function enablePhotoCarouselFromGuide() {
             setPhotoCarouselEnabled(true);
             updatePhotoCarouselStatus();
-            closePhotoCarouselGuide();
-            showToast('照片轮播已开启');
+            showToast('个人照片轮播已开启');
+            closePhotoCarouselGuide(true);
         }
 
-        function closePhotoCarouselGuide() {
+        /** @param {boolean} [continueToLockGuide] 为 true 时（用户点击开启轮播）再继续锁屏设置引导；稍后再说 / 点遮罩为 false */
+        function closePhotoCarouselGuide(continueToLockGuide) {
             const modal = document.getElementById('photo-carousel-guide-modal');
             if (modal) modal.remove();
+            if (!pendingLockScreenGuideAfterPhotoCarousel) return;
+            pendingLockScreenGuideAfterPhotoCarousel = false;
+            if (continueToLockGuide) {
+                showLockScreenGuideModal('photo');
+            }
         }
 
         function togglePhotoManageMode() {
@@ -3364,22 +3331,6 @@
             }
         }
 
-        function toggleHomeBlurSwitch(el) {
-            const dot = el.querySelector('div');
-            const isOn = el.classList.contains('bg-slate-900');
-            if (isOn) {
-                el.classList.replace('bg-slate-900', 'bg-slate-200');
-                dot.style.transform = 'translateX(0)';
-                setHomeBlurEnabled(false);
-                showToast('已关闭桌面壁纸模糊');
-            } else {
-                el.classList.replace('bg-slate-200', 'bg-slate-900');
-                dot.style.transform = 'translateX(18px)';
-                setHomeBlurEnabled(true);
-                showToast('已开启桌面壁纸模糊效果');
-            }
-        }
-
         function togglePushNotifySwitch(el) {
             const dot = el.querySelector('div');
             const isOn = el.classList.contains('bg-slate-900');
@@ -3393,6 +3344,17 @@
                 dot.style.transform = 'translateX(18px)';
                 setPushNotifyEnabled(true);
                 showToast('已开启订阅更新提醒');
+            }
+        }
+
+        function toggleProfilePhotoCarouselSwitch() {
+            const currentState = getPhotoCarouselEnabled();
+            setPhotoCarouselEnabled(!currentState);
+            updatePhotoCarouselStatus();
+            if (!currentState) {
+                showToast('个人照片轮播已开启');
+            } else {
+                showToast('个人照片轮播已关闭，订阅壁纸不受影响');
             }
         }
 
@@ -3411,20 +3373,6 @@
                     dot.style.transform = 'translateX(0)';
                 }
             }
-            const blurSwitch = document.getElementById('home-blur-switch');
-            if (blurSwitch) {
-                const on = getHomeBlurEnabled();
-                const dot = blurSwitch.querySelector('div');
-                if (on) {
-                    blurSwitch.classList.remove('bg-slate-200');
-                    blurSwitch.classList.add('bg-slate-900');
-                    dot.style.transform = 'translateX(18px)';
-                } else {
-                    blurSwitch.classList.remove('bg-slate-900');
-                    blurSwitch.classList.add('bg-slate-200');
-                    dot.style.transform = 'translateX(0)';
-                }
-            }
             const pushSwitch = document.getElementById('push-notify-switch');
             if (pushSwitch) {
                 const on = getPushNotifyEnabled();
@@ -3439,6 +3387,7 @@
                     dot.style.transform = 'translateX(0)';
                 }
             }
+            updatePhotoCarouselStatus();
         }
 
         // ========== 教程弹窗 ==========
@@ -3991,7 +3940,6 @@
                 const isAndroid = getPhotoPermissionPlatform() === 'android';
                 const lockRow = document.getElementById('profile-lock-switch-row');
                 const intervalRow = document.getElementById('profile-interval-row');
-                const homeBlurRow = document.getElementById('home-blur-switch-row');
                 if (lockRow) {
                     lockRow.classList.toggle('profile-android-only', !isAndroid);
                     const sw = lockRow.querySelector('.w-11');
@@ -4001,7 +3949,6 @@
                     if (dot) dot.style.transform = on ? 'translateX(18px)' : 'translateX(0)';
                 }
                 if (intervalRow) intervalRow.classList.toggle('profile-android-only', !isAndroid);
-                if (homeBlurRow) homeBlurRow.classList.toggle('profile-android-only', !isAndroid);
                 updateProfileIntervalRowEnabled();
                 initSettingSwitches();
             }
