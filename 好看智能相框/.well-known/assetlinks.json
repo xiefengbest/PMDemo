@@ -1,0 +1,14 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.hk.phone_album.mobile",
+      "sha256_cert_fingerprints": [
+        "FF:6B:5F:F8:B4:2A:62:56:51:5F:48:BA:2D:17:CF:B0:1B:C5:CC:4C:B3:D9:8A:CE:B4:F1:ED:A0:6D:C1:89:DC"
+      ]
+    }
+  }
+]
