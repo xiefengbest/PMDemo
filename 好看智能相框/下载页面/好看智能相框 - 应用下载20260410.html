@@ -370,6 +370,9 @@
             cursor: pointer;
             transition: background-color 0.2s, opacity 0.2s;
             -webkit-tap-highlight-color: transparent;
+            display: block;
+            text-align: center;
+            text-decoration: none;
         }
 
         /* 当按钮固定时，调整最大宽度 */
@@ -461,8 +464,8 @@
             <!-- 下载区域 -->
             <div class="download-section">
                 <div class="download-actions">
-                    <button class="download-btn" id="primaryBtn">打开App继续</button>
-                    <button class="download-btn secondary" id="secondaryBtn">下载App</button>
+                    <a class="download-btn" id="primaryBtn" href="javascript:void(0)" role="button">打开App继续</a>
+                    <a class="download-btn secondary" id="secondaryBtn" href="javascript:void(0)" role="button">下载App</a>
                 </div>
             </div>
         </div>
@@ -511,6 +514,21 @@
             const base = 'https://92-cn.levect.com/frames/download/index.html';
             const qs = window.location.search || '';
             return qs ? `${base}${qs}` : base;
+        }
+
+        function setAsJsAction(el, handler) {
+            if (!el) return;
+            el.setAttribute('href', 'javascript:void(0)');
+            el.onclick = function (e) {
+                if (e && typeof e.preventDefault === 'function') e.preventDefault();
+                handler();
+            };
+        }
+
+        function setAsLink(el, href) {
+            if (!el) return;
+            el.setAttribute('href', href);
+            el.onclick = null;
         }
 
         // Android：用户点击时再跳转应用商店（仅 market deeplink，无定时自动二次跳转）
@@ -623,10 +641,10 @@
             if (isWeChat()) {
                 wechatMask.classList.add('show');
                 primaryBtn.textContent = '请在浏览器中打开';
-                primaryBtn.onclick = function() {
+                setAsJsAction(primaryBtn, function () {
                     // 提示用户使用浏览器打开
                     alert('请点击右上角"..."菜单，选择"在浏览器中打开"');
-                };
+                });
                 secondaryBtn.style.display = 'none';
                 return;
             }
@@ -636,38 +654,41 @@
                 if (hasToken) {
                     // 邀请/任务链路：优先打开App完成流程
                     primaryBtn.textContent = '打开App继续';
-                    primaryBtn.onclick = openAndroidApp;
+                    setAsJsAction(primaryBtn, openAndroidApp);
 
                     secondaryBtn.textContent = '下载App';
-                    secondaryBtn.onclick = openAndroidStoreWithFallback;
+                    setAsJsAction(secondaryBtn, openAndroidStoreWithFallback);
                 } else {
                     // 普通下载：优先引导安装
                     primaryBtn.textContent = '下载App';
-                    primaryBtn.onclick = openAndroidStoreWithFallback;
+                    setAsJsAction(primaryBtn, openAndroidStoreWithFallback);
 
                     secondaryBtn.textContent = '打开App继续';
-                    secondaryBtn.onclick = openAndroidApp;
+                    setAsJsAction(secondaryBtn, openAndroidApp);
                 }
             } else if (isIOS()) {
+                const inviteUrl = getCurrentInviteUrl();
                 if (hasToken) {
                     // 邀请/任务链路：优先打开App完成流程
                     primaryBtn.textContent = '打开App继续';
-                    primaryBtn.onclick = openIOSAppOrStore;
+                    // iOS: 用真实链接触发 Universal Links（比 window.location 更稳）
+                    setAsLink(primaryBtn, inviteUrl);
 
                     secondaryBtn.textContent = '前往App Store下载';
-                    secondaryBtn.onclick = openAppStore;
+                    setAsJsAction(secondaryBtn, openAppStore);
                 } else {
                     // 普通下载：优先引导安装
                     primaryBtn.textContent = '前往App Store下载';
-                    primaryBtn.onclick = openAppStore;
+                    setAsJsAction(primaryBtn, openAppStore);
 
                     secondaryBtn.textContent = '打开App继续';
-                    secondaryBtn.onclick = openIOSAppOrStore;
+                    // iOS: 用真实链接触发 Universal Links（比 window.location 更稳）
+                    setAsLink(secondaryBtn, inviteUrl);
                 }
             } else {
                 // 其他设备（桌面浏览器等），引导到应用宝，不自动跳转
                 primaryBtn.textContent = '下载App';
-                primaryBtn.onclick = openAndroidStore;
+                setAsJsAction(primaryBtn, openAndroidStore);
                 secondaryBtn.style.display = 'none';
             }
 
