@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>专业级 Invoice 生成器 - 香港公司适用</title>
+  <style>
+    :root { --primary-color: #2c3e50; --accent-color: #3498db; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #eef2f3; padding: 40px 20px; color: #333; }
+    .container { max-width: 850px; margin: auto; }
+    .controls { background: #fff; padding: 15px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-align: center; }
+    .invoice-card { background: #fff; padding: 50px; border-radius: 4px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); min-height: 1000px; position: relative; }
+
+    .header { display: flex; justify-content: space-between; border-bottom: 2px solid var(--primary-color); padding-bottom: 20px; margin-bottom: 30px; }
+    .header h1 { font-size: 40px; color: var(--primary-color); margin: 0; letter-spacing: 2px; }
+
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 40px; }
+    .info-block h3 { font-size: 12px; text-transform: uppercase; color: #999; margin-bottom: 10px; border-bottom: 1px solid #eee; }
+
+    table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+    th { background: var(--primary-color); color: #fff; padding: 12px; text-align: left; }
+    td { padding: 12px; border-bottom: 1px solid #eee; }
+
+    input, textarea, select { border: 1px solid transparent; padding: 5px; width: 100%; font-size: 14px; transition: 0.3s; }
+    input:hover, textarea:hover { border-color: #ddd; background: #fafafa; }
+    input:focus, textarea:focus { border-color: var(--accent-color); outline: none; background: #fff; }
+    textarea { resize: vertical; min-height: 60px; overflow: hidden; }
+
+    .total-section { float: right; width: 300px; margin-top: 20px; }
+    .total-row { display: flex; justify-content: space-between; padding: 10px 0; font-size: 16px; }
+    .grand-total { font-size: 22px; font-weight: bold; color: var(--primary-color); border-top: 2px solid #eee; margin-top: 10px; padding-top: 10px; }
+
+    .btn { padding: 8px 16px; cursor: pointer; border-radius: 4px; border: none; font-weight: bold; transition: 0.3s; }
+    .btn-add { background: #27ae60; color: white; margin-bottom: 10px; }
+    .btn-print { background: var(--accent-color); color: white; font-size: 16px; padding: 12px 30px; }
+    .btn-del { background: #ff7675; color: white; padding: 2px 8px; font-size: 12px; }
+
+    @media print {
+        .controls, .btn-add, .btn-del { display: none !important; }
+        body { background: white; padding: 0; }
+        .invoice-card { box-shadow: none; padding: 20px; width: 100%; }
+        input, textarea { border: none !important; background: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="controls no-print">
+    选择币种：
+    <select id="currencySelector" style="width: 100px; border: 1px solid #ccc;" onchange="updateCurrency()">
+      <option value="USD">USD ($)</option>
+      <option value="HKD">HKD (HK$)</option>
+      <option value="CNY">CNY (¥)</option>
+      <option value="EUR">EUR (€)</option>
+      <option value="SGD">SGD (S$)</option>
+    </select>
+    &nbsp;&nbsp;
+    <button class="btn btn-print" onclick="window.print()">生成 PDF / 导出</button>
+  </div>
+
+  <div class="invoice-card" id="printArea">
+    <div class="header">
+      <div>
+        <h1>INVOICE</h1>
+        <p>Status: <span style="color: #27ae60; font-weight: bold;">Final</span></p>
+      </div>
+      <div style="text-align: right;">
+        <p>Invoice #: <input type="text" value="INV-20240415-01" style="width: 150px; text-align: right;"></p>
+        <p>Date: <input type="date" id="datePicker" style="width: 150px; text-align: right;"></p>
+      </div>
+    </div>
+
+    <div class="info-grid">
+      <div class="info-block">
+        <h3>From (Service Provider)</h3>
+        <input type="text" placeholder="Creator Name / Studio Name" style="font-weight: bold; font-size: 16px;"><br>
+        <textarea placeholder="Address&#10;Email&#10;Phone" rows="4"></textarea>
+      </div>
+      <div class="info-block">
+        <h3>To (Client)</h3>
+        <input type="text" value="ABC TECHNOLOGY (HK) LIMITED" style="font-weight: bold; font-size: 16px;"><br>
+        <textarea rows="4">Unit 1104, 11/F, Crawford House,&#10;70 Queen's Road Central, Central,&#10;Hong Kong</textarea>
+      </div>
+    </div>
+
+    <div class="info-block">
+      <h3>Payment Details</h3>
+      <textarea placeholder="Bank Name: xxx&#10;SWIFT Code: xxx&#10;Account No: xxx&#10;OR PayPal Email: xxx" rows="3"></textarea>
+    </div>
+
+    <table id="itemTable">
+      <thead>
+      <tr>
+        <th width="50%">Description</th>
+        <th width="15%">Qty</th>
+        <th width="15%">Unit Price</th>
+        <th width="15%">Amount</th>
+        <th width="5%" class="no-print"></th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+        <td><input type="text" value="Video Editing - Project Alpha"></td>
+        <td><input type="number" value="1" class="qty" oninput="calc()"></td>
+        <td><input type="number" value="500" class="unit" oninput="calc()"></td>
+        <td><span class="symbol">$</span><span class="subtotal">500.00</span></td>
+        <td class="no-print"></td>
+      </tr>
+      </tbody>
+    </table>
+    <button class="btn btn-add no-print" onclick="addRow()">+ 添加新项</button>
+
+    <div class="total-section">
+      <div class="total-row">
+        <span>Subtotal:</span>
+        <span><span class="symbol">$</span><span id="finalSub">500.00</span></span>
+      </div>
+      <div class="total-row grand-total">
+        <span>Total Amount:</span>
+        <span><span class="symbol">$</span><span id="finalTotal">500.00</span></span>
+      </div>
+    </div>
+
+    <div style="margin-top: 150px; color: #7f8c8d; font-size: 12px;">
+      <p><strong>Note:</strong> 1. Services are performed outside of Hong Kong. 2. No withholding tax applies.</p>
+      <div style="margin-top: 40px; border-top: 1px solid #ccc; width: 250px; padding-top: 10px;">
+        Authorized Signature / Stamp
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.getElementById('datePicker').valueAsDate = new Date();
+  let symbols = { USD: '$', HKD: 'HK$', CNY: '¥', EUR: '€', SGD: 'S$' };
+
+  // Auto-resize textarea based on content
+  function autoResizeTextarea(el) {
+    el.style.height = 'auto';
+    el.style.height = el.scrollHeight + 'px';
+  }
+
+  // Initialize all textareas
+  document.querySelectorAll('textarea').forEach(textarea => {
+    autoResizeTextarea(textarea);
+    textarea.addEventListener('input', function() {
+      autoResizeTextarea(this);
+    });
+  });
+
+  function updateCurrency() {
+      let s = symbols[document.getElementById('currencySelector').value];
+      document.querySelectorAll('.symbol').forEach(el => el.innerText = s);
+  }
+
+  function addRow() {
+      let table = document.getElementById('itemTable').getElementsByTagName('tbody')[0];
+      let row = table.insertRow();
+      row.innerHTML = `
+          <td><input type="text" placeholder="Service description"></td>
+          <td><input type="number" value="1" class="qty" oninput="calc()"></td>
+          <td><input type="number" value="0" class="unit" oninput="calc()"></td>
+          <td><span class="symbol">${symbols[document.getElementById('currencySelector').value]}</span><span class="subtotal">0.00</span></td>
+          <td class="no-print"><button class="btn btn-del" onclick="this.parentElement.parentElement.remove();calc()">X</button></td>
+      `;
+  }
+
+  function calc() {
+      let rows = document.getElementById('itemTable').getElementsByTagName('tbody')[0].rows;
+      let total = 0;
+      for (let i = 0; i < rows.length; i++) {
+          let qty = rows[i].querySelector('.qty').value || 0;
+          let unit = rows[i].querySelector('.unit').value || 0;
+          let sub = qty * unit;
+          rows[i].querySelector('.subtotal').innerText = sub.toFixed(2);
+          total += sub;
+      }
+      document.getElementById('finalSub').innerText = total.toFixed(2);
+      document.getElementById('finalTotal').innerText = total.toFixed(2);
+  }
+</script>
+
+</body>
+</html>

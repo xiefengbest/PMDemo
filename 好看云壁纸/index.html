@@ -1438,7 +1438,7 @@
                     <button class="cat-tab-b" data-cat="trend">潮流明星</button>
                     <button class="cat-tab-b" data-cat="creative">创意脑洞</button>
                 </div>
-                <div class="px-6 space-y-6" id="catProductGrid"></div>
+                <div class="px-6 space-y-6 grid grid-cols-1 gap-6" id="catProductGrid"></div>
             </section>
 
             <!-- 相册视图 -->
@@ -2425,7 +2425,7 @@
         const CAT_PRODUCTS = [
             { id: 401, name: '文观壁纸', artist: '文观WENGUAN', cover: 'https://92cn-image.levect.com/release/image/8280e343d1199df8b2eae257020515ba.jpg', subs: '9.8万', subtitle: '撷诗经草木，揽唐诗月色，掬宋词烟雨', desc: '撷诗经草木，揽唐诗月色，掬宋词烟雨，东方气韵，栖于方寸屏幕。以中国古典诗词为灵感，将千年诗意化为指间风景，每一张壁纸都是一首可以看见的诗。', update: '每日更新', cats: ['recommend', 'culture'], tushuo: '撷诗经草木，揽唐诗月色。东方气韵栖于方寸屏幕，千年诗意化为指间风景。', previews: ['https://92cn-image.levect.com/release/image/c695c62ee0c73d56e451167addcd60a8.jpg@!fw360.webp?k=1&p=1&eid=1', 'https://92cn-image.levect.com/release/image/daa325ac0e7ebc62d2eebf813f49949b.jpg@!fw360.webp?k=1&p=1&eid=1', 'https://92cn-image.levect.com/release/image/b5df685752ed6af077fb9c33e945b7dd.jpg@!fw360.webp?k=1&p=1&eid=1'] },
             { id: 101, name: '千里江山图 · 新绎', artist: '墨染山河', cover: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=800', subs: '28.7万', subtitle: '传世名画与现代插画的梦幻联动', desc: '以《千里江山图》为蓝本，墨染山河工作室用全新的数字绘画手法重新诠释了这幅传世之作。每一张壁纸都是一次跨越千年的对话。', update: '每周更新', cats: ['recommend', 'culture'], tushuo: '青绿山水间，千年画卷徐徐展开。墨色晕染的峰峦叠嶂，仿佛能听见江风拂过水面的声音。' },
-            { id: 102, name: '三丽鸥 · 梦幻花园', artist: '三丽鸥官方', cover: 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=800', subs: '45.3万', subtitle: 'Hello Kitty × My Melody 限定壁纸', desc: '三丽鸥官方授权，Hello Kitty、My Melody、库洛米等人气角色齐聚梦幻花园。独家设计，全网首发。', update: '每周三更新', cats: ['recommend', 'ip', 'trend'], tushuo: '阳光洒落的花园里，Hello Kitty 和朋友们正在举办一场春日派对。粉色的花瓣随风飘落，每一帧都是童话般的梦境。' },
+            { id: 102, name: '组图壁纸', artist: '好看云壁纸', cover: 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=800', usage: '125.8万', subtitle: '精选组图，一次设置多张壁纸', desc: '精选高质量组图壁纸，一次设置多张，让你的锁屏和桌面更加丰富多样。不定期更新，总有新惊喜。', update: '不定期更新', cats: ['recommend'], tushuo: '精选组图壁纸，一次设置多张，让你的锁屏和桌面更加丰富多样。' },
             { id: 103, name: '银河漫游指南', artist: 'Artflow', cover: 'https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=800', subs: '16.9万', subtitle: '从近地轨道到仙女座的视觉旅程', desc: '由概念艺术家Artflow倾力打造，用电影级别的画面质感呈现宇宙的壮阔。星云、黑洞、空间站......每一帧都值得凝视。', update: '每周五更新', cats: ['recommend', 'creative'] },
             { id: 1, name: '樱花物语', artist: '猫小姐', cover: 'https://images.unsplash.com/photo-1522383225653-ed111181a951?w=800', subs: '12.6万', subtitle: '以日本樱花季为灵感的粉色梦境', desc: '以日本樱花季为灵感，每一张壁纸都是一段粉色的梦。插画师猫小姐用细腻的笔触描绘了樱花树下的故事，温暖治愈。', update: '每周三更新', cats: ['recommend', 'nature'] },
             { id: 2, name: '赛博之城', artist: '像素光年', cover: 'https://images.unsplash.com/photo-1514565131-fce0801e5785?w=800', subs: '8.3万', subtitle: '赛博朋克风格的未来都市', desc: '赛博朋克风格的未来都市，霓虹灯闪烁的街道，飞行器穿梭的天空。每一帧都是一场视觉盛宴。', update: '每周五更新', cats: ['recommend', 'creative', 'trend'] },
@@ -2627,9 +2627,10 @@
             const img1 = p.previews ? p.previews[0] : PREVIEW_POOL_B[idx];
             const img2 = p.previews ? p.previews[1] : PREVIEW_POOL_B[(idx + 1) % PREVIEW_POOL_B.length];
             const img3 = p.previews ? p.previews[2] : PREVIEW_POOL_B[(idx + 2) % PREVIEW_POOL_B.length];
+            const isGroupWallpaper = p.id === 102;
             const subscribed = subscribedProductIds.has(p.id);
-            const btnText = subscribed ? '已订阅' : '订阅';
-            const btnOnClick = subscribed ? 'event.stopPropagation()' : `event.stopPropagation();toggleSubB(this, ${p.id})`;
+            const btnText = isGroupWallpaper ? '设为壁纸' : (subscribed ? '已订阅' : '订阅');
+            const btnOnClick = isGroupWallpaper ? 'event.stopPropagation();openWallpaperModeModal()' : (subscribed ? 'event.stopPropagation()' : `event.stopPropagation();toggleSubB(this, ${p.id})`);
 
             return `
                 <div class="product-card-b" onclick="openDetail(${p.id})">
@@ -2639,7 +2640,7 @@
                         <div>
                             <div class="flex items-center gap-2 mb-3">
                                 <span class="text-[10px] font-bold px-2.5 py-1 rounded-md bg-white/20 text-white border border-white/20 backdrop-blur-sm">${p.update}</span>
-                                <span class="text-[11px] text-white/80 font-medium">${p.subs}订阅</span>
+                                <span class="text-[11px] text-white/80 font-medium">${isGroupWallpaper ? p.usage + '使用' : p.subs + '订阅'}</span>
                             </div>
                             <div class="mini-preview">
                                 <div class="mini-preview-img"><img src="${img1}" loading="lazy"></div>
@@ -2651,7 +2652,7 @@
                                     <h3 class="text-xl font-black text-white tracking-tight">${p.name}</h3>
                                     <p class="text-xs text-white/70 mt-1 truncate">${p.subtitle}</p>
                                 </div>
-                                <button class="shrink-0 ${subscribed ? 'bg-white/20 text-white/90' : 'bg-white text-slate-900'} px-5 py-2.5 rounded-2xl text-xs font-black shadow-lg active:scale-95 transition-transform" onclick="${btnOnClick}">${btnText}</button>
+                                <button class="shrink-0 ${isGroupWallpaper ? 'bg-white text-slate-900' : (subscribed ? 'bg-white/20 text-white/90' : 'bg-white text-slate-900')} px-5 py-2.5 rounded-2xl text-xs font-black shadow-lg active:scale-95 transition-transform" onclick="${btnOnClick}">${btnText}</button>
                             </div>
                         </div>
                     </div>
@@ -2676,20 +2677,18 @@
             }
             
             const creatorCard = `
-                <div onclick="openCreatorPage()" style="cursor:pointer;background:white;border-radius:2.5rem;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.06);border:1px solid #e2e8f0;">
-                    <div style="padding:20px;">
-                        <div class="flex items-center gap-3 mb-4">
-                            <img src="${creator.avatar}" class="w-12 h-12 rounded-full object-cover shadow-md" alt="">
-                            <div class="flex-1 min-w-0">
-                                <h3 class="text-base font-black text-slate-900 tracking-tight">${creator.name}</h3>
-                                <p class="text-[11px] text-slate-500 mt-0.5 truncate">${creator.desc}</p>
-                            </div>
+                <div onclick="openCreatorPage()" style="cursor:pointer;background:white;border-radius:2.5rem;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.06);border:1px solid #e2e8f0;padding:20px;">
+                    <div class="flex items-center gap-3 mb-4">
+                        <img src="${creator.avatar}" class="w-12 h-12 rounded-full object-cover shadow-md" alt="">
+                        <div class="flex-1 min-w-0">
+                            <h3 class="text-base font-black text-slate-900 tracking-tight">${creator.name}</h3>
+                            <p class="text-[11px] text-slate-500 mt-0.5 truncate">${creator.desc}</p>
                         </div>
-                        <div class="flex gap-2 mb-4">
-                            ${latestWallpapers.map(src => `<div style="flex:1;aspect-ratio:9/16;border-radius:12px;overflow:hidden;"><img src="${src}" class="w-full h-full object-cover"></div>`).join('')}
-                        </div>
-                        <button class="w-full bg-slate-900 text-white py-3 rounded-2xl text-xs font-black shadow-sm active:scale-[0.98] transition-transform" onclick="event.stopPropagation();openCreatorPage()">查看详情</button>
                     </div>
+                    <div class="flex gap-2 mb-4">
+                        ${latestWallpapers.map(src => `<div style="flex:1;aspect-ratio:9/16;border-radius:12px;overflow:hidden;"><img src="${src}" class="w-full h-full object-cover"></div>`).join('')}
+                    </div>
+                    <button class="w-full bg-slate-900 text-white py-3 rounded-2xl text-xs font-black shadow-sm active:scale-[0.98] transition-transform" onclick="event.stopPropagation();openCreatorPage()">查看详情</button>
                 </div>
             `;
             
@@ -2783,13 +2782,13 @@
             const allImages = (works || []).map(w => w.src);
             // 收集所有图说（取第一个有图说的作品）
             const allTushuo = (works || []).find(w => w.tushuo)?.tushuo || null;
+            window.allWorksImages = allImages;
+            window.allWorksTushuo = allTushuo;
             el.innerHTML = (works || []).map((w, idx) => `
                 <div class="wallpaper-item" onclick="openGenericFullscreenPreview(allWorksImages, ${idx}, '全部壁纸', allWorksTushuo)">
                     <img src="${w.src}" alt="" loading="lazy">
                 </div>
             `).join('');
-            window.allWorksImages = allImages;
-            window.allWorksTushuo = allTushuo;
         }
 
         // ========== 全屏壁纸预览 ==========
@@ -3560,7 +3559,7 @@
             document.getElementById('detailMetaB').innerHTML = `
                 <div class="flex items-center gap-3">
                     <span class="text-[10px] font-bold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-lg">${p.update}</span>
-                    <span class="text-xs text-slate-500">${p.subs}人订阅</span>
+                    <span class="text-xs text-slate-500">${p.id === 102 ? p.usage + '人使用' : p.subs + '人订阅'}</span>
                 </div>
             `;
 
@@ -3654,8 +3653,16 @@
             const btn2 = document.getElementById('detailSubBarBtn2');
             const reviewIconBtn = document.getElementById('detailReviewIconBtn');
             const subscribed = subscribedProductIds.has(productId);
+            const isGroupWallpaper = productId === 102;
 
-            if (!subscribed) {
+            if (isGroupWallpaper) {
+                btn.textContent = '设为壁纸';
+                btn.onclick = openWallpaperModeModal;
+                btn.className = 'flex-1 py-4 bg-slate-900 text-white rounded-2xl text-sm font-black shadow-xl shadow-slate-300 active:scale-[0.97] transition-transform';
+                btn.classList.remove('hidden');
+                btn2.classList.add('hidden');
+                reviewIconBtn.classList.add('hidden');
+            } else if (!subscribed) {
                 btn.textContent = '立即订阅';
                 btn.onclick = handleDetailSubscribe;
                 btn.className = 'flex-1 py-4 bg-slate-900 text-white rounded-2xl text-sm font-black shadow-xl shadow-slate-300 active:scale-[0.97] transition-transform';
