@@ -344,6 +344,41 @@
         }
         #creator-modal.show { transform: translate(-50%, 0); pointer-events: auto; }
 
+        /* 通用圆形返回按钮 */
+        .back-btn-floating {
+            position: fixed;
+            top: calc(16px + env(safe-area-inset-top, 0px));
+            left: 16px;
+            z-index: 999;
+            display: none;
+        }
+        .back-btn-absolute {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            z-index: 10;
+        }
+        .back-btn-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 9999px;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        .back-btn-circle:active {
+            transform: scale(0.9);
+        }
+        .back-btn-circle i {
+            color: white;
+            font-size: 14px;
+        }
+
         /* 横向合辑卡片 */
         .album-strip {
             display: flex;
@@ -1655,8 +1690,10 @@
         <div id="detail-modal">
             <div style="height:100vh;overflow-y:auto;" class="scrollbar-hide">
                 <!-- 返回按钮 -->
-                <div onclick="closeDetail()" class="absolute top-4 left-4 z-10 w-10 h-10 rounded-full bg-black/30 backdrop-blur-md flex items-center justify-center cursor-pointer active:scale-90 transition-transform">
-                    <i class="fa-solid fa-chevron-left text-white text-sm"></i>
+                <div onclick="closeDetail()" class="back-btn-absolute">
+                    <div class="back-btn-circle">
+                        <i class="fa-solid fa-chevron-left"></i>
+                    </div>
                 </div>
                 <!-- 封面图 -->
                 <img class="detail-cover-b" id="detailCoverB" src="" alt="">
@@ -1747,6 +1784,13 @@
             </div>
         </div>
 
+        <!-- 创作者页悬浮返回按钮 -->
+        <div id="creatorBackBtn" class="back-btn-floating" onclick="closeCreatorPage()">
+            <div class="back-btn-circle">
+                <i class="fa-solid fa-chevron-left"></i>
+            </div>
+        </div>
+
         <!-- 创作者页模态框 -->
         <div id="creator-modal">
             <div style="height:100vh;overflow-y:auto;" class="scrollbar-hide">
@@ -1756,11 +1800,6 @@
                     <img id="creatorCover" class="absolute inset-0 w-full h-full object-cover" style="filter: blur(40px) saturate(1.5); transform: scale(1.2);" src="" alt="">
                     <!-- 渐变遮罩层 -->
                     <div class="absolute inset-0" style="background: linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.5) 100%);"></div>
-                    
-                    <!-- 返回按钮 -->
-                    <div onclick="closeCreatorPage()" class="absolute top-4 left-4 z-10 w-9 h-9 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center cursor-pointer active:scale-90 transition-transform">
-                        <i class="fa-solid fa-chevron-left text-white text-sm"></i>
-                    </div>
                     
                     <!-- 创作者信息 -->
                     <div class="absolute bottom-0 left-0 right-0 p-5 pb-4">
@@ -1795,50 +1834,40 @@
             <img id="fullscreenWallpaperImg" class="absolute inset-0 w-full h-full object-cover" src="" alt="">
             
             <!-- 锁屏时间控件 -->
-            <div class="absolute inset-0 z-0 flex flex-col items-center justify-start pt-24 pointer-events-none">
+            <div class="absolute inset-0 z-0 flex flex-col items-center justify-start pointer-events-none" style="padding-top: calc(80px + env(safe-area-inset-top, 0px));">
                 <div class="text-white text-center" style="text-shadow: 0 2px 20px rgba(0,0,0,0.5);">
-                    <div id="lockscreenTime" class="text-7xl font-black tracking-tight" style="font-weight: 900;">12:00</div>
-                    <div id="lockscreenDate" class="text-sm font-medium mt-2 opacity-90">4月13日 星期一</div>
+                    <div id="lockscreenTime" class="text-[80px] font-extralight tracking-tight" style="font-weight: 200; line-height: 1; letter-spacing: -2px;">12:00</div>
+                    <div id="lockscreenDate" class="text-base font-normal mt-2 opacity-90" style="font-weight: 400;">4月13日 星期一</div>
                 </div>
             </div>
 
             <!-- 顶部操作栏 -->
-            <div class="absolute top-0 left-0 right-0 z-10 p-4 pt-12" style="background: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, transparent 100%);">
+            <div class="absolute top-0 left-0 right-0 z-10 px-4 pt-4" style="padding-top: calc(16px + env(safe-area-inset-top, 0px)); background: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, transparent 100%);">
                 <div class="flex items-center justify-between">
-                    <button onclick="closeFullscreenPreview()" class="w-10 h-10 rounded-full bg-black/30 backdrop-blur-md flex items-center justify-center cursor-pointer active:scale-90 transition-transform">
-                        <i class="fa-solid fa-xmark text-white text-lg"></i>
+                    <button onclick="closeFullscreenPreview()" class="back-btn-circle">
+                        <i class="fa-solid fa-xmark"></i>
                     </button>
                     <div class="text-white text-sm font-bold" id="fullscreenPageIndicator">1 / 6</div>
-                    <button onclick="openDetailByAlbum(currentPreviewAlbumId)" class="w-10 h-10 rounded-full bg-black/30 backdrop-blur-md flex items-center justify-center cursor-pointer active:scale-90 transition-transform">
-                        <i class="fa-solid fa-circle-info text-white text-sm"></i>
-                    </button>
+                    <div class="w-10 h-10"></div>
                 </div>
             </div>
 
             <!-- 底部操作区 -->
             <div class="absolute bottom-0 left-0 right-0 z-10 p-6 pb-12" style="background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%);">
-                <div id="fullscreenWallpaperInfo" class="mb-6 text-white">
-                    <h3 id="fullscreenAlbumName" class="text-lg font-black mb-1"></h3>
-                    <p class="text-xs text-white/70">点击壁纸可切换查看原图/锁屏效果</p>
+                <!-- 图说内容 -->
+                <div id="fullscreenTuShuo" class="mb-4 hidden">
+                    <p class="text-white/90 text-sm leading-relaxed" style="line-height: 1.6; max-height: 5em; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical;"></p>
                 </div>
-
+                
                 <div class="space-y-3">
-                    <button onclick="setWallpaperFromFullscreen()" class="w-full py-4 bg-white text-slate-900 rounded-2xl text-sm font-black shadow-xl active:scale-[0.97] transition-transform">
-                        <i class="fa-solid fa-mobile-screen mr-2"></i>单独设置为锁屏
+                    <button onclick="showWallpaperModeModal()" class="w-full py-4 bg-white text-slate-900 rounded-2xl text-sm font-black shadow-xl active:scale-[0.97] transition-transform">
+                        <i class="fa-solid fa-mobile-screen mr-2"></i>设为壁纸
                     </button>
                     <button onclick="subscribeAlbumFromFullscreen()" class="w-full py-4 bg-white/20 backdrop-blur-md text-white rounded-2xl text-sm font-black border-2 border-white/30 active:scale-[0.97] transition-transform">
                         <i class="fa-solid fa-layer-group mr-2"></i>整组设为壁纸
                     </button>
                 </div>
             </div>
-
-            <!-- 左右切换按钮 -->
-            <button onclick="prevWallpaper()" class="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-black/30 backdrop-blur-md flex items-center justify-center cursor-pointer active:scale-90 transition-transform z-10">
-                <i class="fa-solid fa-chevron-left text-white text-lg"></i>
-            </button>
-            <button onclick="nextWallpaper()" class="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-black/30 backdrop-blur-md flex items-center justify-center cursor-pointer active:scale-90 transition-transform z-10">
-                <i class="fa-solid fa-chevron-right text-white text-lg"></i>
-            </button>
         </div>
 
         <!-- 教程模态框 -->
@@ -2225,6 +2254,74 @@
             </div>
         </div>
 
+        <!-- Android 设置壁纸确认弹窗 -->
+        <div id="android-wallpaper-confirm-overlay" style="position:fixed;inset:0;z-index:600;background:rgba(0,0,0,0.5);display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.3s ease;">
+            <div style="background:white;border-radius:24px 24px 0 0;width:100%;max-width:28rem;padding:24px 24px calc(24px + env(safe-area-inset-bottom, 0px));transform:translateY(100%);transition:transform 0.35s cubic-bezier(0.32,0.72,0,1);">
+                <!-- 拖拽条 -->
+                <div style="width:36px;height:4px;background:#e2e8f0;border-radius:2px;margin:0 auto 20px;"></div>
+                
+                <h3 style="font-size:18px;font-weight:900;color:#0f172a;margin-bottom:8px;">检测到锁屏自动更换已开启</h3>
+                <p style="font-size:14px;color:#64748b;line-height:1.6;margin-bottom:16px;">单独设置壁纸需要关闭「锁屏自动更换」功能。关闭后，当前壁纸将固定不变。</p>
+                
+                <div style="background:#f8fafc;border-radius:12px;padding:12px 16px;margin-bottom:24px;">
+                    <div style="font-size:12px;font-weight:700;color:#475569;margin-bottom:4px;">如何重新开启自动更换：</div>
+                    <div style="font-size:12px;color:#64748b;line-height:1.5;">进入「我的」→「功能设置」→ 开启「锁屏自动更换壁纸」</div>
+                </div>
+
+                <div style="display:flex;flex-direction:column;gap:12px;">
+                    <button onclick="confirmDisableAutoRotation()" style="width:100%;padding:16px;background:#0f172a;color:white;border:none;border-radius:16px;font-size:15px;font-weight:800;cursor:pointer;transition:transform 0.15s ease;" onmousedown="this.style.transform='scale(0.98)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(0.98)'" ontouchend="this.style.transform='scale(1)'">
+                        确认关闭并设置壁纸
+                    </button>
+                    <button onclick="closeAndroidWallpaperConfirmModal()" style="width:100%;padding:16px;background:transparent;color:#64748b;border:none;border-radius:16px;font-size:15px;font-weight:600;cursor:pointer;">
+                        取消
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <style>
+            #android-wallpaper-confirm-overlay.show {
+                opacity: 1;
+                pointer-events: auto;
+            }
+            #android-wallpaper-confirm-overlay.show > div {
+                transform: translateY(0);
+            }
+        </style>
+
+        <!-- 壁纸模式选择弹窗 -->
+        <div id="wallpaper-mode-overlay" style="position:fixed;inset:0;z-index:600;background:rgba(0,0,0,0.5);display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.3s ease;">
+            <div style="background:white;border-radius:24px 24px 0 0;width:100%;max-width:28rem;padding:24px 24px calc(24px + env(safe-area-inset-bottom, 0px));transform:translateY(100%);transition:transform 0.35s cubic-bezier(0.32,0.72,0,1);">
+                <!-- 拖拽条 -->
+                <div style="width:36px;height:4px;background:#e2e8f0;border-radius:2px;margin:0 auto 20px;"></div>
+                
+                <h3 style="font-size:18px;font-weight:900;color:#0f172a;margin-bottom:8px;">设为壁纸</h3>
+                <p style="font-size:14px;color:#64748b;line-height:1.6;margin-bottom:24px;">请选择壁纸设置方式：</p>
+
+                <div style="display:flex;flex-direction:column;gap:12px;">
+                    <button onclick="setWallpaperFromFullscreen()" style="width:100%;padding:16px;background:#0f172a;color:white;border:none;border-radius:16px;font-size:15px;font-weight:800;cursor:pointer;transition:transform 0.15s ease;" onmousedown="this.style.transform='scale(0.98)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(0.98)'" ontouchend="this.style.transform='scale(1)'">
+                        <i class="fa-solid fa-mobile-screen mr-2"></i>单独设为壁纸
+                    </button>
+                    <button onclick="addToRotationFromFullscreen()" style="width:100%;padding:16px;background:#f1f5f9;color:#334155;border:none;border-radius:16px;font-size:15px;font-weight:700;cursor:pointer;transition:transform 0.15s ease;" onmousedown="this.style.transform='scale(0.98)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(0.98)'" ontouchend="this.style.transform='scale(1)'">
+                        <i class="fa-solid fa-rotate mr-2"></i>加入轮播
+                    </button>
+                    <button onclick="closeWallpaperModeModal()" style="width:100%;padding:16px;background:transparent;color:#64748b;border:none;border-radius:16px;font-size:15px;font-weight:600;cursor:pointer;">
+                        取消
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <style>
+            #wallpaper-mode-overlay.show {
+                opacity: 1;
+                pointer-events: auto;
+            }
+            #wallpaper-mode-overlay.show > div {
+                transform: translateY(0);
+            }
+        </style>
+
         <!-- 底部导航栏 -->
         <div class="fixed bottom-0 left-0 right-0 z-50 px-8 pointer-events-none" style="padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));">
             <nav class="nav-blur h-16 max-w-sm mx-auto rounded-[2rem] flex items-center justify-between px-2 shadow-[0_12px_40px_rgba(0,0,0,0.12)] pointer-events-auto">
@@ -2276,6 +2373,7 @@
                         update: '每日更新',
                         updateColor: 'emerald',
                         cover: 'https://images.unsplash.com/photo-1490750967868-88aa4486c946?w=300&h=530&fit=crop',
+                        tushuo: '春风拂过，樱花如雪般飘落。粉白色的花瓣在晨光中闪耀，仿佛大自然最温柔的笔触。每一朵樱花都承载着春天的气息，让人感受到生命的蓬勃与美好。愿这抹粉色能为你的每一天带来温暖与希望。',
                         wallpapers: [
                             'https://images.unsplash.com/photo-1490750967868-88aa4486c946?w=300&h=530&fit=crop',
                             'https://images.unsplash.com/photo-1508610048659-a06b669e3321?w=300&h=530&fit=crop',
@@ -2292,6 +2390,7 @@
                         update: '每周三更新',
                         updateColor: 'indigo',
                         cover: 'https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=300&h=530&fit=crop',
+                        tushuo: '当夜幕降临，城市的灯火如星河般璀璨。霓虹闪烁，高楼林立，每一扇窗后都有一个故事。夜色中的城市有着独特的魅力，喧嚣与宁静交织，繁华与孤独并存。愿这抹夜色能陪伴你度过每一个不眠之夜。',
                         wallpapers: [
                             'https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=300&h=530&fit=crop',
                             'https://images.unsplash.com/photo-1514565131-fce0801e5785?w=300&h=530&fit=crop',
@@ -2308,6 +2407,7 @@
                         update: '不定期更新',
                         updateColor: 'amber',
                         cover: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=300&h=530&fit=crop',
+                        tushuo: '站在雪山之巅，俯瞰苍茫大地。皑皑白雪覆盖着连绵的山峰，云雾缭绕间仿佛置身仙境。阳光洒在雪面上，折射出耀眼的光芒。这是大自然最壮丽的画卷，让人感受到生命的渺小与自然的伟大。',
                         wallpapers: [
                             'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=300&h=530&fit=crop',
                             'https://images.unsplash.com/photo-1454496522488-7a8e488e8606?w=300&h=530&fit=crop',
@@ -2323,9 +2423,9 @@
 
         // ========== 产品数据 ==========
         const CAT_PRODUCTS = [
-            { id: 401, name: '文观壁纸', artist: '文观WENGUAN', cover: 'https://92cn-image.levect.com/release/image/8280e343d1199df8b2eae257020515ba.jpg', subs: '9.8万', subtitle: '撷诗经草木，揽唐诗月色，掬宋词烟雨', desc: '撷诗经草木，揽唐诗月色，掬宋词烟雨，东方气韵，栖于方寸屏幕。以中国古典诗词为灵感，将千年诗意化为指间风景，每一张壁纸都是一首可以看见的诗。', update: '每日更新', cats: ['recommend', 'culture'], previews: ['https://92cn-image.levect.com/release/image/c695c62ee0c73d56e451167addcd60a8.jpg@!fw360.webp?k=1&p=1&eid=1', 'https://92cn-image.levect.com/release/image/daa325ac0e7ebc62d2eebf813f49949b.jpg@!fw360.webp?k=1&p=1&eid=1', 'https://92cn-image.levect.com/release/image/b5df685752ed6af077fb9c33e945b7dd.jpg@!fw360.webp?k=1&p=1&eid=1'] },
-            { id: 101, name: '千里江山图 · 新绎', artist: '墨染山河', cover: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=800', subs: '28.7万', subtitle: '传世名画与现代插画的梦幻联动', desc: '以《千里江山图》为蓝本，墨染山河工作室用全新的数字绘画手法重新诠释了这幅传世之作。每一张壁纸都是一次跨越千年的对话。', update: '每周更新', cats: ['recommend', 'culture'] },
-            { id: 102, name: '三丽鸥 · 梦幻花园', artist: '三丽鸥官方', cover: 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=800', subs: '45.3万', subtitle: 'Hello Kitty × My Melody 限定壁纸', desc: '三丽鸥官方授权，Hello Kitty、My Melody、库洛米等人气角色齐聚梦幻花园。独家设计，全网首发。', update: '每周三更新', cats: ['recommend', 'ip', 'trend'] },
+            { id: 401, name: '文观壁纸', artist: '文观WENGUAN', cover: 'https://92cn-image.levect.com/release/image/8280e343d1199df8b2eae257020515ba.jpg', subs: '9.8万', subtitle: '撷诗经草木，揽唐诗月色，掬宋词烟雨', desc: '撷诗经草木，揽唐诗月色，掬宋词烟雨，东方气韵，栖于方寸屏幕。以中国古典诗词为灵感，将千年诗意化为指间风景，每一张壁纸都是一首可以看见的诗。', update: '每日更新', cats: ['recommend', 'culture'], tushuo: '撷诗经草木，揽唐诗月色。东方气韵栖于方寸屏幕，千年诗意化为指间风景。', previews: ['https://92cn-image.levect.com/release/image/c695c62ee0c73d56e451167addcd60a8.jpg@!fw360.webp?k=1&p=1&eid=1', 'https://92cn-image.levect.com/release/image/daa325ac0e7ebc62d2eebf813f49949b.jpg@!fw360.webp?k=1&p=1&eid=1', 'https://92cn-image.levect.com/release/image/b5df685752ed6af077fb9c33e945b7dd.jpg@!fw360.webp?k=1&p=1&eid=1'] },
+            { id: 101, name: '千里江山图 · 新绎', artist: '墨染山河', cover: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=800', subs: '28.7万', subtitle: '传世名画与现代插画的梦幻联动', desc: '以《千里江山图》为蓝本，墨染山河工作室用全新的数字绘画手法重新诠释了这幅传世之作。每一张壁纸都是一次跨越千年的对话。', update: '每周更新', cats: ['recommend', 'culture'], tushuo: '青绿山水间，千年画卷徐徐展开。墨色晕染的峰峦叠嶂，仿佛能听见江风拂过水面的声音。' },
+            { id: 102, name: '三丽鸥 · 梦幻花园', artist: '三丽鸥官方', cover: 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=800', subs: '45.3万', subtitle: 'Hello Kitty × My Melody 限定壁纸', desc: '三丽鸥官方授权，Hello Kitty、My Melody、库洛米等人气角色齐聚梦幻花园。独家设计，全网首发。', update: '每周三更新', cats: ['recommend', 'ip', 'trend'], tushuo: '阳光洒落的花园里，Hello Kitty 和朋友们正在举办一场春日派对。粉色的花瓣随风飘落，每一帧都是童话般的梦境。' },
             { id: 103, name: '银河漫游指南', artist: 'Artflow', cover: 'https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=800', subs: '16.9万', subtitle: '从近地轨道到仙女座的视觉旅程', desc: '由概念艺术家Artflow倾力打造，用电影级别的画面质感呈现宇宙的壮阔。星云、黑洞、空间站......每一帧都值得凝视。', update: '每周五更新', cats: ['recommend', 'creative'] },
             { id: 1, name: '樱花物语', artist: '猫小姐', cover: 'https://images.unsplash.com/photo-1522383225653-ed111181a951?w=800', subs: '12.6万', subtitle: '以日本樱花季为灵感的粉色梦境', desc: '以日本樱花季为灵感，每一张壁纸都是一段粉色的梦。插画师猫小姐用细腻的笔触描绘了樱花树下的故事，温暖治愈。', update: '每周三更新', cats: ['recommend', 'nature'] },
             { id: 2, name: '赛博之城', artist: '像素光年', cover: 'https://images.unsplash.com/photo-1514565131-fce0801e5785?w=800', subs: '8.3万', subtitle: '赛博朋克风格的未来都市', desc: '赛博朋克风格的未来都市，霓虹灯闪烁的街道，飞行器穿梭的天空。每一帧都是一场视觉盛宴。', update: '每周五更新', cats: ['recommend', 'creative', 'trend'] },
@@ -2351,6 +2451,9 @@
             { id: 303, name: '繁花', artist: '植物美学社', cover: 'https://images.unsplash.com/photo-1490750967868-88aa4f44baee?w=800', subs: '18.6万', subtitle: '四季花事 · 以花为媒', desc: '从春天的樱花、夏日的荷花、秋天的桂花到冬日的梅花，精选全球各地最美的花卉摄影。每一张壁纸都是一首写给自然的情诗，让芬芳与色彩治愈每一次亮屏时刻。', update: '每周三更新', cats: ['recommend', 'nature'] },
             { id: 304, name: '国色', artist: '东方色彩研究所', cover: 'https://images.unsplash.com/photo-1547981609-4b6bfe67ca0b?w=800', subs: '12.3万', subtitle: '中国传统色 · 千年美学', desc: '取自《天工开物》《本草纲目》等古典文献中的东方色谱——黛青、月白、胭脂、缃叶、竹青、藕荷……每种颜色背后都是一段跨越千年的文化记忆。用中国传统色装点你的屏幕，感受东方美学的含蓄与隽永。', update: '每周一更新', cats: ['recommend', 'culture'] },
         ];
+
+        // ========== 锁屏壁纸引导配置 ==========
+        const LOCK_GUIDE_KEYS = { iosShortcuts: 'lockGuide_iosShortcutsInstalled', androidService: 'lockGuide_androidServiceEnabled' };
 
         // ========== 用户照片数据（模拟相册选中的初始数据，授权流程会覆盖） ==========
         const USER_PHOTOS_B = [
@@ -2480,6 +2583,7 @@
             updateDateLabel();
             renderCatProducts('recommend');
             updatePhotoView();
+            initSwipeGestures();
         });
 
         function updateDateLabel() {
@@ -2584,7 +2688,7 @@
                         <div class="flex gap-2 mb-4">
                             ${latestWallpapers.map(src => `<div style="flex:1;aspect-ratio:9/16;border-radius:12px;overflow:hidden;"><img src="${src}" class="w-full h-full object-cover"></div>`).join('')}
                         </div>
-                        <button class="w-full bg-slate-900 text-white py-3 rounded-2xl text-xs font-black shadow-sm active:scale-[0.98] transition-transform" onclick="event.stopPropagation();openCreatorPage()">查看创作者</button>
+                        <button class="w-full bg-slate-900 text-white py-3 rounded-2xl text-xs font-black shadow-sm active:scale-[0.98] transition-transform" onclick="event.stopPropagation();openCreatorPage()">查看详情</button>
                     </div>
                 </div>
             `;
@@ -2617,11 +2721,13 @@
             renderWorksGrid(works);
 
             document.getElementById('creator-modal').classList.add('show');
+            document.getElementById('creatorBackBtn').style.display = 'block';
             document.body.style.overflow = 'hidden';
         }
 
         function closeCreatorPage() {
             document.getElementById('creator-modal').classList.remove('show');
+            document.getElementById('creatorBackBtn').style.display = 'none';
             document.body.style.overflow = '';
         }
 
@@ -2633,7 +2739,8 @@
                         src,
                         albumId: album.id,
                         albumName: album.name,
-                        idxInAlbum
+                        idxInAlbum,
+                        tushuo: album.tushuo || null
                     });
                 });
             });
@@ -2673,11 +2780,16 @@
 
         function renderWorksGrid(works) {
             const el = document.getElementById('worksGrid');
+            const allImages = (works || []).map(w => w.src);
+            // 收集所有图说（取第一个有图说的作品）
+            const allTushuo = (works || []).find(w => w.tushuo)?.tushuo || null;
             el.innerHTML = (works || []).map((w, idx) => `
-                <div class="wallpaper-item" onclick="openFullscreenPreview('${w.albumId}', ${idx})">
+                <div class="wallpaper-item" onclick="openGenericFullscreenPreview(allWorksImages, ${idx}, '全部壁纸', allWorksTushuo)">
                     <img src="${w.src}" alt="" loading="lazy">
                 </div>
             `).join('');
+            window.allWorksImages = allImages;
+            window.allWorksTushuo = allTushuo;
         }
 
         // ========== 全屏壁纸预览 ==========
@@ -2685,6 +2797,46 @@
         let currentPreviewIndex = 0;
         let currentPreviewImages = [];
         let isGenericPreview = false;
+        let currentPreviewTushuo = null;
+
+        // 手势滑动支持
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let touchEndX = 0;
+        let touchEndY = 0;
+
+        function initSwipeGestures() {
+            const preview = document.getElementById('wallpaper-fullscreen-preview');
+            if (!preview) return;
+
+            preview.addEventListener('touchstart', function(e) {
+                touchStartX = e.changedTouches[0].screenX;
+                touchStartY = e.changedTouches[0].screenY;
+            }, { passive: true });
+
+            preview.addEventListener('touchend', function(e) {
+                touchEndX = e.changedTouches[0].screenX;
+                touchEndY = e.changedTouches[0].screenY;
+                handleSwipe();
+            }, { passive: true });
+        }
+
+        function handleSwipe() {
+            const diffX = touchStartX - touchEndX;
+            const diffY = touchStartY - touchEndY;
+            const minSwipeDistance = 50;
+
+            // 只在水平滑动距离大于垂直滑动距离时触发切换
+            if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > minSwipeDistance) {
+                if (diffX > 0) {
+                    // 向左滑动，下一张
+                    nextWallpaper();
+                } else {
+                    // 向右滑动，上一张
+                    prevWallpaper();
+                }
+            }
+        }
 
         function openFullscreenPreview(albumId, index) {
             const creator = CREATORS[0];
@@ -2695,20 +2847,46 @@
             currentPreviewIndex = index;
             currentPreviewImages = album.wallpapers;
             isGenericPreview = false;
+            currentPreviewTushuo = album.tushuo || null;
 
-            updateFullscreenPreview();
+            // 隐藏创作者页悬浮按钮
+            document.getElementById('creatorBackBtn').style.display = 'none';
+
+            document.getElementById('fullscreenWallpaperImg').src = album.wallpapers[index];
+            document.getElementById('fullscreenPageIndicator').textContent = `${index + 1} / ${album.wallpapers.length}`;
+            
+            updateTushuoDisplay();
+            
+            updateLockscreenTime();
+            
             document.getElementById('wallpaper-fullscreen-preview').classList.add('show');
             document.body.style.overflow = 'hidden';
         }
 
-        function openGenericFullscreenPreview(images, index, title) {
+        function updateTushuoDisplay() {
+            const tushuoEl = document.getElementById('fullscreenTuShuo');
+            const tushuoP = tushuoEl ? tushuoEl.querySelector('p') : null;
+            if (tushuoEl && tushuoP && currentPreviewTushuo) {
+                tushuoP.textContent = currentPreviewTushuo;
+                tushuoEl.classList.remove('hidden');
+            } else if (tushuoEl) {
+                tushuoEl.classList.add('hidden');
+            }
+        }
+
+        function openGenericFullscreenPreview(images, index, title, tushuo) {
             currentPreviewImages = images;
             currentPreviewIndex = index;
             isGenericPreview = true;
+            currentPreviewTushuo = tushuo || null;
+
+            // 隐藏创作者页悬浮按钮
+            document.getElementById('creatorBackBtn').style.display = 'none';
 
             document.getElementById('fullscreenWallpaperImg').src = images[index];
             document.getElementById('fullscreenPageIndicator').textContent = `${index + 1} / ${images.length}`;
-            document.getElementById('fullscreenAlbumName').textContent = title;
+            
+            updateTushuoDisplay();
             
             updateLockscreenTime();
             
@@ -2730,7 +2908,6 @@
             const src = album.wallpapers[currentPreviewIndex];
             document.getElementById('fullscreenWallpaperImg').src = src;
             document.getElementById('fullscreenPageIndicator').textContent = `${currentPreviewIndex + 1} / ${album.wallpapers.length}`;
-            document.getElementById('fullscreenAlbumName').textContent = album.name;
             
             updateLockscreenTime();
         }
@@ -2748,15 +2925,26 @@
 
         function closeFullscreenPreview() {
             document.getElementById('wallpaper-fullscreen-preview').classList.remove('show');
-            document.body.style.overflow = '';
+            document.body.style.overflow = document.getElementById('creator-modal').classList.contains('show') ? 'hidden' : '';
             currentPreviewAlbumId = null;
             currentPreviewIndex = 0;
             currentPreviewImages = [];
             isGenericPreview = false;
+            currentPreviewTushuo = null;
+            
+            // 隐藏图说
+            const tushuoEl = document.getElementById('fullscreenTuShuo');
+            if (tushuoEl) tushuoEl.classList.add('hidden');
             
             // 恢复按钮显示
             const subBtn = document.querySelector('#wallpaper-fullscreen-preview button[onclick="subscribeAlbumFromFullscreen()"]');
             if (subBtn) subBtn.style.display = '';
+            
+            // 如果创作者页打开着且详情页未打开，重新显示悬浮按钮
+            if (document.getElementById('creator-modal').classList.contains('show') && 
+                !document.getElementById('detail-modal').classList.contains('show')) {
+                document.getElementById('creatorBackBtn').style.display = 'block';
+            }
         }
 
         function prevWallpaper() {
@@ -2773,14 +2961,141 @@
             document.getElementById('fullscreenPageIndicator').textContent = `${currentPreviewIndex + 1} / ${currentPreviewImages.length}`;
         }
 
+        function showWallpaperModeModal() {
+            const platform = getPhotoPermissionPlatform();
+            
+            if (platform === 'ios') {
+                // iOS：直接通过快捷指令换壁纸，不弹弹窗
+                showLockScreenGuideStep('lockScreenGuideIosSetting');
+                document.getElementById('lock-screen-guide-modal').classList.add('show');
+                setTimeout(() => {
+                    showToast('设置成功');
+                    closeLockScreenGuideModal(true);
+                }, 2000);
+            } else {
+                // Android：弹出选择弹窗
+                const overlay = document.getElementById('wallpaper-mode-overlay');
+                if (overlay) {
+                    overlay.classList.add('show');
+                }
+            }
+        }
+
+        function closeWallpaperModeModal() {
+            const overlay = document.getElementById('wallpaper-mode-overlay');
+            if (overlay) {
+                overlay.classList.remove('show');
+            }
+        }
+
         function setWallpaperFromFullscreen() {
-            showToast('已设置为锁屏壁纸');
+            closeWallpaperModeModal();
+            const platform = getPhotoPermissionPlatform();
+            
+            if (platform === 'ios') {
+                // iOS：直接通过快捷指令换壁纸
+                showLockScreenGuideStep('lockScreenGuideIosSetting');
+                document.getElementById('lock-screen-guide-modal').classList.add('show');
+                setTimeout(() => {
+                    showToast('设置成功');
+                    closeLockScreenGuideModal(true);
+                }, 2000);
+            } else {
+                // Android：检查是否开启了锁屏自动更换
+                const isAutoRotationEnabled = localStorage.getItem(LOCK_GUIDE_KEYS.androidService) === '1';
+                
+                if (isAutoRotationEnabled) {
+                    // 已开启，弹窗二次确认
+                    showAndroidWallpaperConfirmModal();
+                } else {
+                    // 未开启，直接设置
+                    showLockScreenGuideStep('lockScreenGuideAndroidSetting');
+                    document.getElementById('lock-screen-guide-modal').classList.add('show');
+                    setTimeout(() => {
+                        showToast('设置成功');
+                        closeLockScreenGuideModal(true);
+                    }, 2000);
+                }
+            }
+        }
+
+        // Android 设置壁纸确认弹窗
+        function showAndroidWallpaperConfirmModal() {
+            const overlay = document.getElementById('android-wallpaper-confirm-overlay');
+            if (overlay) {
+                overlay.classList.add('show');
+            }
+        }
+
+        function closeAndroidWallpaperConfirmModal() {
+            const overlay = document.getElementById('android-wallpaper-confirm-overlay');
+            if (overlay) {
+                overlay.classList.remove('show');
+            }
+        }
+
+        function confirmDisableAutoRotation() {
+            // 关闭自动更换
+            localStorage.removeItem(LOCK_GUIDE_KEYS.androidService);
+            closeAndroidWallpaperConfirmModal();
+            showLockScreenGuideStep('lockScreenGuideAndroidSetting');
+            document.getElementById('lock-screen-guide-modal').classList.add('show');
+            setTimeout(() => {
+                showToast('设置成功');
+                closeLockScreenGuideModal(true);
+            }, 2000);
+        }
+
+        function addToRotationFromFullscreen() {
+            if (isGenericPreview && currentPreviewImages.length > 0) {
+                // 照片预览模式：将当前照片加入轮播
+                showToast('已加入锁屏轮播');
+            } else if (currentPreviewAlbumId) {
+                // 合辑预览模式：将整个合辑加入轮播
+                showToast('已加入锁屏轮播');
+            } else {
+                showToast('已加入锁屏轮播');
+            }
+        }
+
+        function showTuShuoIntro() {
+            showToast('图说功能介绍');
         }
 
         function subscribeAlbumFromFullscreen() {
             if (currentPreviewAlbumId) {
                 openDetailByAlbum(currentPreviewAlbumId);
             }
+        }
+
+        // 打开照片全屏预览
+        function openPhotoFullscreen(index) {
+            const photos = photoModuleState.photos;
+            if (!photos || !photos[index]) return;
+
+            currentPreviewImages = photos.map(p => p.src);
+            currentPreviewIndex = index;
+            isGenericPreview = true;
+            currentPreviewTushuo = null;
+
+            // 隐藏创作者页悬浮按钮
+            document.getElementById('creatorBackBtn').style.display = 'none';
+
+            document.getElementById('fullscreenWallpaperImg').src = photos[index].src;
+            document.getElementById('fullscreenPageIndicator').textContent = `${index + 1} / ${photos.length}`;
+            
+            // 隐藏图说
+            const tushuoEl = document.getElementById('fullscreenTuShuo');
+            if (tushuoEl) tushuoEl.classList.add('hidden');
+            
+            updateLockscreenTime();
+            
+            // 隐藏不相关的按钮
+            const subBtn = document.querySelector('#wallpaper-fullscreen-preview button[onclick="subscribeAlbumFromFullscreen()"]');
+            if (subBtn) subBtn.style.display = 'none';
+
+            document.getElementById('wallpaper-fullscreen-preview').classList.add('show');
+            document.body.style.overflow = 'hidden';
         }
 
         function openAlbumDetail(albumId) {
@@ -2793,10 +3108,13 @@
         }
 
         function openDetailWithAlbumData(album) {
+            // 隐藏创作者页悬浮按钮
+            document.getElementById('creatorBackBtn').style.display = 'none';
+
             // 设置详情页数据为合辑数据
             document.getElementById('detailCoverB').src = album.cover;
             document.getElementById('detailTitleB').textContent = album.name;
-            document.getElementById('detailDescB').textContent = `本合辑包含 ${album.count} 张精选壁纸，${album.update}。设为壁纸后可免费使用所有壁纸，并自动加入锁屏轮播池。`;
+            document.getElementById('detailDescB').textContent = `本合辑包含 ${album.count} 张精选壁纸，${album.update}。订阅后可免费使用所有壁纸，并自动加入锁屏轮播池。`;
             document.getElementById('detailMetaB').innerHTML = `
                 <div class="flex items-center gap-3">
                     <span class="text-[10px] font-bold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-lg">${album.update}</span>
@@ -2813,7 +3131,7 @@
                 const div = document.createElement('div');
                 div.className = 'wallpaper-item';
                 div.innerHTML = `<img src="${src}" alt="" loading="lazy">`;
-                div.onclick = () => openGenericFullscreenPreview(previewImages, idx, album.name);
+                div.onclick = () => openGenericFullscreenPreview(previewImages, idx, album.name, album.tushuo || null);
                 previews.appendChild(div);
             });
 
@@ -2836,15 +3154,18 @@
                 </div>
             `).join('');
             
-            // 更新底部按钮
-            const subBtn = document.getElementById('detailSubBarBtn');
-            const subBtn2 = document.getElementById('detailSubBarBtn2');
-            subBtn.textContent = '设为壁纸';
-            subBtn.className = 'flex-1 py-4 bg-slate-900 text-white rounded-2xl text-sm font-black shadow-xl shadow-slate-300 active:scale-[0.97] transition-transform';
-            subBtn.onclick = () => { showToast('已设置为壁纸'); };
-            subBtn2.classList.add('hidden');
-
-            detailProductId = null; // 标记为合辑数据
+            // 根据合辑 ID 映射到产品 ID，使用订阅逻辑
+            const albumToProductMap = {
+                'album1': 401,
+                'album2': 101,
+                'album3': 102
+            };
+            const productId = albumToProductMap[album.id] || null;
+            detailProductId = productId;
+            
+            // 更新底部按钮为订阅逻辑
+            updateDetailBar(productId);
+            updateDetailReviewEntry(productId);
 
             document.getElementById('detail-modal').classList.add('show');
             document.body.style.overflow = 'hidden';
@@ -3065,7 +3386,7 @@
                     <span class="text-[10px] font-bold">添加照片</span>
                 </div>
                 ${photos.map((p, i) => `
-                    <div class="photo-item ${manageMode ? 'manage-mode' : ''} ${photoSelectedIndices.has(i) ? 'selected' : ''}" data-index="${i}" onclick="${manageMode ? `togglePhotoSelection(${i})` : `event.stopPropagation()`}">
+                    <div class="photo-item ${manageMode ? 'manage-mode' : ''} ${photoSelectedIndices.has(i) ? 'selected' : ''}" data-index="${i}" onclick="${manageMode ? `togglePhotoSelection(${i})` : `openPhotoFullscreen(${i})`}">
                         <img src="${p.src}" alt="" loading="lazy">
                         ${manageMode ? `<span class="photo-manage-check"><i class="fa-solid fa-check"></i></span>` : ''}
                     </div>
@@ -3230,6 +3551,9 @@
             if (!p) return;
             detailProductId = p.id;
 
+            // 隐藏创作者页悬浮按钮
+            document.getElementById('creatorBackBtn').style.display = 'none';
+
             document.getElementById('detailCoverB').src = p.cover;
             document.getElementById('detailTitleB').textContent = p.name;
             document.getElementById('detailDescB').textContent = p.desc || p.subtitle;
@@ -3242,13 +3566,14 @@
 
             const previews = document.getElementById('detailPreviewsB');
             const previewImages = [];
+            const tushuo = p.tushuo || null;
             if (p.previews && p.previews.length) {
                 p.previews.forEach((src, idx) => {
                     previewImages.push(src);
                     const div = document.createElement('div');
                     div.className = 'wallpaper-item';
                     div.innerHTML = `<img src="${src}" alt="" loading="lazy">`;
-                    div.onclick = () => openGenericFullscreenPreview(previewImages, idx, p.name);
+                    div.onclick = () => openGenericFullscreenPreview(previewImages, idx, p.name, tushuo);
                     previews.appendChild(div);
                 });
             } else {
@@ -3259,7 +3584,7 @@
                     const div = document.createElement('div');
                     div.className = 'wallpaper-item';
                     div.innerHTML = `<img src="${src}" alt="" loading="lazy">`;
-                    div.onclick = () => openGenericFullscreenPreview(previewImages, i, p.name);
+                    div.onclick = () => openGenericFullscreenPreview(previewImages, i, p.name, tushuo);
                     previews.appendChild(div);
                 }
             }
@@ -3502,7 +3827,6 @@
         }
 
         // ========== 锁屏壁纸引导弹窗（订阅成功/添加照片成功后，按平台条件引导） ==========
-        const LOCK_GUIDE_KEYS = { iosShortcuts: 'lockGuide_iosShortcutsInstalled', androidService: 'lockGuide_androidServiceEnabled' };
         localStorage.removeItem(LOCK_GUIDE_KEYS.iosShortcuts);
         localStorage.removeItem(LOCK_GUIDE_KEYS.androidService);
 
@@ -3663,6 +3987,11 @@
             document.body.style.overflow = '';
             const activeCat = document.querySelector('.cat-tab-b.active');
             if (activeCat) renderCatProducts(activeCat.dataset.cat);
+            
+            // 如果创作者页仍然打开着，重新显示悬浮按钮
+            if (document.getElementById('creator-modal').classList.contains('show')) {
+                document.getElementById('creatorBackBtn').style.display = 'block';
+            }
         }
 
         // ========== 大图查看（壁纸预览 / 我的照片 点击放大） ==========
