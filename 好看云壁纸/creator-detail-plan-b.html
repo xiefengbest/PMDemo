@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>创作者详情页（Plan B）- 好看云壁纸</title>
+    <script>
+      (function () {
+        var designWidth = 375;
+        var meta = document.querySelector('meta[name="viewport"]');
+        var clientWidth = window.innerWidth || document.documentElement.clientWidth || screen.width;
+        var scale = clientWidth / designWidth;
+        meta.setAttribute('content',
+          'width=' + designWidth +
+          ', initial-scale=' + scale +
+          ', maximum-scale=' + scale +
+          ', minimum-scale=' + scale +
+          ', user-scalable=no, viewport-fit=cover');
+      })();
+    </script>
+    <link rel="icon" href="https://hk-h5-cdn.levect.com/html/xiefeng/CloudWallpaper/logo-android.png" type="image/png">
+    <link rel="apple-touch-icon" href="https://hk-h5-cdn.levect.com/html/xiefeng/CloudWallpaper/logo-ios.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap');
+
+        :root { --accent: #6366f1; --bg: #fdfdfe; }
+
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: var(--bg);
+            color: #1a1a1b;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+        }
+
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+
+        /* 壁纸网格 */
+        .wallpaper-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+        .wallpaper-item {
+            aspect-ratio: 9/16;
+            border-radius: 14px;
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .wallpaper-item:active { transform: scale(0.95); }
+        .wallpaper-item img { width: 100%; height: 100%; object-fit: cover; }
+
+        .wallpaper-item.selected::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border: 3px solid #6366f1;
+            border-radius: 14px;
+        }
+
+        /* 作品角标（来自合辑） */
+        .work-badge {
+            position: absolute;
+            left: 8px;
+            bottom: 8px;
+            max-width: calc(100% - 16px);
+            padding: 6px 8px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 800;
+            line-height: 1;
+            color: rgba(255,255,255,0.92);
+            background: rgba(0,0,0,0.35);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.18);
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        /* 横向合辑卡片 */
+        .album-strip {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            -webkit-overflow-scrolling: touch;
+        }
+        .album-card-h {
+            flex: 0 0 220px;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+            border: 1px solid rgba(226,232,240,0.8);
+            cursor: pointer;
+            transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .album-card-h:active { transform: scale(0.97); }
+        .album-card-h.subscribed {
+            border-color: #6366f1;
+            border-width: 2px;
+        }
+        .album-card-h .cover-row {
+            display: flex;
+            gap: 4px;
+            padding: 12px 12px 8px;
+        }
+        .album-card-h .cover-thumb {
+            flex: 1;
+            aspect-ratio: 9/16;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .album-card-h .cover-thumb img { width: 100%; height: 100%; object-fit: cover; }
+        .album-card-h .info {
+            padding: 0 12px 12px;
+        }
+        .album-card-h .title {
+            font-size: 13px;
+            font-weight: 900;
+            color: #0f172a;
+            margin-bottom: 4px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .album-card-h .meta {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .album-card-h .meta-tag {
+            font-size: 9px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 6px;
+        }
+        .album-card-h .meta-count {
+            font-size: 10px;
+            color: #94a3b8;
+        }
+        .album-card-h .sub-badge {
+            font-size: 9px;
+            font-weight: 700;
+            color: #059669;
+            background: #ecfdf5;
+            padding: 2px 6px;
+            border-radius: 6px;
+        }
+
+        /* 合辑详情页（二级页面 push） */
+        #album-detail-modal {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 250;
+            background: var(--bg);
+            width: 100%;
+            max-width: 28rem;
+            transform: translateX(100%);
+            transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+        }
+        #album-detail-modal.show { transform: translateX(0); }
+
+        /* 全屏作品详情页 */
+        #wallpaper-fullscreen-preview {
+            position: fixed;
+            inset: 0;
+            z-index: 500;
+            background: #000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        #wallpaper-fullscreen-preview.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* 底部操作栏 */
+        .detail-sub-bar-b {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 28rem;
+            background: rgba(253,253,254,0.92);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(0,0,0,0.08);
+            padding: 14px 24px;
+            padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 260;
+        }
+
+        /* 底部弹出选择面板 */
+        #wallpaper-action-sheet {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translate(-50%, 100%);
+            width: 100%;
+            max-width: 28rem;
+            background: white;
+            border-radius: 20px 20px 0 0;
+            box-shadow: 0 -8px 32px rgba(0,0,0,0.12);
+            z-index: 300;
+            transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+        }
+        #wallpaper-action-sheet.show { transform: translate(-50%, 0); }
+        .sheet-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.45);
+            z-index: 290;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.35s ease;
+        }
+        .sheet-overlay.show { opacity: 1; pointer-events: auto; }
+
+        /* Toast */
+        .toast-b {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            background: rgba(0,0,0,0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            color: white;
+            padding: 14px 28px;
+            border-radius: 14px;
+            font-size: 14px;
+            font-weight: 500;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+            z-index: 9999;
+        }
+        .toast-b.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    </style>
+</head>
+<body>
+
+    <!-- Plan B：创作者页（内容优先） -->
+    <div class="max-w-md mx-auto" style="background: #fdfdfe; min-height: 100vh;">
+
+        <!-- 顶部封面 -->
+        <div class="relative" style="aspect-ratio: 1.8;">
+            <img id="creatorCover" class="absolute inset-0 w-full h-full object-cover" src="" alt="">
+            <div class="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/80"></div>
+
+            <button onclick="history.back()" class="absolute top-4 left-4 z-10 w-10 h-10 rounded-full bg-black/30 backdrop-blur-md flex items-center justify-center cursor-pointer active:scale-90 transition-transform" style="top: calc(16px + env(safe-area-inset-top, 0px));">
+                <i class="fa-solid fa-chevron-left text-white text-sm"></i>
+            </button>
+
+            <div class="absolute bottom-0 left-0 right-0 p-6 pb-8 text-white">
+                <div class="flex items-end gap-3">
+                    <img id="creatorAvatar" class="w-12 h-12 rounded-xl shadow-lg border-2 border-white/30" src="" alt="">
+                    <div class="flex-1 min-w-0">
+                        <h1 id="creatorName" class="text-lg font-black tracking-tight" style="text-shadow: 0 2px 8px rgba(0,0,0,0.25);"></h1>
+                        <p id="creatorBio" class="text-[10px] text-white/75 mt-0.5 truncate"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 内容区 -->
+        <main class="px-6 -mt-4 bg-[#fdfdfe] rounded-t-[2rem] relative z-10" style="padding-top: 20px; padding-bottom: 120px;">
+            <!-- 简介 -->
+            <p id="creatorDesc" class="text-sm text-slate-500 leading-relaxed mb-6"></p>
+
+            <!-- 横向合辑入口 -->
+            <div class="mb-8">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-base font-black text-slate-800">合辑</h3>
+                </div>
+                <div id="albumStrip" class="album-strip scrollbar-hide"></div>
+            </div>
+
+            <div id="worksGrid" class="wallpaper-grid"></div>
+        </main>
+    </div>
+
+    <!-- 合辑详情页（push 二级页） -->
+    <div id="album-detail-modal">
+        <div class="h-full overflow-y-auto scrollbar-hide" style="padding-bottom: 100px;">
+            <div class="relative" style="aspect-ratio: 1.8;">
+                <img id="albumCover" class="w-full h-full object-cover" src="" alt="">
+                <div onclick="closeAlbumDetail()" class="absolute top-4 left-4 z-10 w-10 h-10 rounded-full bg-black/30 backdrop-blur-md flex items-center justify-center cursor-pointer active:scale-90 transition-transform" style="top: calc(16px + env(safe-area-inset-top, 0px));">
+                    <i class="fa-solid fa-chevron-left text-white text-sm"></i>
+                </div>
+                <div class="absolute bottom-0 left-0 right-0 p-6 pb-8 text-white" style="background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%);">
+                    <h1 id="albumDetailName" class="text-2xl font-black tracking-tight" style="text-shadow: 0 2px 8px rgba(0,0,0,0.3);"></h1>
+                    <div class="flex items-center gap-3 mt-2">
+                        <span id="albumDetailUpdate" class="text-[10px] font-bold px-2.5 py-1 rounded-md bg-white/20 border border-white/20 backdrop-blur-sm"></span>
+                        <span id="albumDetailCount" class="text-xs text-white/80"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="px-6 -mt-4 bg-[#fdfdfe] rounded-t-[2rem] relative z-10" style="padding-top: 20px;">
+                <p id="albumDetailDesc" class="text-sm text-slate-500 leading-relaxed mb-6"></p>
+
+                <div class="flex items-center gap-3 p-4 bg-white rounded-2xl border border-slate-200 shadow-sm mb-8">
+                    <img id="albumCreatorAvatar" class="w-8 h-8 rounded-lg object-cover" src="" alt="">
+                    <div class="flex-1 min-w-0">
+                        <div id="albumCreatorName" class="text-sm font-black text-slate-800"></div>
+                        <div class="text-[10px] text-slate-400 mt-0.5">作者主页</div>
+                    </div>
+                    <button onclick="backToCreator()" class="px-4 py-2 rounded-xl text-xs font-bold text-indigo-600 bg-indigo-50 border border-indigo-100 active:scale-95 transition-transform">
+                        查看主页
+                    </button>
+                </div>
+
+                <h3 class="text-base font-black text-slate-800 mb-4">全部壁纸</h3>
+                <div id="albumWallpaperGrid" class="wallpaper-grid mb-8"></div>
+
+                <!-- 订阅权益 -->
+                <h3 class="text-base font-black text-slate-800 mb-3">订阅权益</h3>
+                <div class="grid grid-cols-2 gap-3 mb-6">
+                    <div class="flex items-start gap-3 p-3.5 bg-indigo-50/60 rounded-2xl border border-indigo-100/50">
+                        <div class="w-9 h-9 rounded-xl bg-white flex items-center justify-center text-indigo-500 shadow-sm shrink-0">
+                            <i class="fa-solid fa-gem text-sm"></i>
+                        </div>
+                        <div>
+                            <div class="text-xs font-black text-slate-700">高清原图</div>
+                            <div class="text-[10px] text-slate-500 mt-0.5">4K 超清无水印</div>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3 p-3.5 bg-emerald-50/60 rounded-2xl border border-emerald-100/50">
+                        <div class="w-9 h-9 rounded-xl bg-white flex items-center justify-center text-emerald-500 shadow-sm shrink-0">
+                            <i class="fa-solid fa-mobile-screen text-sm"></i>
+                        </div>
+                        <div>
+                            <div class="text-xs font-black text-slate-700">多尺寸适配</div>
+                            <div class="text-[10px] text-slate-500 mt-0.5">iOS/Android 通用</div>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3 p-3.5 bg-amber-50/60 rounded-2xl border border-amber-100/50">
+                        <div class="w-9 h-9 rounded-xl bg-white flex items-center justify-center text-amber-500 shadow-sm shrink-0">
+                            <i class="fa-solid fa-wand-magic-sparkles text-sm"></i>
+                        </div>
+                        <div>
+                            <div class="text-xs font-black text-slate-700">机型专属</div>
+                            <div class="text-[10px] text-slate-500 mt-0.5">为你的设备优化</div>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3 p-3.5 bg-rose-50/60 rounded-2xl border border-rose-100/50">
+                        <div class="w-9 h-9 rounded-xl bg-white flex items-center justify-center text-rose-500 shadow-sm shrink-0">
+                            <i class="fa-solid fa-arrows-rotate text-sm"></i>
+                        </div>
+                        <div>
+                            <div class="text-xs font-black text-slate-700">持续更新</div>
+                            <div class="text-[10px] text-slate-500 mt-0.5">新壁纸定期推送</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 广告说明 -->
+                <div class="bg-amber-50/60 border border-amber-100/50 rounded-2xl p-4 mb-8">
+                    <div class="flex gap-3 items-start">
+                        <div class="w-9 h-9 rounded-xl bg-white flex items-center justify-center text-amber-500 shadow-sm shrink-0">
+                            <i class="fa-solid fa-circle-info text-sm"></i>
+                        </div>
+                        <div>
+                            <div class="text-xs font-black text-slate-700">免费使用，锁屏含广告</div>
+                            <div class="text-[11px] text-slate-500 mt-0.5 leading-relaxed">订阅后可免费使用本合辑所有壁纸。为支持持续运营，锁屏轮播时会展示广告壁纸。</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="height: 80px;"></div>
+            </div>
+        </div>
+
+        <div class="detail-sub-bar-b" id="albumSubBar">
+            <div><span class="text-2xl font-black text-slate-900">免费</span></div>
+            <button id="albumSubscribeBtn" class="flex-1 ml-4 py-4 bg-slate-900 text-white rounded-2xl text-sm font-black shadow-xl shadow-slate-300 active:scale-[0.97] transition-transform" onclick="subscribeCurrentAlbum()">
+                设为壁纸
+            </button>
+        </div>
+    </div>
+
+    <!-- 作品详情页（全屏预览） -->
+    <div id="wallpaper-fullscreen-preview">
+        <img id="fullscreenWallpaperImg" class="absolute inset-0 w-full h-full object-cover" src="" alt="">
+
+        <!-- 顶部操作栏 -->
+        <div class="absolute top-0 left-0 right-0 z-10 p-4 pt-12" style="background: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, transparent 100%);">
+            <div class="flex items-center justify-between">
+                <button onclick="closeWorkDetail()" class="w-10 h-10 rounded-full bg-black/30 backdrop-blur-md flex items-center justify-center cursor-pointer active:scale-90 transition-transform">
+                    <i class="fa-solid fa-xmark text-white text-lg"></i>
+                </button>
+                <div class="text-white text-sm font-bold" id="fullscreenPageIndicator">1 / 1</div>
+                <button onclick="toggleFullscreenInfo()" class="w-10 h-10 rounded-full bg-black/30 backdrop-blur-md flex items-center justify-center cursor-pointer active:scale-90 transition-transform">
+                    <i class="fa-solid fa-circle-info text-white text-sm"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- 底部信息与操作 -->
+        <div class="absolute bottom-0 left-0 right-0 z-10 p-6 pb-12" style="background: linear-gradient(to top, rgba(0,0,0,0.72) 0%, transparent 100%);">
+            <div id="fullscreenWallpaperInfo" class="mb-6 text-white">
+                <div class="flex items-center justify-between gap-3">
+                    <div class="min-w-0">
+                        <h3 id="fullscreenAlbumName" class="text-lg font-black mb-1 truncate"></h3>
+                        <p class="text-xs text-white/70">左右滑动浏览当前合辑</p>
+                    </div>
+                    <button onclick="openCurrentAlbumDetailFromWork()" class="px-4 py-2 rounded-xl text-xs font-bold text-white bg-white/20 backdrop-blur-md border border-white/20 active:scale-95 transition-transform shrink-0">
+                        查看合辑
+                    </button>
+                </div>
+            </div>
+
+            <div class="space-y-3">
+                <button onclick="setWallpaperFromWorkDetail()" class="w-full py-4 bg-white text-slate-900 rounded-2xl text-sm font-black shadow-xl active:scale-[0.97] transition-transform">
+                    <i class="fa-solid fa-mobile-screen mr-2"></i>单独设置为锁屏
+                </button>
+                <button onclick="addToCarouselFromWorkDetail()" class="w-full py-4 bg-white/20 backdrop-blur-md text-white rounded-2xl text-sm font-black border-2 border-white/25 active:scale-[0.97] transition-transform">
+                    <i class="fa-solid fa-shuffle mr-2"></i>加入轮播池
+                </button>
+            </div>
+        </div>
+
+        <!-- 左右切换按钮 -->
+        <button onclick="prevWork()" class="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-black/30 backdrop-blur-md flex items-center justify-center cursor-pointer active:scale-90 transition-transform z-10">
+            <i class="fa-solid fa-chevron-left text-white text-lg"></i>
+        </button>
+        <button onclick="nextWork()" class="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-black/30 backdrop-blur-md flex items-center justify-center cursor-pointer active:scale-90 transition-transform z-10">
+            <i class="fa-solid fa-chevron-right text-white text-lg"></i>
+        </button>
+    </div>
+
+    <!-- 壁纸操作面板 -->
+    <div class="sheet-overlay" id="wallpaperSheetOverlay" onclick="closeWallpaperSheet()"></div>
+    <div id="wallpaper-action-sheet">
+        <div class="p-6">
+            <div class="w-9 h-1 bg-slate-300 rounded-full mx-auto mb-6"></div>
+            <h3 id="wallpaperSheetTitle" class="text-lg font-black text-slate-900 mb-2">选择操作</h3>
+            <p id="wallpaperSheetDesc" class="text-sm text-slate-500 mb-6"></p>
+            <div id="wallpaperPreview" class="mb-6"></div>
+            <div class="space-y-3">
+                <button onclick="setWallpaperSingle()" class="w-full py-4 bg-slate-900 text-white rounded-2xl text-sm font-black shadow-xl active:scale-[0.97] transition-transform">
+                    <i class="fa-solid fa-mobile-screen mr-2"></i>单独设置为锁屏
+                </button>
+                <button onclick="addToCarousel()" class="w-full py-4 bg-indigo-50 text-indigo-600 rounded-2xl text-sm font-black border-2 border-indigo-100 active:scale-[0.97] transition-transform">
+                    <i class="fa-solid fa-shuffle mr-2"></i>加入轮播池
+                </button>
+                <button onclick="closeWallpaperSheet()" class="w-full py-4 text-slate-500 rounded-2xl text-sm font-bold active:scale-[0.97] transition-transform">
+                    取消
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-b" id="toastB"></div>
+
+    <script>
+        // ========== 创作者数据（沿用 Plan A，便于对比） ==========
+        const CREATORS = {
+            creator1: {
+                id: 'creator1',
+                name: '摄影师小王',
+                avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=128&h=128&fit=crop',
+                cover: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800',
+                bio: '',
+                desc: '用镜头记录世界各地的绝美风景。先看作品，喜欢再进入合辑设为壁纸，壁纸自动叠加到锁屏轮播池。',
+                stats: { works: 156, albums: 8, subs: '12.5K' },
+                albums: [
+                    {
+                        id: 'album1',
+                        name: '春日樱花系列',
+                        count: 15,
+                        update: '每日更新',
+                        updateColor: 'emerald',
+                        cover: 'https://images.unsplash.com/photo-1490750967868-88aa4486c946?w=300&h=530&fit=crop',
+                        wallpapers: [
+                            'https://images.unsplash.com/photo-1490750967868-88aa4486c946?w=300&h=530&fit=crop',
+                            'https://images.unsplash.com/photo-1508610048659-a06b669e3321?w=300&h=530&fit=crop',
+                            'https://images.unsplash.com/photo-1522383225653-ed111181a951?w=300&h=530&fit=crop',
+                            'https://images.unsplash.com/photo-1522383225653-ed111181a951?w=300&h=530&fit=crop',
+                            'https://images.unsplash.com/photo-1490750967868-88aa4486c946?w=300&h=530&fit=crop',
+                            'https://images.unsplash.com/photo-1508610048659-a06b669e3321?w=300&h=530&fit=crop',
+                        ]
+                    },
+                    {
+                        id: 'album2',
+                        name: '城市夜景',
+                        count: 11,
+                        update: '每周三更新',
+                        updateColor: 'indigo',
+                        cover: 'https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=300&h=530&fit=crop',
+                        wallpapers: [
+                            'https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=300&h=530&fit=crop',
+                            'https://images.unsplash.com/photo-1514565131-fce0801e5785?w=300&h=530&fit=crop',
+                            'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=300&h=530&fit=crop',
+                            'https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=300&h=530&fit=crop',
+                            'https://images.unsplash.com/photo-1514565131-fce0801e5785?w=300&h=530&fit=crop',
+                            'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=300&h=530&fit=crop',
+                        ]
+                    },
+                    {
+                        id: 'album3',
+                        name: '雪山之巅',
+                        count: 9,
+                        update: '不定期更新',
+                        updateColor: 'amber',
+                        cover: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=300&h=530&fit=crop',
+                        wallpapers: [
+                            'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=300&h=530&fit=crop',
+                            'https://images.unsplash.com/photo-1454496522488-7a8e488e8606?w=300&h=530&fit=crop',
+                            'https://images.unsplash.com/photo-1486870591958-9b9d0d1dda99?w=300&h=530&fit=crop',
+                            'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=300&h=530&fit=crop',
+                            'https://images.unsplash.com/photo-1454496522488-7a8e488e8606?w=300&h=530&fit=crop',
+                            'https://images.unsplash.com/photo-1486870591958-9b9d0d1dda99?w=300&h=530&fit=crop',
+                        ]
+                    }
+                ]
+            },
+            creator2: {
+                id: 'creator2',
+                name: '像素光年',
+                avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=128&h=128&fit=crop',
+                cover: 'https://images.unsplash.com/photo-1514565131-fce0801e5785?w=800',
+                bio: '赛博朋克城市夜景',
+                desc: '捕捉深夜都市中闪烁的霓虹与极速掠过的光影。先浏览作品，再进入合辑设为壁纸。',
+                stats: { works: 45, albums: 3, subs: '8.3K' },
+                albums: [
+                    {
+                        id: 'album4',
+                        name: '赛博朋克都市',
+                        count: 20,
+                        update: '每周五更新',
+                        updateColor: 'indigo',
+                        cover: 'https://images.unsplash.com/photo-1514565131-fce0801e5785?w=300&h=530&fit=crop',
+                        wallpapers: [
+                            'https://images.unsplash.com/photo-1514565131-fce0801e5785?w=300&h=530&fit=crop',
+                            'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=300&h=530&fit=crop',
+                            'https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=300&h=530&fit=crop',
+                            'https://images.unsplash.com/photo-1514565131-fce0801e5785?w=300&h=530&fit=crop',
+                            'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=300&h=530&fit=crop',
+                            'https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=300&h=530&fit=crop',
+                        ]
+                    }
+                ]
+            }
+        };
+
+        // ========== 状态 ==========
+        let currentCreatorId = null;
+        let currentAlbumId = null;
+        let currentFocusIndex = null;
+        const subscribedAlbums = new Set();
+        let selectedWallpaper = null;
+
+        // ========== URL 参数 ==========
+        function getQueryParam(name) {
+            const u = new URL(window.location.href);
+            return u.searchParams.get(name);
+        }
+
+        // ========== Plan B：作品流聚合 ==========
+        function buildCreatorWorks(creator) {
+            const works = [];
+            (creator.albums || []).forEach(album => {
+                (album.wallpapers || []).forEach((src, idxInAlbum) => {
+                    works.push({
+                        src,
+                        albumId: album.id,
+                        albumName: album.name,
+                        idxInAlbum,
+                        update: album.update
+                    });
+                });
+            });
+            return works;
+        }
+
+        // ========== 渲染：创作者页 ==========
+        function renderCreatorPage(creator) {
+            document.getElementById('creatorCover').src = creator.cover;
+            document.getElementById('creatorAvatar').src = creator.avatar;
+            document.getElementById('creatorName').textContent = creator.name;
+            document.getElementById('creatorBio').textContent = creator.bio;
+            document.getElementById('creatorDesc').textContent = creator.desc;
+
+            renderAlbumStrip(creator.albums);
+
+            const works = buildCreatorWorks(creator);
+            document.getElementById('worksCount').textContent = `${works.length} 张`;
+            renderWorksGrid(works);
+        }
+
+        function renderAlbumStrip(albums) {
+            const el = document.getElementById('albumStrip');
+            const colorMap = {
+                emerald: { bg: 'bg-emerald-50', text: 'text-emerald-600' },
+                indigo: { bg: 'bg-indigo-50', text: 'text-indigo-600' },
+                amber: { bg: 'bg-amber-50', text: 'text-amber-600' },
+                rose: { bg: 'bg-rose-50', text: 'text-rose-600' },
+                cyan: { bg: 'bg-cyan-50', text: 'text-cyan-600' },
+            };
+            
+            el.innerHTML = (albums || []).map(a => {
+                const isSubscribed = subscribedAlbums.has(a.id);
+                const colors = colorMap[a.updateColor] || colorMap.indigo;
+                const thumbs = (a.wallpapers || []).slice(0, 3);
+                
+                return `
+                    <div class="album-card-h ${isSubscribed ? 'subscribed' : ''}" onclick="openAlbumDetail('${a.id}', 0)">
+                        <div class="cover-row">
+                            ${thumbs.map(src => `<div class="cover-thumb"><img src="${src}" alt=""></div>`).join('')}
+                        </div>
+                        <div class="info">
+                            <div class="title">${a.name}</div>
+                            <div class="meta">
+                                <span class="meta-tag ${colors.bg} ${colors.text}">${a.update}</span>
+                                <span class="meta-count">${a.count} 张</span>
+                                ${isSubscribed ? '<span class="sub-badge">已设置</span>' : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderWorksGrid(works) {
+            const el = document.getElementById('worksGrid');
+            el.innerHTML = (works || []).map(w => `
+                <div class="wallpaper-item" onclick="openWorkDetail('${w.albumId}', ${w.idxInAlbum})">
+                    <img src="${w.src}" alt="" loading="lazy">
+                    <div class="work-badge">${w.albumName}</div>
+                </div>
+            `).join('');
+        }
+
+        // ========== 合辑详情（跳转到 index.html 的详情页） ==========
+        function openAlbumDetail(albumId, focusIndex) {
+            // 跳转到 index.html 并带上 album 参数，打开对应的详情页
+            window.location.href = `index.html?album=${albumId}`;
+        }
+
+        function renderAlbumWallpapers(album, focusIndex) {
+            const el = document.getElementById('albumWallpaperGrid');
+            el.innerHTML = (album.wallpapers || []).map((src, idx) => `
+                <div class="wallpaper-item" data-idx="${idx}" onclick="openWorkDetail('${album.id}', ${idx})">
+                    <img src="${src}" alt="" loading="lazy">
+                </div>
+            `).join('');
+
+            if (typeof focusIndex === 'number') {
+                setTimeout(() => {
+                    const target = el.querySelector(`[data-idx="${focusIndex}"]`);
+                    if (!target) return;
+                    target.classList.add('selected');
+                    setTimeout(() => target.classList.remove('selected'), 900);
+                }, 60);
+            }
+        }
+
+        function closeAlbumDetail() {
+            document.getElementById('album-detail-modal').classList.remove('show');
+            currentAlbumId = null;
+            currentFocusIndex = null;
+        }
+
+        function backToCreator() {
+            closeAlbumDetail();
+        }
+
+        // ========== 订阅状态 ==========
+        function updateAlbumSubscribeBtn(albumId) {
+            const btn = document.getElementById('albumSubscribeBtn');
+            const isSubscribed = subscribedAlbums.has(albumId);
+
+            if (isSubscribed) {
+                btn.textContent = '已设置';
+                btn.className = 'flex-1 ml-4 py-4 bg-slate-100 text-slate-600 rounded-2xl text-sm font-black border-2 border-slate-200 active:scale-[0.97] transition-transform';
+                btn.onclick = unsubscribeCurrentAlbum;
+            } else {
+                btn.textContent = '设为壁纸';
+                btn.className = 'flex-1 ml-4 py-4 bg-slate-900 text-white rounded-2xl text-sm font-black shadow-xl shadow-slate-300 active:scale-[0.97] transition-transform';
+                btn.onclick = subscribeCurrentAlbum;
+            }
+        }
+
+        function subscribeCurrentAlbum() {
+            if (!currentAlbumId) return;
+            subscribedAlbums.add(currentAlbumId);
+            updateAlbumSubscribeBtn(currentAlbumId);
+            refreshAlbumStrip();
+            showToast('已设置为壁纸');
+        }
+
+        function unsubscribeCurrentAlbum() {
+            if (!currentAlbumId) return;
+            subscribedAlbums.delete(currentAlbumId);
+            updateAlbumSubscribeBtn(currentAlbumId);
+            refreshAlbumStrip();
+            showToast('已取消');
+        }
+
+        function refreshAlbumStrip() {
+            const creator = CREATORS[currentCreatorId];
+            if (creator) renderAlbumStrip(creator.albums);
+        }
+
+        // ========== 作品详情（全屏预览，范围：当前合辑） ==========
+        let currentPreviewAlbumId = null;
+        let currentPreviewIndex = 0;
+
+        function openWorkDetail(albumId, index) {
+            const creator = CREATORS[currentCreatorId];
+            const album = (creator.albums || []).find(a => a.id === albumId);
+            if (!album) return;
+
+            currentPreviewAlbumId = albumId;
+            currentPreviewIndex = Math.max(0, Math.min(index || 0, (album.wallpapers || []).length - 1));
+
+            updateWorkDetail();
+            document.getElementById('wallpaper-fullscreen-preview').classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function updateWorkDetail() {
+            const creator = CREATORS[currentCreatorId];
+            const album = (creator.albums || []).find(a => a.id === currentPreviewAlbumId);
+            if (!album) return;
+
+            const src = (album.wallpapers || [])[currentPreviewIndex];
+            document.getElementById('fullscreenWallpaperImg').src = src || '';
+            document.getElementById('fullscreenPageIndicator').textContent = `${currentPreviewIndex + 1} / ${(album.wallpapers || []).length || 1}`;
+            document.getElementById('fullscreenAlbumName').textContent = album.name || '合辑';
+        }
+
+        function closeWorkDetail() {
+            document.getElementById('wallpaper-fullscreen-preview').classList.remove('show');
+            document.body.style.overflow = '';
+            currentPreviewAlbumId = null;
+            currentPreviewIndex = 0;
+        }
+
+        function prevWork() {
+            const creator = CREATORS[currentCreatorId];
+            const album = (creator.albums || []).find(a => a.id === currentPreviewAlbumId);
+            if (!album || !(album.wallpapers || []).length) return;
+            currentPreviewIndex = (currentPreviewIndex - 1 + album.wallpapers.length) % album.wallpapers.length;
+            updateWorkDetail();
+        }
+
+        function nextWork() {
+            const creator = CREATORS[currentCreatorId];
+            const album = (creator.albums || []).find(a => a.id === currentPreviewAlbumId);
+            if (!album || !(album.wallpapers || []).length) return;
+            currentPreviewIndex = (currentPreviewIndex + 1) % album.wallpapers.length;
+            updateWorkDetail();
+        }
+
+        function toggleFullscreenInfo() {
+            const info = document.getElementById('fullscreenWallpaperInfo');
+            info.style.opacity = info.style.opacity === '0' ? '1' : '0';
+        }
+
+        function openCurrentAlbumDetailFromWork() {
+            if (!currentPreviewAlbumId) return;
+            const idx = currentPreviewIndex;
+            closeWorkDetail();
+            openAlbumDetail(currentPreviewAlbumId, idx);
+        }
+
+        function setWallpaperFromWorkDetail() {
+            showToast('已设置为锁屏壁纸');
+        }
+
+        function addToCarouselFromWorkDetail() {
+            showToast('已加入轮播池');
+        }
+
+        // ========== 壁纸操作面板 ==========
+        function openWallpaperSheet(albumId, src, idx) {
+            selectedWallpaper = { albumId, src, idx };
+            document.getElementById('wallpaperSheetTitle').textContent = '选择操作';
+            document.getElementById('wallpaperSheetDesc').textContent = '你想如何使用这张壁纸？';
+            document.getElementById('wallpaperPreview').innerHTML = `
+                <div class="w-24 h-40 mx-auto rounded-xl overflow-hidden shadow-lg mb-4">
+                    <img src="${src}" class="w-full h-full object-cover" alt="">
+                </div>
+            `;
+            document.getElementById('wallpaperSheetOverlay').classList.add('show');
+            document.getElementById('wallpaper-action-sheet').classList.add('show');
+        }
+
+        function closeWallpaperSheet() {
+            document.getElementById('wallpaperSheetOverlay').classList.remove('show');
+            document.getElementById('wallpaper-action-sheet').classList.remove('show');
+            selectedWallpaper = null;
+        }
+
+        function setWallpaperSingle() {
+            showToast('已设置为锁屏壁纸');
+            closeWallpaperSheet();
+        }
+
+        function addToCarousel() {
+            showToast('已加入轮播池');
+            closeWallpaperSheet();
+        }
+
+        // ========== Toast ==========
+        let toastTimer;
+        function showToast(msg) {
+            const el = document.getElementById('toastB');
+            el.textContent = msg;
+            el.classList.add('show');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => el.classList.remove('show'), 1800);
+        }
+
+        // ========== 初始化 ==========
+        window.addEventListener('DOMContentLoaded', () => {
+            const creatorId = getQueryParam('creatorId') || 'creator1';
+            const creator = CREATORS[creatorId] || CREATORS.creator1;
+            currentCreatorId = creator.id;
+            renderCreatorPage(creator);
+        });
+    </script>
+</body>
+</html>
+
