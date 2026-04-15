@@ -2657,7 +2657,7 @@
                                     <h3 class="text-xl font-black text-white tracking-tight">${p.name}</h3>
                                     <p class="text-xs text-white/70 mt-1 truncate">${p.subtitle}</p>
                                 </div>
-                                <button class="shrink-0 ${isGroupWallpaper ? 'bg-white text-slate-900' : (subscribed ? 'bg-white/20 text-white/90' : 'bg-white text-slate-900')} px-5 py-2.5 rounded-2xl text-xs font-black shadow-lg active:scale-95 transition-transform" onclick="${btnOnClick}">${btnText}</button>
+                                <button class="shrink-0 ${subscribed ? 'bg-white/20 text-white/90' : 'bg-white text-slate-900'} px-5 py-2.5 rounded-2xl text-xs font-black shadow-lg active:scale-95 transition-transform" onclick="${btnOnClick}">${btnText}</button>
                             </div>
                         </div>
                     </div>
