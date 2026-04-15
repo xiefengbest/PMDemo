@@ -1567,7 +1567,7 @@
                             </div>
                             <i class="fa-solid fa-chevron-right text-slate-400 text-xs"></i>
                         </button>
-                        <button onclick="openMyRotationModal()" class="w-full flex items-center justify-between p-4 hover:bg-slate-100 rounded-[1.5rem] transition-all">
+                        <button onclick="openMyRotationModal()" class="w-full flex items-center justify-between p-4 hover:bg-slate-100 rounded-[1.5rem] transition-all" id="rotationWallpaperBtn">
                             <div class="flex items-center gap-4">
                                 <div class="w-10 h-10 bg-violet-50 text-violet-500 rounded-xl flex items-center justify-center"><i class="fa-solid fa-rotate"></i></div>
                                 <span class="text-sm font-bold text-slate-700">轮播壁纸</span>
@@ -3679,7 +3679,7 @@
                 btn2.classList.remove('hidden');
                 btn2.textContent = isGroupWallpaper ? '正在使用' : '取消订阅';
                 btn2.onclick = handleDetailUnsubscribe;
-                reviewIconBtn.classList.toggle('hidden', isGroupWallpaper);
+                reviewIconBtn.classList.remove('hidden');
             }
         }
 
@@ -4974,6 +4974,10 @@
                 if (intervalRow) intervalRow.classList.toggle('profile-android-only', !isAndroid);
                 updateProfileIntervalRowEnabled();
                 initSettingSwitches();
+                
+                // iOS 隐藏轮播壁纸按钮
+                const rotationBtn = document.getElementById('rotationWallpaperBtn');
+                if (rotationBtn) rotationBtn.style.display = isAndroid ? 'flex' : 'none';
             }
         }
     </script>
