@@ -471,7 +471,7 @@
         #wallpaper-fullscreen-preview {
             position: fixed;
             inset: 0;
-            z-index: 230;
+            z-index: 500;
             background: #000;
             opacity: 0;
             pointer-events: none;
@@ -1567,6 +1567,13 @@
                             </div>
                             <i class="fa-solid fa-chevron-right text-slate-400 text-xs"></i>
                         </button>
+                        <button onclick="openMyRotationModal()" class="w-full flex items-center justify-between p-4 hover:bg-slate-100 rounded-[1.5rem] transition-all">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 bg-violet-50 text-violet-500 rounded-xl flex items-center justify-center"><i class="fa-solid fa-rotate"></i></div>
+                                <span class="text-sm font-bold text-slate-700">轮播壁纸</span>
+                            </div>
+                            <i class="fa-solid fa-chevron-right text-slate-400 text-xs"></i>
+                        </button>
                     </div>
                 </div>
 
@@ -1842,12 +1849,11 @@
             </div>
 
             <!-- 顶部操作栏 -->
-            <div class="absolute top-0 left-0 right-0 z-10 px-4 pt-4" style="padding-top: calc(16px + env(safe-area-inset-top, 0px)); background: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, transparent 100%);">
+            <div class="absolute top-0 left-0 right-0 z-10 px-4 pt-4" style="padding-top: calc(16px + env(safe-area-inset-top, 0px));">
                 <div class="flex items-center justify-between">
                     <button onclick="closeFullscreenPreview()" class="back-btn-circle">
                         <i class="fa-solid fa-xmark"></i>
                     </button>
-                    <div class="text-white text-sm font-bold" id="fullscreenPageIndicator">1 / 6</div>
                     <div class="w-10 h-10"></div>
                 </div>
             </div>
@@ -1860,11 +1866,8 @@
                 </div>
                 
                 <div class="space-y-3">
-                    <button onclick="showWallpaperModeModal()" class="w-full py-4 bg-white text-slate-900 rounded-2xl text-sm font-black shadow-xl active:scale-[0.97] transition-transform">
+                    <button id="fullscreenActionBtn" onclick="handleFullscreenAction()" class="w-full py-4 bg-white text-slate-900 rounded-2xl text-sm font-black shadow-xl active:scale-[0.97] transition-transform">
                         <i class="fa-solid fa-mobile-screen mr-2"></i>设为壁纸
-                    </button>
-                    <button onclick="subscribeAlbumFromFullscreen()" class="w-full py-4 bg-white/20 backdrop-blur-md text-white rounded-2xl text-sm font-black border-2 border-white/30 active:scale-[0.97] transition-transform">
-                        <i class="fa-solid fa-layer-group mr-2"></i>整组设为壁纸
                     </button>
                 </div>
             </div>
@@ -2314,11 +2317,11 @@
 
         <style>
             #wallpaper-mode-overlay.show {
-                opacity: 1;
-                pointer-events: auto;
+                opacity: 1 !important;
+                pointer-events: auto !important;
             }
             #wallpaper-mode-overlay.show > div {
-                transform: translateY(0);
+                transform: translateY(0) !important;
             }
         </style>
 
@@ -2425,7 +2428,7 @@
         const CAT_PRODUCTS = [
             { id: 401, name: '文观壁纸', artist: '文观WENGUAN', cover: 'https://92cn-image.levect.com/release/image/8280e343d1199df8b2eae257020515ba.jpg', subs: '9.8万', subtitle: '撷诗经草木，揽唐诗月色，掬宋词烟雨', desc: '撷诗经草木，揽唐诗月色，掬宋词烟雨，东方气韵，栖于方寸屏幕。以中国古典诗词为灵感，将千年诗意化为指间风景，每一张壁纸都是一首可以看见的诗。', update: '每日更新', cats: ['recommend', 'culture'], tushuo: '撷诗经草木，揽唐诗月色。东方气韵栖于方寸屏幕，千年诗意化为指间风景。', previews: ['https://92cn-image.levect.com/release/image/c695c62ee0c73d56e451167addcd60a8.jpg@!fw360.webp?k=1&p=1&eid=1', 'https://92cn-image.levect.com/release/image/daa325ac0e7ebc62d2eebf813f49949b.jpg@!fw360.webp?k=1&p=1&eid=1', 'https://92cn-image.levect.com/release/image/b5df685752ed6af077fb9c33e945b7dd.jpg@!fw360.webp?k=1&p=1&eid=1'] },
             { id: 101, name: '千里江山图 · 新绎', artist: '墨染山河', cover: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=800', subs: '28.7万', subtitle: '传世名画与现代插画的梦幻联动', desc: '以《千里江山图》为蓝本，墨染山河工作室用全新的数字绘画手法重新诠释了这幅传世之作。每一张壁纸都是一次跨越千年的对话。', update: '每周更新', cats: ['recommend', 'culture'], tushuo: '青绿山水间，千年画卷徐徐展开。墨色晕染的峰峦叠嶂，仿佛能听见江风拂过水面的声音。' },
-            { id: 102, name: '组图壁纸', artist: '好看云壁纸', cover: 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=800', usage: '125.8万', subtitle: '精选组图，一次设置多张壁纸', desc: '精选高质量组图壁纸，一次设置多张，让你的锁屏和桌面更加丰富多样。不定期更新，总有新惊喜。', update: '不定期更新', cats: ['recommend'], tushuo: '精选组图壁纸，一次设置多张，让你的锁屏和桌面更加丰富多样。' },
+            { id: 102, name: '画境集', artist: '好看云壁纸', cover: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=800', count: '9张壁纸', subtitle: '精选组图，一次设置多张壁纸', desc: '精选高质量组图壁纸，一次设置多张，让你的锁屏和桌面更加丰富多样。不定期更新，总有新惊喜。', update: '不定期更新', cats: ['recommend'], tushuo: '精选组图壁纸，一次设置多张，让你的锁屏和桌面更加丰富多样。' },
             { id: 103, name: '银河漫游指南', artist: 'Artflow', cover: 'https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=800', subs: '16.9万', subtitle: '从近地轨道到仙女座的视觉旅程', desc: '由概念艺术家Artflow倾力打造，用电影级别的画面质感呈现宇宙的壮阔。星云、黑洞、空间站......每一帧都值得凝视。', update: '每周五更新', cats: ['recommend', 'creative'] },
             { id: 1, name: '樱花物语', artist: '猫小姐', cover: 'https://images.unsplash.com/photo-1522383225653-ed111181a951?w=800', subs: '12.6万', subtitle: '以日本樱花季为灵感的粉色梦境', desc: '以日本樱花季为灵感，每一张壁纸都是一段粉色的梦。插画师猫小姐用细腻的笔触描绘了樱花树下的故事，温暖治愈。', update: '每周三更新', cats: ['recommend', 'nature'] },
             { id: 2, name: '赛博之城', artist: '像素光年', cover: 'https://images.unsplash.com/photo-1514565131-fce0801e5785?w=800', subs: '8.3万', subtitle: '赛博朋克风格的未来都市', desc: '赛博朋克风格的未来都市，霓虹灯闪烁的街道，飞行器穿梭的天空。每一帧都是一场视觉盛宴。', update: '每周五更新', cats: ['recommend', 'creative', 'trend'] },
@@ -2630,7 +2633,7 @@
             const isGroupWallpaper = p.id === 102;
             const subscribed = subscribedProductIds.has(p.id);
             const btnText = isGroupWallpaper ? '设为壁纸' : (subscribed ? '已订阅' : '订阅');
-            const btnOnClick = isGroupWallpaper ? 'event.stopPropagation();openWallpaperModeModal()' : (subscribed ? 'event.stopPropagation()' : `event.stopPropagation();toggleSubB(this, ${p.id})`);
+            const btnOnClick = isGroupWallpaper ? 'event.stopPropagation();showWallpaperModeModal()' : (subscribed ? 'event.stopPropagation()' : `event.stopPropagation();toggleSubB(this, ${p.id})`);
 
             return `
                 <div class="product-card-b" onclick="openDetail(${p.id})">
@@ -2640,7 +2643,7 @@
                         <div>
                             <div class="flex items-center gap-2 mb-3">
                                 <span class="text-[10px] font-bold px-2.5 py-1 rounded-md bg-white/20 text-white border border-white/20 backdrop-blur-sm">${p.update}</span>
-                                <span class="text-[11px] text-white/80 font-medium">${isGroupWallpaper ? p.usage + '使用' : p.subs + '订阅'}</span>
+                                <span class="text-[11px] text-white/80 font-medium">${isGroupWallpaper ? p.count : p.subs + '订阅'}</span>
                             </div>
                             <div class="mini-preview">
                                 <div class="mini-preview-img"><img src="${img1}" loading="lazy"></div>
@@ -2797,6 +2800,7 @@
         let currentPreviewImages = [];
         let isGenericPreview = false;
         let currentPreviewTushuo = null;
+        let isFromRotation = false; // 标记是否从轮播壁纸打开
 
         // 手势滑动支持
         let touchStartX = 0;
@@ -2846,18 +2850,20 @@
             currentPreviewIndex = index;
             currentPreviewImages = album.wallpapers;
             isGenericPreview = false;
+            isFromRotation = false;
             currentPreviewTushuo = album.tushuo || null;
 
             // 隐藏创作者页悬浮按钮
             document.getElementById('creatorBackBtn').style.display = 'none';
 
             document.getElementById('fullscreenWallpaperImg').src = album.wallpapers[index];
-            document.getElementById('fullscreenPageIndicator').textContent = `${index + 1} / ${album.wallpapers.length}`;
             
             updateTushuoDisplay();
             
             updateLockscreenTime();
             
+            updateFullscreenActionButton();
+
             document.getElementById('wallpaper-fullscreen-preview').classList.add('show');
             document.body.style.overflow = 'hidden';
         }
@@ -2877,21 +2883,19 @@
             currentPreviewImages = images;
             currentPreviewIndex = index;
             isGenericPreview = true;
+            isFromRotation = false;
             currentPreviewTushuo = tushuo || null;
 
             // 隐藏创作者页悬浮按钮
             document.getElementById('creatorBackBtn').style.display = 'none';
 
             document.getElementById('fullscreenWallpaperImg').src = images[index];
-            document.getElementById('fullscreenPageIndicator').textContent = `${index + 1} / ${images.length}`;
             
             updateTushuoDisplay();
             
             updateLockscreenTime();
             
-            // 隐藏不相关的按钮
-            const subBtn = document.querySelector('#wallpaper-fullscreen-preview button[onclick="subscribeAlbumFromFullscreen()"]');
-            if (subBtn) subBtn.style.display = 'none';
+            updateFullscreenActionButton();
 
             document.getElementById('wallpaper-fullscreen-preview').classList.add('show');
             document.body.style.overflow = 'hidden';
@@ -2906,7 +2910,6 @@
 
             const src = album.wallpapers[currentPreviewIndex];
             document.getElementById('fullscreenWallpaperImg').src = src;
-            document.getElementById('fullscreenPageIndicator').textContent = `${currentPreviewIndex + 1} / ${album.wallpapers.length}`;
             
             updateLockscreenTime();
         }
@@ -2950,14 +2953,18 @@
             if (currentPreviewImages.length === 0) return;
             currentPreviewIndex = (currentPreviewIndex - 1 + currentPreviewImages.length) % currentPreviewImages.length;
             document.getElementById('fullscreenWallpaperImg').src = currentPreviewImages[currentPreviewIndex];
-            document.getElementById('fullscreenPageIndicator').textContent = `${currentPreviewIndex + 1} / ${currentPreviewImages.length}`;
+            if (isFromRotation) {
+                updateFullscreenActionButton();
+            }
         }
 
         function nextWallpaper() {
             if (currentPreviewImages.length === 0) return;
             currentPreviewIndex = (currentPreviewIndex + 1) % currentPreviewImages.length;
             document.getElementById('fullscreenWallpaperImg').src = currentPreviewImages[currentPreviewIndex];
-            document.getElementById('fullscreenPageIndicator').textContent = `${currentPreviewIndex + 1} / ${currentPreviewImages.length}`;
+            if (isFromRotation) {
+                updateFullscreenActionButton();
+            }
         }
 
         function showWallpaperModeModal() {
@@ -3048,13 +3055,28 @@
         function addToRotationFromFullscreen() {
             if (isGenericPreview && currentPreviewImages.length > 0) {
                 // 照片预览模式：将当前照片加入轮播
-                showToast('已加入锁屏轮播');
+                const currentSrc = currentPreviewImages[currentPreviewIndex];
+                addToRotation({ src: currentSrc, name: '照片' });
             } else if (currentPreviewAlbumId) {
                 // 合辑预览模式：将整个合辑加入轮播
-                showToast('已加入锁屏轮播');
+                const album = CAT_PRODUCTS.find(p => p.id === currentPreviewAlbumId);
+                if (album && album.previews && album.previews.length > 0) {
+                    album.previews.forEach((src, idx) => {
+                        addToRotation({ src, name: album.name + ' ' + (idx + 1) });
+                    });
+                } else {
+                    showToast('已加入锁屏轮播');
+                }
             } else {
-                showToast('已加入锁屏轮播');
+                // 其他模式：将当前预览图片加入轮播
+                const img = document.getElementById('fullscreenWallpaperImg');
+                if (img && img.src) {
+                    addToRotation({ src: img.src, name: '壁纸' });
+                } else {
+                    showToast('已加入锁屏轮播');
+                }
             }
+            closeWallpaperModeModal();
         }
 
         function showTuShuoIntro() {
@@ -3081,7 +3103,6 @@
             document.getElementById('creatorBackBtn').style.display = 'none';
 
             document.getElementById('fullscreenWallpaperImg').src = photos[index].src;
-            document.getElementById('fullscreenPageIndicator').textContent = `${index + 1} / ${photos.length}`;
             
             // 隐藏图说
             const tushuoEl = document.getElementById('fullscreenTuShuo');
@@ -3559,7 +3580,7 @@
             document.getElementById('detailMetaB').innerHTML = `
                 <div class="flex items-center gap-3">
                     <span class="text-[10px] font-bold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-lg">${p.update}</span>
-                    <span class="text-xs text-slate-500">${p.id === 102 ? p.usage + '人使用' : p.subs + '人订阅'}</span>
+                    <span class="text-xs text-slate-500">${p.id === 102 ? p.count : p.subs + '人订阅'}</span>
                 </div>
             `;
 
@@ -3657,7 +3678,7 @@
 
             if (isGroupWallpaper) {
                 btn.textContent = '设为壁纸';
-                btn.onclick = openWallpaperModeModal;
+                btn.onclick = showWallpaperModeModal;
                 btn.className = 'flex-1 py-4 bg-slate-900 text-white rounded-2xl text-sm font-black shadow-xl shadow-slate-300 active:scale-[0.97] transition-transform';
                 btn.classList.remove('hidden');
                 btn2.classList.add('hidden');
@@ -4787,6 +4808,140 @@
             openSecondaryPage('我的订阅', bodyHtml);
         }
         function closeMySubscriptionsModal() {
+            closeSecondaryPage();
+        }
+
+        // ========== 轮播壁纸管理 ==========
+        function getRotationWallpapers() {
+            const data = localStorage.getItem('myRotationWallpapers');
+            return data ? JSON.parse(data) : [];
+        }
+
+        function saveRotationWallpapers(wallpapers) {
+            localStorage.setItem('myRotationWallpapers', JSON.stringify(wallpapers));
+        }
+
+        function addToRotation(wallpaperData) {
+            const wallpapers = getRotationWallpapers();
+            const exists = wallpapers.some(w => w.src === wallpaperData.src);
+            if (!exists) {
+                wallpapers.push({
+                    src: wallpaperData.src,
+                    name: wallpaperData.name || '壁纸',
+                    addedAt: Date.now()
+                });
+                saveRotationWallpapers(wallpapers);
+                showToast('已加入轮播');
+            } else {
+                showToast('已在轮播列表中');
+            }
+        }
+
+        function removeFromRotation(index) {
+            const wallpapers = getRotationWallpapers();
+            wallpapers.splice(index, 1);
+            saveRotationWallpapers(wallpapers);
+            openMyRotationModal(); // 重新渲染页面
+            showToast('已移除');
+        }
+
+        function openRotationWallpaperPreview(index) {
+            const wallpapers = getRotationWallpapers();
+            if (wallpapers.length === 0) return;
+
+            currentPreviewImages = wallpapers.map(w => w.src);
+            currentPreviewIndex = index;
+            isGenericPreview = true;
+            isFromRotation = true;
+            currentPreviewTushuo = null;
+
+            // 隐藏创作者页悬浮按钮
+            document.getElementById('creatorBackBtn').style.display = 'none';
+
+            document.getElementById('fullscreenWallpaperImg').src = wallpapers[index].src;
+            
+            // 隐藏图说
+            const tushuoEl = document.getElementById('fullscreenTuShuo');
+            if (tushuoEl) tushuoEl.classList.add('hidden');
+            
+            updateLockscreenTime();
+            
+            // 更新按钮为"移除"
+            updateFullscreenActionButton();
+
+            document.getElementById('wallpaper-fullscreen-preview').classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function updateFullscreenActionButton() {
+            const btn = document.getElementById('fullscreenActionBtn');
+            if (!btn) return;
+
+            if (isFromRotation) {
+                btn.innerHTML = '<i class="fa-solid fa-trash mr-2"></i>移除';
+                btn.onclick = () => removeFromRotationFromPreview();
+            } else {
+                btn.innerHTML = '<i class="fa-solid fa-mobile-screen mr-2"></i>设为壁纸';
+                btn.onclick = () => showWallpaperModeModal();
+            }
+        }
+
+        function removeFromRotationFromPreview() {
+            const wallpapers = getRotationWallpapers();
+            if (wallpapers.length === 0) return;
+
+            // 移除当前预览的壁纸
+            wallpapers.splice(currentPreviewIndex, 1);
+            saveRotationWallpapers(wallpapers);
+
+            // 关闭全屏预览
+            document.getElementById('wallpaper-fullscreen-preview').classList.remove('show');
+            document.body.style.overflow = '';
+
+            showToast('已移除');
+
+            // 如果还有壁纸，重新打开轮播壁纸页面
+            if (wallpapers.length > 0) {
+                setTimeout(() => openMyRotationModal(), 300);
+            }
+        }
+
+        function handleFullscreenAction() {
+            if (isFromRotation) {
+                removeFromRotationFromPreview();
+            } else {
+                showWallpaperModeModal();
+            }
+        }
+
+        function openMyRotationModal() {
+            const wallpapers = getRotationWallpapers();
+            let bodyHtml;
+            if (wallpapers.length === 0) {
+                bodyHtml = `
+                    <div class="text-center py-16 text-slate-500">
+                        <div class="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-4"><i class="fa-solid fa-rotate text-2xl text-slate-400"></i></div>
+                        <p class="text-sm font-bold text-slate-600 mb-2">暂无轮播壁纸</p>
+                        <p class="text-xs text-slate-400 mb-4">浏览壁纸后点击"加入轮播"即可添加</p>
+                        <button type="button" onclick="closeSecondaryPage();switchTab('category')" class="px-6 py-3 bg-slate-900 text-white rounded-2xl text-sm font-black active:scale-95">去首页看看</button>
+                    </div>
+                `;
+            } else {
+                bodyHtml = `
+                    <div class="grid grid-cols-3 gap-3">
+                        ${wallpapers.map((w, index) => `
+                            <div class="relative group rounded-2xl overflow-hidden bg-slate-100 aspect-[9/16]" onclick="openRotationWallpaperPreview(${index})">
+                                <img src="${w.src}" loading="lazy" class="w-full h-full object-cover">
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+            openSecondaryPage('轮播壁纸', bodyHtml);
+        }
+        function closeMyRotationModal() {
             closeSecondaryPage();
         }
 
