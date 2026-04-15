@@ -1845,8 +1845,8 @@
             <!-- 锁屏时间控件 -->
             <div class="absolute inset-0 z-0 flex flex-col items-center justify-start pointer-events-none" style="padding-top: calc(80px + env(safe-area-inset-top, 0px));">
                 <div class="text-white text-center" style="text-shadow: 0 2px 20px rgba(0,0,0,0.5);">
-                    <div id="lockscreenTime" class="text-[80px] font-extralight tracking-tight" style="font-weight: 200; line-height: 1; letter-spacing: -2px;">12:00</div>
-                    <div id="lockscreenDate" class="text-base font-normal mt-2 opacity-90" style="font-weight: 400;">4月13日 星期一</div>
+                    <div id="lockscreenDate" class="text-lg font-medium mb-2 opacity-90" style="font-weight: 500; text-shadow: 0 1px 8px rgba(0,0,0,0.45);">4月13日 星期一</div>
+                    <div id="lockscreenTime" class="text-[80px] font-extralight tracking-tight" style="font-weight: 200; line-height: 1; letter-spacing: -2px; text-shadow: 0 2px 24px rgba(0,0,0,0.4);">12:00</div>
                 </div>
             </div>
 
@@ -4171,11 +4171,30 @@
 
             const indexEl = overlay.querySelector('.ls-index');
 
+            // 更新时间函数
+            const updateLsTime = () => {
+                const now = new Date();
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                const timeEl = document.getElementById('lsTime');
+                const dateEl = document.getElementById('lsDate');
+                if (timeEl) timeEl.textContent = `${hours}:${minutes}`;
+                if (dateEl) {
+                    const months = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+                    const days = ['星期日','星期一','星期二','星期三','星期四','星期五','星期六'];
+                    dateEl.textContent = `${months[now.getMonth()]}${now.getDate()}日 ${days[now.getDay()]}`;
+                }
+            };
+
+            // 每分钟更新时间
+            const timeInterval = setInterval(updateLsTime, 60000);
+
             const updateUI = () => {
                 if (indexEl) indexEl.textContent = images.length > 1 ? `${index + 1}/${images.length}` : '';
             };
 
             overlay.addEventListener('click', () => {
+                clearInterval(timeInterval);
                 document.body.removeChild(overlay);
             });
 
