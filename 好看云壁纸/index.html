@@ -2154,6 +2154,7 @@
                         <button type="button" class="profile-interval-opt w-full flex items-center justify-between p-4 rounded-2xl border-2 border-slate-200 text-left text-sm font-bold text-slate-700 hover:bg-slate-50 active:scale-[0.99] transition-all" data-value="15">15 分钟</button>
                         <button type="button" class="profile-interval-opt w-full flex items-center justify-between p-4 rounded-2xl border-2 border-slate-200 text-left text-sm font-bold text-slate-700 hover:bg-slate-50 active:scale-[0.99] transition-all" data-value="30">30 分钟</button>
                         <button type="button" class="profile-interval-opt w-full flex items-center justify-between p-4 rounded-2xl border-2 border-slate-200 text-left text-sm font-bold text-slate-700 hover:bg-slate-50 active:scale-[0.99] transition-all" data-value="60">1 小时</button>
+                        <button type="button" class="profile-interval-opt w-full flex items-center justify-between p-4 rounded-2xl border-2 border-slate-200 text-left text-sm font-bold text-slate-700 hover:bg-slate-50 active:scale-[0.99] transition-all" data-value="1440">1 天</button>
                     </div>
                 </div>
             </div>
@@ -2572,7 +2573,7 @@
 
         // 切换间隔：localStorage key，可选值 screen | 15 | 30 | 60（每次亮屏 | 15/30/60 分钟）
         const PROFILE_INTERVAL_KEY = 'profile_interval';
-        const PROFILE_INTERVAL_LABELS = { screen: '每次亮屏', '15': '15 分钟', '30': '30 分钟', '60': '1 小时' };
+        const PROFILE_INTERVAL_LABELS = { screen: '每次亮屏', '15': '15 分钟', '30': '30 分钟', '60': '1 小时', '1440': '1 天' };
         function getProfileInterval() { return localStorage.getItem(PROFILE_INTERVAL_KEY) || 'screen'; }
         function setProfileInterval(value) { localStorage.setItem(PROFILE_INTERVAL_KEY, value || 'screen'); }
 
@@ -3966,6 +3967,12 @@
                     showSubscriptionPushNotice(p);
                 } else {
                     pendingPushNoticeProduct = null;
+                }
+                
+                // Android 首次设置成功后弹出切换间隔弹窗
+                if (getPhotoPermissionPlatform() === 'android' && !localStorage.getItem('hasShownIntervalGuide')) {
+                    localStorage.setItem('hasShownIntervalGuide', '1');
+                    setTimeout(() => openProfileIntervalModal(), 500);
                 }
             } else {
                 pendingPushNoticeProduct = null;
