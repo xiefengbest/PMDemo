@@ -1684,13 +1684,77 @@
             </section>
         </main>
 
-        <!-- 二级页面（我的合辑 / 账号管理 / 关于我们，模拟原生从右滑入） -->
+        <!-- 二级页面（我的合辑 / 账号管理 / 关于我们 / 轮播壁纸，模拟原生从右滑入） -->
         <div id="secondary-page">
             <header class="secondary-header">
                 <button type="button" class="secondary-back" onclick="secondaryPageBack()" aria-label="返回"><i class="fa-solid fa-chevron-left"></i></button>
                 <h1 id="secondary-page-title" class="secondary-title"></h1>
             </header>
-            <div id="secondary-page-body" class="secondary-body"></div>
+            <div id="secondary-page-body" class="secondary-body">
+                <!-- 账号管理页面 -->
+                <div id="secondary-account-page" class="secondary-sub-page hidden">
+                    <div id="account-main" class="space-y-6">
+                        <section>
+                            <h4 class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 px-1">账号信息</h4>
+                            <div class="bg-white rounded-[2rem] p-2 shadow-sm border border-slate-200 space-y-0.5">
+                                <button type="button" onclick="showAccountSubPage('phone')" class="w-full flex items-center justify-between p-4 hover:bg-slate-50 rounded-[1.5rem] transition-all active:scale-[0.99]">
+                                    <div class="flex items-center gap-4">
+                                        <div class="w-10 h-10 bg-cyan-50 text-cyan-500 rounded-xl flex items-center justify-center shrink-0"><i class="fa-solid fa-mobile-screen text-sm"></i></div>
+                                        <span class="text-sm font-bold text-slate-700">绑定手机</span>
+                                    </div>
+                                    <i class="fa-solid fa-chevron-right text-slate-400 text-xs"></i>
+                                </button>
+                                <button type="button" onclick="showAccountSubPage('password')" class="w-full flex items-center justify-between p-4 hover:bg-slate-50 rounded-[1.5rem] transition-all active:scale-[0.99]">
+                                    <div class="flex items-center gap-4">
+                                        <div class="w-10 h-10 bg-emerald-50 text-emerald-500 rounded-xl flex items-center justify-center shrink-0"><i class="fa-solid fa-lock text-sm"></i></div>
+                                        <span class="text-sm font-bold text-slate-700">修改密码</span>
+                                    </div>
+                                    <i class="fa-solid fa-chevron-right text-slate-400 text-xs"></i>
+                                </button>
+                            </div>
+                        </section>
+                        <section>
+                            <h4 class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 px-1">账号安全</h4>
+                            <div class="bg-white rounded-[2rem] p-2 shadow-sm border border-slate-200">
+                                <button type="button" onclick="closeSecondaryPage();openProfileCancelAccountModal()" class="w-full flex items-center justify-between p-4 hover:bg-rose-50 rounded-[1.5rem] transition-all active:scale-[0.99]">
+                                    <div class="flex items-center gap-4">
+                                        <div class="w-10 h-10 bg-rose-50 text-rose-500 rounded-xl flex items-center justify-center shrink-0"><i class="fa-solid fa-user-xmark text-sm"></i></div>
+                                        <span class="text-sm font-bold text-rose-600">账号注销</span>
+                                    </div>
+                                    <i class="fa-solid fa-chevron-right text-rose-400 text-xs"></i>
+                                </button>
+                            </div>
+                        </section>
+                    </div>
+                    <div id="account-phone-sub" class="hidden"></div>
+                    <div id="account-password-sub" class="hidden"></div>
+                </div>
+
+                <!-- 关于我们页面 -->
+                <div id="secondary-about-page" class="secondary-sub-page hidden">
+                    <div class="text-center py-8">
+                        <div class="w-20 h-20 rounded-3xl bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center mx-auto mb-4 shadow-lg">
+                            <i class="fa-solid fa-infinity text-3xl text-white"></i>
+                        </div>
+                        <h3 class="text-lg font-black text-slate-800 mb-1">好看云壁纸</h3>
+                        <p class="text-xs text-slate-500 mb-6">版本 1.0.0</p>
+                        <div class="bg-white rounded-[2rem] p-5 shadow-sm border border-slate-200 text-left space-y-3">
+                            <p class="text-sm text-slate-600 leading-relaxed">用高质量壁纸点亮你的每一天，让每次亮屏都是美好回忆。</p>
+                        </div>
+                        <p class="text-xs text-slate-400 text-center mt-8">©️2025 无限向量（北京）科技有限公司</p>
+                    </div>
+                </div>
+
+                <!-- 我的合辑页面 -->
+                <div id="secondary-subscriptions-page" class="secondary-sub-page hidden">
+                    <div id="mySubscriptionsBody"></div>
+                </div>
+
+                <!-- 轮播壁纸页面 -->
+                <div id="secondary-rotation-page" class="secondary-sub-page hidden">
+                    <div id="myRotationBody"></div>
+                </div>
+            </div>
         </div>
 
         <!-- 订阅详情模态框 -->
@@ -4482,23 +4546,11 @@
         }
 
         function openProfileAccountModal() {
-            openSecondaryPage('账号管理', getAccountManagementBodyHtml());
+            openSecondaryPage('secondary-account-page', '账号管理');
             accountSubPage = 'account';
         }
         function openAboutPage() {
-            const bodyHtml = `
-                <p class="text-sm text-slate-600 leading-relaxed mb-4">好看云壁纸为你提供精选锁屏壁纸与自动换壁纸能力，支持订阅主题与自定义照片轮播，让每次亮屏都是惊喜。</p>
-                <p class="text-xs text-slate-500 mb-6">版本 v2.6.0</p>
-                <div class="space-y-2">
-                    <button type="button" onclick="closeSecondaryPage();showToast('即将打开官网')" class="w-full p-4 rounded-2xl border border-slate-200 text-sm font-bold text-slate-700 hover:bg-slate-50 transition-all">官网与帮助</button>
-                    <a href="mailto:haokan@levect.com" class="w-full p-4 rounded-2xl border border-slate-200 text-sm font-bold text-slate-700 hover:bg-slate-50 transition-all flex items-center justify-between">
-                        <span>联系我们</span>
-                        <span class="text-slate-500 font-normal">haokan@levect.com</span>
-                    </a>
-                </div>
-                <p class="text-xs text-slate-400 text-center mt-8">©️2025 无限向量（北京）科技有限公司</p>
-            `;
-            openSecondaryPage('关于我们', bodyHtml);
+            openSecondaryPage('secondary-about-page', '关于我们');
         }
         function closeProfileAccountModal() {
             document.getElementById('profile-account-modal').classList.remove('show');
@@ -4520,16 +4572,22 @@
             showToast('账号已注销');
         }
 
-        function openSecondaryPage(title, bodyHtml) {
+        function openSecondaryPage(pageId, title) {
             const page = document.getElementById('secondary-page');
             const titleEl = document.getElementById('secondary-page-title');
-            const bodyEl = document.getElementById('secondary-page-body');
-            if (!page || !titleEl || !bodyEl) return;
+            if (!page || !titleEl) return;
+            
+            // 隐藏所有子页面
+            document.querySelectorAll('.secondary-sub-page').forEach(p => p.classList.add('hidden'));
+            
+            // 显示目标子页面
+            const targetPage = document.getElementById(pageId);
+            if (targetPage) targetPage.classList.remove('hidden');
+            
             const isAndroid = getPhotoPermissionPlatform() === 'android';
             page.classList.toggle('secondary-android', isAndroid);
             page.classList.toggle('secondary-ios', !isAndroid);
             titleEl.textContent = title;
-            bodyEl.innerHTML = bodyHtml;
             accountSubPage = '';
             page.classList.add('show');
             document.body.style.overflow = 'hidden';
@@ -4555,43 +4613,6 @@
             if (accountSubPage === 'account' || !accountSubPage) closeSecondaryPage();
             else showAccountSubPage('account');
         }
-        function getAccountManagementBodyHtml() {
-            return `
-                <div class="space-y-6">
-                    <section>
-                        <h4 class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 px-1">账号信息</h4>
-                        <div class="bg-white rounded-[2rem] p-2 shadow-sm border border-slate-200 space-y-0.5">
-                            <button type="button" onclick="showAccountSubPage('phone')" class="w-full flex items-center justify-between p-4 hover:bg-slate-50 rounded-[1.5rem] transition-all active:scale-[0.99]">
-                                <div class="flex items-center gap-4">
-                                    <div class="w-10 h-10 bg-cyan-50 text-cyan-500 rounded-xl flex items-center justify-center shrink-0"><i class="fa-solid fa-mobile-screen text-sm"></i></div>
-                                    <span class="text-sm font-bold text-slate-700">绑定手机</span>
-                                </div>
-                                <i class="fa-solid fa-chevron-right text-slate-400 text-xs"></i>
-                            </button>
-                            <button type="button" onclick="showAccountSubPage('password')" class="w-full flex items-center justify-between p-4 hover:bg-slate-50 rounded-[1.5rem] transition-all active:scale-[0.99]">
-                                <div class="flex items-center gap-4">
-                                    <div class="w-10 h-10 bg-emerald-50 text-emerald-500 rounded-xl flex items-center justify-center shrink-0"><i class="fa-solid fa-lock text-sm"></i></div>
-                                    <span class="text-sm font-bold text-slate-700">修改密码</span>
-                                </div>
-                                <i class="fa-solid fa-chevron-right text-slate-400 text-xs"></i>
-                            </button>
-                        </div>
-                    </section>
-                    <section>
-                        <h4 class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 px-1">账号安全</h4>
-                        <div class="bg-white rounded-[2rem] p-2 shadow-sm border border-slate-200">
-                            <button type="button" onclick="closeSecondaryPage();openProfileCancelAccountModal()" class="w-full flex items-center justify-between p-4 hover:bg-rose-50 rounded-[1.5rem] transition-all active:scale-[0.99]">
-                                <div class="flex items-center gap-4">
-                                    <div class="w-10 h-10 bg-rose-50 text-rose-500 rounded-xl flex items-center justify-center shrink-0"><i class="fa-solid fa-user-xmark text-sm"></i></div>
-                                    <span class="text-sm font-bold text-rose-600">账号注销</span>
-                                </div>
-                                <i class="fa-solid fa-chevron-right text-rose-400 text-xs"></i>
-                            </button>
-                        </div>
-                    </section>
-                </div>
-            `;
-        }
         const AVATAR_OPTIONS = [
             'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&h=200&fit=crop',
             'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&h=200&fit=crop',
@@ -4601,17 +4622,23 @@
         function showAccountSubPage(type) {
             accountSubPage = type;
             const titleEl = document.getElementById('secondary-page-title');
-            const bodyEl = document.getElementById('secondary-page-body');
-            if (!titleEl || !bodyEl) return;
+            if (!titleEl) return;
+            
+            // 隐藏所有账号子页面
+            document.getElementById('account-main').classList.add('hidden');
+            document.getElementById('account-phone-sub').classList.add('hidden');
+            document.getElementById('account-password-sub').classList.add('hidden');
+            
             if (type === 'account') {
                 titleEl.textContent = '账号管理';
-                bodyEl.innerHTML = getAccountManagementBodyHtml();
+                document.getElementById('account-main').classList.remove('hidden');
                 return;
             }
             if (type === 'phone') {
                 titleEl.textContent = '绑定手机';
                 const phone = (profileUser && profileUser.phone) ? profileUser.phone : '';
-                bodyEl.innerHTML = `
+                document.getElementById('account-phone-sub').classList.remove('hidden');
+                document.getElementById('account-phone-sub').innerHTML = `
                     <div class="bg-white rounded-[2rem] p-5 shadow-sm border border-slate-200 space-y-4">
                         <div>
                             <label class="block text-sm font-bold text-slate-700 mb-2">手机号</label>
@@ -4629,7 +4656,8 @@
             if (type === 'password') {
                 titleEl.textContent = '修改密码';
                 const phone = (profileUser && profileUser.phone) ? profileUser.phone : '138****8888';
-                bodyEl.innerHTML = `
+                document.getElementById('account-password-sub').classList.remove('hidden');
+                document.getElementById('account-password-sub').innerHTML = `
                     <div class="bg-white rounded-[2rem] p-5 shadow-sm border border-slate-200 space-y-4">
                         <div>
                             <label class="block text-sm font-bold text-slate-700 mb-2">手机号</label>
@@ -4799,9 +4827,9 @@
 
         function openMySubscriptionsModal() {
             const list = CAT_PRODUCTS.filter(p => subscribedProductIds.has(p.id));
-            let bodyHtml;
+            const bodyEl = document.getElementById('mySubscriptionsBody');
             if (list.length === 0) {
-                bodyHtml = `
+                bodyEl.innerHTML = `
                     <div class="text-center py-16 text-slate-500">
                         <div class="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-4"><i class="fa-solid fa-bookmark text-2xl text-slate-400"></i></div>
                         <p class="text-sm font-bold text-slate-600 mb-2">暂无合辑</p>
@@ -4810,9 +4838,9 @@
                     </div>
                 `;
             } else {
-                bodyHtml = '<div class="space-y-6">' + list.map(renderCatCard).join('') + '</div>';
+                bodyEl.innerHTML = '<div class="space-y-6">' + list.map(renderCatCard).join('') + '</div>';
             }
-            openSecondaryPage('我的合辑', bodyHtml);
+            openSecondaryPage('secondary-subscriptions-page', '我的合辑');
         }
         function closeMySubscriptionsModal() {
             closeSecondaryPage();
@@ -4923,9 +4951,9 @@
 
         function openMyRotationModal() {
             const wallpapers = getRotationWallpapers();
-            let bodyHtml;
+            const bodyEl = document.getElementById('myRotationBody');
             if (wallpapers.length === 0) {
-                bodyHtml = `
+                bodyEl.innerHTML = `
                     <div class="text-center py-16 text-slate-500">
                         <div class="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-4"><i class="fa-solid fa-rotate text-2xl text-slate-400"></i></div>
                         <p class="text-sm font-bold text-slate-600 mb-2">暂无轮播壁纸</p>
@@ -4934,7 +4962,7 @@
                     </div>
                 `;
             } else {
-                bodyHtml = `
+                bodyEl.innerHTML = `
                     <div class="grid grid-cols-3 gap-3">
                         ${wallpapers.map((w, index) => `
                             <div class="relative group rounded-2xl overflow-hidden bg-slate-100 aspect-[9/16]" onclick="openRotationWallpaperPreview(${index})">
@@ -4945,7 +4973,7 @@
                     </div>
                 `;
             }
-            openSecondaryPage('轮播壁纸', bodyHtml);
+            openSecondaryPage('secondary-rotation-page', '轮播壁纸');
         }
         function closeMyRotationModal() {
             closeSecondaryPage();
