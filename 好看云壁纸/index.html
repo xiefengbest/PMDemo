@@ -1548,7 +1548,7 @@
                 <div class="flex justify-around py-5 mb-6 border-y border-slate-200">
                     <div class="text-center">
                         <div class="text-xl font-black text-slate-800">12</div>
-                        <div class="text-[10px] text-slate-500 font-bold uppercase tracking-wider mt-1">我的订阅</div>
+                        <div class="text-[10px] text-slate-500 font-bold uppercase tracking-wider mt-1">我的合辑</div>
                     </div>
                     <div class="text-center">
                         <div class="text-xl font-black text-slate-800">6</div>
@@ -1563,7 +1563,7 @@
                         <button onclick="openMySubscriptionsModal()" class="w-full flex items-center justify-between p-4 hover:bg-slate-100 rounded-[1.5rem] transition-all">
                             <div class="flex items-center gap-4">
                                 <div class="w-10 h-10 bg-indigo-50 text-indigo-500 rounded-xl flex items-center justify-center"><i class="fa-solid fa-bookmark"></i></div>
-                                <span class="text-sm font-bold text-slate-700">我的订阅</span>
+                                <span class="text-sm font-bold text-slate-700">我的合辑</span>
                             </div>
                             <i class="fa-solid fa-chevron-right text-slate-400 text-xs"></i>
                         </button>
@@ -1684,7 +1684,7 @@
             </section>
         </main>
 
-        <!-- 二级页面（我的订阅 / 账号管理 / 关于我们，模拟原生从右滑入） -->
+        <!-- 二级页面（我的合辑 / 账号管理 / 关于我们，模拟原生从右滑入） -->
         <div id="secondary-page">
             <header class="secondary-header">
                 <button type="button" class="secondary-back" onclick="secondaryPageBack()" aria-label="返回"><i class="fa-solid fa-chevron-left"></i></button>
@@ -1717,42 +1717,44 @@
                     <div class="wallpaper-grid mb-8" id="detailPreviewsB"></div>
 
                     <!-- 订阅权益 -->
-                    <h3 class="text-base font-black text-slate-800 mb-3">订阅权益</h3>
-                    <div class="benefit-grid-b mb-8">
-                        <div class="flex items-center gap-3 p-3.5 bg-indigo-50/60 rounded-2xl border border-indigo-100/50">
-                            <div class="w-9 h-9 rounded-xl bg-white flex items-center justify-center text-indigo-500 shadow-sm shrink-0">
-                                <i class="fa-solid fa-wand-magic-sparkles text-sm"></i>
+                    <div id="detailBenefitsSection">
+                        <h3 class="text-base font-black text-slate-800 mb-3">订阅权益</h3>
+                        <div class="benefit-grid-b mb-8">
+                            <div class="flex items-center gap-3 p-3.5 bg-indigo-50/60 rounded-2xl border border-indigo-100/50">
+                                <div class="w-9 h-9 rounded-xl bg-white flex items-center justify-center text-indigo-500 shadow-sm shrink-0">
+                                    <i class="fa-solid fa-wand-magic-sparkles text-sm"></i>
+                                </div>
+                                <div>
+                                    <div class="text-xs font-black text-slate-700">自动换壁纸</div>
+                                    <div class="text-[10px] text-slate-500 mt-0.5">每天亮屏即新图，无需动手</div>
+                                </div>
                             </div>
-                            <div>
-                                <div class="text-xs font-black text-slate-700">自动换壁纸</div>
-                                <div class="text-[10px] text-slate-500 mt-0.5">每天亮屏即新图，无需动手</div>
+                            <div class="flex items-center gap-3 p-3.5 bg-amber-50/60 rounded-2xl border border-amber-100/50">
+                                <div class="w-9 h-9 rounded-xl bg-white flex items-center justify-center text-amber-500 shadow-sm shrink-0">
+                                    <i class="fa-solid fa-image text-sm"></i>
+                                </div>
+                                <div>
+                                    <div class="text-xs font-black text-slate-700">高清原图</div>
+                                    <div class="text-[10px] text-slate-500 mt-0.5">4K 超清无水印，锁屏也清晰</div>
+                                </div>
                             </div>
-                        </div>
-                        <div class="flex items-center gap-3 p-3.5 bg-amber-50/60 rounded-2xl border border-amber-100/50">
-                            <div class="w-9 h-9 rounded-xl bg-white flex items-center justify-center text-amber-500 shadow-sm shrink-0">
-                                <i class="fa-solid fa-image text-sm"></i>
+                            <div class="flex items-center gap-3 p-3.5 bg-emerald-50/60 rounded-2xl border border-emerald-100/50">
+                                <div class="w-9 h-9 rounded-xl bg-white flex items-center justify-center text-emerald-500 shadow-sm shrink-0">
+                                    <i class="fa-solid fa-bookmark text-sm"></i>
+                                </div>
+                                <div>
+                                    <div class="text-xs font-black text-slate-700">专属壁纸库</div>
+                                    <div class="text-[10px] text-slate-500 mt-0.5">仅订阅可看，持续更新</div>
+                                </div>
                             </div>
-                            <div>
-                                <div class="text-xs font-black text-slate-700">高清原图</div>
-                                <div class="text-[10px] text-slate-500 mt-0.5">4K 超清无水印，锁屏也清晰</div>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-3 p-3.5 bg-emerald-50/60 rounded-2xl border border-emerald-100/50">
-                            <div class="w-9 h-9 rounded-xl bg-white flex items-center justify-center text-emerald-500 shadow-sm shrink-0">
-                                <i class="fa-solid fa-bookmark text-sm"></i>
-                            </div>
-                            <div>
-                                <div class="text-xs font-black text-slate-700">专属壁纸库</div>
-                                <div class="text-[10px] text-slate-500 mt-0.5">仅订阅可看，持续更新</div>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-3 p-3.5 bg-rose-50/60 rounded-2xl border border-rose-100/50">
-                            <div class="w-9 h-9 rounded-xl bg-white flex items-center justify-center text-rose-500 shadow-sm shrink-0">
-                                <i class="fa-solid fa-bolt text-sm"></i>
-                            </div>
-                            <div>
-                                <div class="text-xs font-black text-slate-700">优先体验</div>
-                                <div class="text-[10px] text-slate-500 mt-0.5">新图抢先看，随时可取消</div>
+                            <div class="flex items-center gap-3 p-3.5 bg-rose-50/60 rounded-2xl border border-rose-100/50">
+                                <div class="w-9 h-9 rounded-xl bg-white flex items-center justify-center text-rose-500 shadow-sm shrink-0">
+                                    <i class="fa-solid fa-bolt text-sm"></i>
+                                </div>
+                                <div>
+                                    <div class="text-xs font-black text-slate-700">优先体验</div>
+                                    <div class="text-[10px] text-slate-500 mt-0.5">新图抢先看，随时可取消</div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -2093,13 +2095,13 @@
             </div>
         </div>
 
-        <!-- 我的订阅列表（与首页订阅 item 样式一致） -->
+        <!-- 我的合辑列表（与首页订阅 item 样式一致） -->
         <div id="my-subscriptions-modal" class="modal-overlay">
             <div class="modal-backdrop" onclick="closeMySubscriptionsModal()"></div>
             <div class="modal-sheet" style="max-height: 85vh; display: flex; flex-direction: column;">
                 <div class="modal-drag-bar"></div>
                 <div class="flex items-center justify-between mb-4">
-                    <h3 class="modal-title mb-0">我的订阅</h3>
+                    <h3 class="modal-title mb-0">我的合辑</h3>
                     <button type="button" onclick="closeMySubscriptionsModal()" class="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500 active:scale-95"><i class="fa-solid fa-xmark"></i></button>
                 </div>
                 <div id="mySubscriptionsGrid" class="flex-1 overflow-y-auto space-y-6 pb-4 scrollbar-hide px-1"></div>
@@ -2632,8 +2634,8 @@
             const img3 = p.previews ? p.previews[2] : PREVIEW_POOL_B[(idx + 2) % PREVIEW_POOL_B.length];
             const isGroupWallpaper = p.id === 102;
             const subscribed = subscribedProductIds.has(p.id);
-            const btnText = isGroupWallpaper ? '设为壁纸' : (subscribed ? '已订阅' : '订阅');
-            const btnOnClick = isGroupWallpaper ? 'event.stopPropagation();showWallpaperModeModal()' : (subscribed ? 'event.stopPropagation()' : `event.stopPropagation();toggleSubB(this, ${p.id})`);
+            const btnText = isGroupWallpaper ? (subscribed ? '正在使用' : '设为壁纸') : (subscribed ? '已订阅' : '立即订阅');
+            const btnOnClick = subscribed ? 'event.stopPropagation()' : `event.stopPropagation();toggleSubB(this, ${p.id})`;
 
             return `
                 <div class="product-card-b" onclick="openDetail(${p.id})">
@@ -3526,16 +3528,18 @@
 
         // ========== 订阅切换（仅订阅/已订阅，取消订阅在详情页） ==========
         function toggleSubB(btn, productId) {
-            const isSubscribing = btn.textContent.trim() === '订阅';
+            const isGroupWallpaper = productId === 102;
+            const isSubscribing = !subscribedProductIds.has(productId);
             if (isSubscribing) {
                 if (productId != null) subscribedProductIds.add(productId);
-                btn.textContent = '已订阅';
+                btn.textContent = isGroupWallpaper ? '正在使用' : '已订阅';
                 btn.classList.remove('bg-white', 'text-slate-900');
                 btn.classList.add('bg-white/20', 'text-white/90');
                 btn.style.boxShadow = 'none';
                 btn.setAttribute('onclick', 'event.stopPropagation()');
-                showToast('订阅成功！');
-                if (getPushNotifyEnabled()) {
+                showToast(isGroupWallpaper ? '设置成功！' : '订阅成功！');
+                // 组图壁纸不设置订阅提醒
+                if (!isGroupWallpaper && getPushNotifyEnabled()) {
                     pendingPushNoticeProduct = CAT_PRODUCTS.find(p => p.id === productId) || null;
                 }
                 showLockScreenGuideModal('subscribe');
@@ -3615,6 +3619,12 @@
             updateDetailReviewEntry(p.id);
             updateDetailBar(p.id);
 
+            // 画境集（id: 102）隐藏订阅权益模块
+            const benefitsSection = document.getElementById('detailBenefitsSection');
+            if (benefitsSection) {
+                benefitsSection.style.display = p.id === 102 ? 'none' : 'block';
+            }
+
             document.getElementById('detail-modal').classList.add('show');
             document.body.style.overflow = 'hidden';
         }
@@ -3676,15 +3686,8 @@
             const subscribed = subscribedProductIds.has(productId);
             const isGroupWallpaper = productId === 102;
 
-            if (isGroupWallpaper) {
-                btn.textContent = '设为壁纸';
-                btn.onclick = showWallpaperModeModal;
-                btn.className = 'flex-1 py-4 bg-slate-900 text-white rounded-2xl text-sm font-black shadow-xl shadow-slate-300 active:scale-[0.97] transition-transform';
-                btn.classList.remove('hidden');
-                btn2.classList.add('hidden');
-                reviewIconBtn.classList.add('hidden');
-            } else if (!subscribed) {
-                btn.textContent = '立即订阅';
+            if (!subscribed) {
+                btn.textContent = isGroupWallpaper ? '设为壁纸' : '立即订阅';
                 btn.onclick = handleDetailSubscribe;
                 btn.className = 'flex-1 py-4 bg-slate-900 text-white rounded-2xl text-sm font-black shadow-xl shadow-slate-300 active:scale-[0.97] transition-transform';
                 btn.classList.remove('hidden');
@@ -3693,9 +3696,9 @@
             } else {
                 btn.classList.add('hidden');
                 btn2.classList.remove('hidden');
-                btn2.textContent = '取消订阅';
+                btn2.textContent = isGroupWallpaper ? '正在使用' : '取消订阅';
                 btn2.onclick = handleDetailUnsubscribe;
-                reviewIconBtn.classList.remove('hidden');
+                reviewIconBtn.classList.toggle('hidden', isGroupWallpaper);
             }
         }
 
@@ -3704,14 +3707,17 @@
             updateDetailBar(detailProductId);
             updateDetailReviewEntry(detailProductId);
             
-            showLoadingOverlay('正在同步壁纸数据…');
+            const isGroupWallpaper = detailProductId === 102;
+            
+            showLoadingOverlay(isGroupWallpaper ? '正在准备壁纸…' : '正在同步壁纸数据…');
             const product = CAT_PRODUCTS.find(p => p.id === detailProductId);
             const previewUrls = product?.previews || [];
             
             preloadImages(previewUrls, () => {
                 hideLoadingOverlay();
-                showToast('订阅成功！壁纸已准备就绪');
-                if (getPushNotifyEnabled()) {
+                showToast(isGroupWallpaper ? '设置成功！壁纸已准备就绪' : '订阅成功！壁纸已准备就绪');
+                // 组图壁纸不设置订阅提醒
+                if (!isGroupWallpaper && getPushNotifyEnabled()) {
                     pendingPushNoticeProduct = product;
                 } else {
                     pendingPushNoticeProduct = null;
@@ -3724,7 +3730,8 @@
             if (detailProductId != null) subscribedProductIds.delete(detailProductId);
             updateDetailBar(detailProductId);
             updateDetailReviewEntry(detailProductId);
-            showToast('已取消订阅');
+            const isGroupWallpaper = detailProductId === 102;
+            showToast(isGroupWallpaper ? '已取消使用' : '已取消订阅');
         }
 
         let reviewStarsValue = 5;
@@ -4797,15 +4804,15 @@
                 bodyHtml = `
                     <div class="text-center py-16 text-slate-500">
                         <div class="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-4"><i class="fa-solid fa-bookmark text-2xl text-slate-400"></i></div>
-                        <p class="text-sm font-bold text-slate-600 mb-2">暂无订阅</p>
-                        <p class="text-xs text-slate-400 mb-4">去首页发现喜欢的壁纸并订阅吧</p>
+                        <p class="text-sm font-bold text-slate-600 mb-2">暂无合辑</p>
+                        <p class="text-xs text-slate-400 mb-4">去首页发现喜欢的壁纸并设置吧</p>
                         <button type="button" onclick="closeSecondaryPage();switchTab('category')" class="px-6 py-3 bg-slate-900 text-white rounded-2xl text-sm font-black active:scale-95">去首页看看</button>
                     </div>
                 `;
             } else {
                 bodyHtml = '<div class="space-y-6">' + list.map(renderCatCard).join('') + '</div>';
             }
-            openSecondaryPage('我的订阅', bodyHtml);
+            openSecondaryPage('我的合辑', bodyHtml);
         }
         function closeMySubscriptionsModal() {
             closeSecondaryPage();
