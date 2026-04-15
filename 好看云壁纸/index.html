@@ -318,7 +318,7 @@
             top: 0;
             bottom: 0;
             left: 50%;
-            z-index: 220;
+            z-index: 450;
             background: var(--bg);
             width: 100%;
             max-width: 28rem;
@@ -1117,7 +1117,7 @@
         #lock-screen-guide-modal {
             position: fixed;
             inset: 0;
-            z-index: 303;
+            z-index: 550;
             display: flex;
             align-items: flex-end;
             justify-content: center;
@@ -2998,6 +2998,7 @@
 
         function setWallpaperFromFullscreen() {
             closeWallpaperModeModal();
+            
             const platform = getPhotoPermissionPlatform();
             
             if (platform === 'ios') {
@@ -3091,33 +3092,13 @@
             }
         }
 
-        // 打开照片全屏预览
+        // 打开照片全屏预览（使用锁屏全屏预览）
         function openPhotoFullscreen(index) {
             const photos = photoModuleState.photos;
             if (!photos || !photos[index]) return;
 
-            currentPreviewImages = photos.map(p => p.src);
-            currentPreviewIndex = index;
-            isGenericPreview = true;
-            currentPreviewTushuo = null;
-
-            // 隐藏创作者页悬浮按钮
-            document.getElementById('creatorBackBtn').style.display = 'none';
-
-            document.getElementById('fullscreenWallpaperImg').src = photos[index].src;
-            
-            // 隐藏图说
-            const tushuoEl = document.getElementById('fullscreenTuShuo');
-            if (tushuoEl) tushuoEl.classList.add('hidden');
-            
-            updateLockscreenTime();
-            
-            // 隐藏不相关的按钮
-            const subBtn = document.querySelector('#wallpaper-fullscreen-preview button[onclick="subscribeAlbumFromFullscreen()"]');
-            if (subBtn) subBtn.style.display = 'none';
-
-            document.getElementById('wallpaper-fullscreen-preview').classList.add('show');
-            document.body.style.overflow = 'hidden';
+            const images = photos.map(p => p.src);
+            showLockScreenPreview(images, index);
         }
 
         function openAlbumDetail(albumId) {
@@ -4940,7 +4921,6 @@
                             <div class="relative group rounded-2xl overflow-hidden bg-slate-100 aspect-[9/16]" onclick="openRotationWallpaperPreview(${index})">
                                 <img src="${w.src}" loading="lazy" class="w-full h-full object-cover">
                                 <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                                </div>
                             </div>
                         `).join('')}
                     </div>
