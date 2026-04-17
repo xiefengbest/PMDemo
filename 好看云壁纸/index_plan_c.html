@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IP Paper - 官方授权壁纸</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;700&display=swap');
+
+    body {
+        font-family: 'Noto Sans SC', sans-serif;
+        background-color: #1a1a1a;
+        margin: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        overflow: hidden;
+    }
+
+    /* 中间内容滚动区 */
+    .app-container {
+        width: 100vw;
+        height: 100vh;
+        background-color: #0a0a0a;
+        color: #ffffff;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* 中间内容滚动区 */
+    .content-main {
+        flex: 1;
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding-bottom: 60px;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* 隐藏滚动条 */
+    .hide-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+    .hide-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+
+    /* 壁纸卡片比例 9:18 */
+    .wallpaper-card {
+        aspect-ratio: 9 / 18;
+        width: 160px;
+        flex-shrink: 0;
+        border-radius: 16px;
+        overflow: hidden;
+        position: relative;
+        background: #111;
+    }
+
+    .glass-effect {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .ip-badge {
+        background: linear-gradient(90deg, #f59e0b 0%, #d97706 100%);
+        font-size: 10px;
+        padding: 2px 6px;
+        border-radius: 4px;
+        text-transform: uppercase;
+        font-weight: bold;
+        color: #000;
+    }
+
+    /* 底部导航 */
+    .bottom-nav {
+        background: rgba(10, 10, 10, 0.98);
+        backdrop-filter: blur(20px);
+        border-top: 1px solid rgba(255,255,255,0.08);
+        padding: 10px 20px 25px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        z-index: 100;
+        flex-shrink: 0;
+    }
+
+    .nav-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        color: #666;
+        cursor: pointer;
+    }
+
+    .nav-item.active {
+        color: #f59e0b;
+    }
+
+    /* 横向滑动容器 */
+    .horizontal-scroller {
+        display: flex;
+        gap: 16px;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+    }
+
+    .horizontal-scroller > div {
+        scroll-snap-align: start;
+        flex-shrink: 0;
+    }
+
+    /* 订阅 Banner 样式 */
+    .recommend-banner {
+        width: 85%;
+        height: 140px;
+        flex-shrink: 0;
+        border-radius: 20px;
+        position: relative;
+        overflow: hidden;
+        scroll-snap-align: center !important;
+    }
+
+    .banner-mask {
+        background: linear-gradient(to right, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 60%);
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding-left: 20px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- 手机模拟容器 -->
+<div class="app-container">
+
+  <!-- 顶部导航 -->
+  <header class="px-8 pt-5 pb-5 flex justify-between items-center bg-[#0a0a0a]/90 backdrop-blur-md z-50 flex-shrink-0">
+    <div>
+      <h1 class="text-2xl font-bold tracking-tighter italic">IP <span class="text-amber-500">PAPER</span></h1>
+      <p class="text-[10px] text-gray-500 font-light tracking-widest uppercase">Premium IP Wallpaper</p>
+    </div>
+    <div class="flex gap-3">
+      <button class="w-9 h-9 rounded-full glass-effect flex items-center justify-center">
+        <i class="fa-solid fa-magnifying-glass text-xs text-gray-400"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- 可滚动内容区 -->
+  <main class="content-main hide-scrollbar">
+
+    <!-- 订阅推荐 Banner 区域 -->
+    <section class="mb-10">
+      <div class="px-6 flex items-center justify-between mb-4">
+        <h2 class="text-lg font-bold">订阅推荐 <span class="text-amber-500 text-[10px] ml-1">HOT</span></h2>
+        <span class="text-[10px] text-gray-500">滑动探索更多</span>
+      </div>
+
+      <div class="horizontal-scroller hide-scrollbar !gap-4">
+        <!-- Banner 1 -->
+        <div class="recommend-banner shadow-lg">
+          <img src="https://images.unsplash.com/photo-1614728263952-84ea256f9679?auto=format&fit=crop&w=600&q=80" class="w-full h-full object-cover" alt="Cyberpunk IP">
+          <div class="banner-mask">
+            <span class="text-amber-500 text-[9px] font-bold tracking-widest mb-1">本周主打</span>
+            <h3 class="text-xl font-bold">荒坂重工</h3>
+            <p class="text-[10px] text-gray-400 mb-3">赛博朋克工业美学</p>
+            <button class="w-fit px-4 py-1.5 bg-white text-black text-[10px] font-bold rounded-full">立即订阅</button>
+          </div>
+        </div>
+        <!-- Banner 2 -->
+        <div class="recommend-banner shadow-lg">
+          <img src="https://images.unsplash.com/photo-1578632292335-df3abbb0d586?auto=format&fit=crop&w=600&q=80" class="w-full h-full object-cover" alt="Cure IP">
+          <div class="banner-mask">
+            <span class="text-amber-500 text-[9px] font-bold tracking-widest mb-1">新入驻</span>
+            <h3 class="text-xl font-bold">极意猫</h3>
+            <p class="text-[10px] text-gray-400 mb-3">治愈系潮流插画</p>
+            <button class="w-fit px-4 py-1.5 bg-white text-black text-[10px] font-bold rounded-full">立即订阅</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 分类标签 -->
+    <section class="px-6 mb-8">
+      <div class="flex gap-3 overflow-x-auto hide-scrollbar py-1">
+        <button class="px-5 py-2 rounded-full bg-amber-500 text-black font-bold whitespace-nowrap text-xs">全部 IP</button>
+        <button class="px-5 py-2 rounded-full glass-effect whitespace-nowrap text-xs text-gray-300">赛博朋克</button>
+        <button class="px-5 py-2 rounded-full glass-effect whitespace-nowrap text-xs text-gray-300">国风神话</button>
+        <button class="px-5 py-2 rounded-full glass-effect whitespace-nowrap text-xs text-gray-300">机甲核心</button>
+        <button class="px-5 py-2 rounded-full glass-effect whitespace-nowrap text-xs text-gray-300">极简主义</button>
+      </div>
+    </section>
+
+    <!-- 核心板块：IP 组图 -->
+    <div class="space-y-12">
+
+      <!-- IP 1: 星云战姬 -->
+      <section>
+        <div class="px-6 flex items-center justify-between mb-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="ip-badge">签约</span>
+              <h3 class="text-md font-bold text-gray-100">《星云战姬》</h3>
+            </div>
+            <p class="text-[10px] text-gray-500 mt-1">艺术家：Void Walker · 已更新至 24 张</p>
+          </div>
+          <button class="text-xs text-amber-500">全集</button>
+        </div>
+        <div class="horizontal-scroller hide-scrollbar">
+          <div class="wallpaper-card shadow-xl shadow-amber-500/5" style="margin-left: 24px;">
+            <img src="https://images.unsplash.com/photo-1618331835717-801e976710b2?auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover" alt="Wallpaper">
+            <div class="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 to-transparent">
+              <span class="text-[9px] text-white/60 tracking-widest uppercase font-bold">Nova-01</span>
+            </div>
+          </div>
+          <div class="wallpaper-card">
+            <img src="https://images.unsplash.com/photo-1635805737707-575885ab0820?auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover" alt="Wallpaper">
+          </div>
+          <div class="wallpaper-card">
+            <img src="https://images.unsplash.com/photo-1614850523296-d8c1af93d400?auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover" alt="Wallpaper">
+          </div>
+          <div class="wallpaper-card">
+            <img src="https://images.unsplash.com/photo-1620641788421-7a1c342ea45e?auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover" alt="Wallpaper">
+          </div>
+          <div class="wallpaper-card">
+            <img src="https://images.unsplash.com/photo-1614851099511-773084f6911d?auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover" alt="Wallpaper">
+          </div>
+          <div class="wallpaper-card">
+            <img src="https://images.unsplash.com/photo-1633167606207-d840b5070fc2?auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover" alt="Wallpaper">
+          </div>
+          <div class="wallpaper-card">
+            <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover" alt="Wallpaper">
+          </div>
+          <div class="wallpaper-card">
+            <img src="https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover" alt="Wallpaper">
+          </div>
+          <div class="wallpaper-card">
+            <img src="https://images.unsplash.com/photo-1614850715649-1d0106293bd1?auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover" alt="Wallpaper">
+          </div>
+          <div class="wallpaper-card">
+            <img src="https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover" alt="Wallpaper">
+          </div>
+        </div>
+      </section>
+
+      <!-- IP 2: 山海遗珍 (国风) -->
+      <section>
+        <div class="px-6 flex items-center justify-between mb-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="ip-badge">独家</span>
+              <h3 class="text-md font-bold text-gray-100">《山海遗珍》</h3>
+            </div>
+            <p class="text-[10px] text-gray-500 mt-1">中国神话重塑计划 · 4K 高清</p>
+          </div>
+          <button class="text-xs text-amber-500">全集</button>
+        </div>
+        <div class="horizontal-scroller hide-scrollbar">
+          <div class="wallpaper-card" style="margin-left: 24px;">
+            <img src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover" alt="Ink Style">
+            <div class="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 to-transparent">
+              <span class="text-[9px] text-white/60 tracking-widest uppercase font-bold">Cyan Dragon</span>
+            </div>
+          </div>
+          <div class="wallpaper-card">
+            <img src="https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover" alt="Kyoto vibe">
+          </div>
+          <div class="wallpaper-card">
+            <img src="https://images.unsplash.com/photo-1528164344705-47542687990d?auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover" alt="Temple">
+          </div>
+          <div class="wallpaper-card">
+            <img src="https://images.unsplash.com/photo-1545569341-9eb8b30979d9?auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover" alt="Wallpaper">
+          </div>
+          <div class="wallpaper-card">
+            <img src="https://images.unsplash.com/photo-1524413840807-0c3cb6fa808d?auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover" alt="Wallpaper">
+          </div>
+          <div class="wallpaper-card">
+            <img src="https://images.unsplash.com/photo-1480796927426-f609979314bd?auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover" alt="Wallpaper">
+          </div>
+          <div class="wallpaper-card">
+            <img src="https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover" alt="Wallpaper">
+          </div>
+          <div class="wallpaper-card">
+            <img src="https://images.unsplash.com/photo-1528360983277-13d401cdc186?auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover" alt="Wallpaper">
+          </div>
+          <div class="wallpaper-card">
+            <img src="https://images.unsplash.com/photo-1542051841857-5f90071e7989?auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover" alt="Wallpaper">
+          </div>
+          <div class="wallpaper-card">
+            <img src="https://images.unsplash.com/photo-1552975084-6e0279069438?auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover" alt="Wallpaper">
+          </div>
+        </div>
+      </section>
+
+      <!-- IP 3: 重型核心 (机甲) -->
+      <section>
+        <div class="px-6 flex items-center justify-between mb-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="ip-badge">联动</span>
+              <h3 class="text-md font-bold text-gray-100">《重型核心》</h3>
+            </div>
+            <p class="text-[10px] text-gray-500 mt-1">IP：Mech-X Lab · 机械结构美学</p>
+          </div>
+          <button class="text-xs text-amber-500">全集</button>
+        </div>
+        <div class="horizontal-scroller hide-scrollbar">
+          <div class="wallpaper-card" style="margin-left: 24px;">
+            <img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover" alt="Robot">
+          </div>
+          <div class="wallpaper-card">
+            <img src="https://images.unsplash.com/photo-1531297484001-80022131f5a1?auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover" alt="Tech">
+          </div>
+          <div class="wallpaper-card">
+            <img src="https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover" alt="Driod">
+          </div>
+          <div class="wallpaper-card">
+            <img src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover" alt="Wallpaper">
+          </div>
+          <div class="wallpaper-card">
+            <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover" alt="Wallpaper">
+          </div>
+          <div class="wallpaper-card">
+            <img src="https://images.unsplash.com/photo-1515630771457-09367d0ae038?auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover" alt="Wallpaper">
+          </div>
+          <div class="wallpaper-card">
+            <img src="https://images.unsplash.com/photo-1535378437327-b71494669e9d?auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover" alt="Wallpaper">
+          </div>
+          <div class="wallpaper-card">
+            <img src="https://images.unsplash.com/photo-1546443046-ed1ce1c943f5?auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover" alt="Wallpaper">
+          </div>
+          <div class="wallpaper-card">
+            <img src="https://images.unsplash.com/photo-1563089145-599997674d42?auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover" alt="Wallpaper">
+          </div>
+          <div class="wallpaper-card">
+            <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover" alt="Wallpaper">
+          </div>
+        </div>
+      </section>
+
+      <!-- IP 4: 浮世录 (极简/意境) -->
+      <section class="pb-8">
+        <div class="px-6 flex items-center justify-between mb-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="ip-badge">精选</span>
+              <h3 class="text-md font-bold text-gray-100">《浮世录》</h3>
+            </div>
+            <p class="text-[10px] text-gray-500 mt-1">大师系列 · 禅意与空间</p>
+          </div>
+          <button class="text-xs text-amber-500">全集</button>
+        </div>
+        <div class="horizontal-scroller hide-scrollbar">
+          <div class="wallpaper-card" style="margin-left: 24px;">
+            <img src="https://images.unsplash.com/photo-1494438639946-1ebd1d20bf85?auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover" alt="Minimal">
+          </div>
+          <div class="wallpaper-card">
+            <img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=400&q=80" alt="Mountain" class="w-full h-full object-cover">
+          </div>
+          <div class="wallpaper-card">
+            <img src="https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=400&q=80" alt="Forest" class="w-full h-full object-cover">
+          </div>
+          <div class="wallpaper-card">
+            <img src="https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover" alt="Wallpaper">
+          </div>
+          <div class="wallpaper-card">
+            <img src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover" alt="Wallpaper">
+          </div>
+          <div class="wallpaper-card">
+            <img src="https://images.unsplash.com/photo-1472214103451-9374bd1c798e?auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover" alt="Wallpaper">
+          </div>
+          <div class="wallpaper-card">
+            <img src="https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover" alt="Wallpaper">
+          </div>
+          <div class="wallpaper-card">
+            <img src="https://images.unsplash.com/photo-1501854140801-50d01698950b?auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover" alt="Wallpaper">
+          </div>
+          <div class="wallpaper-card">
+            <img src="https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover" alt="Wallpaper">
+          </div>
+          <div class="wallpaper-card">
+            <img src="https://images.unsplash.com/photo-1433086966358-54859d0ed716?auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover" alt="Wallpaper">
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- 底部导航 -->
+  <nav class="bottom-nav">
+    <div class="nav-item active">
+      <i class="fa-solid fa-house text-lg"></i>
+      <span class="text-[9px] font-bold">首页</span>
+    </div>
+    <div class="nav-item">
+      <i class="fa-solid fa-compass text-lg"></i>
+      <span class="text-[9px]">发现</span>
+    </div>
+    <div class="flex flex-col items-center">
+      <div class="w-12 h-12 rounded-full bg-amber-500 -mt-10 border-4 border-[#0a0a0a] flex items-center justify-center text-black shadow-xl shadow-amber-500/40">
+        <i class="fa-solid fa-plus text-xl"></i>
+      </div>
+      <span class="text-[9px] text-gray-500 mt-1">投稿</span>
+    </div>
+    <div class="nav-item">
+      <i class="fa-solid fa-heart text-lg"></i>
+      <span class="text-[9px]">关注</span>
+    </div>
+    <div class="nav-item">
+      <i class="fa-solid fa-user text-lg"></i>
+      <span class="text-[9px]">我的</span>
+    </div>
+  </nav>
+</div>
+
+<script>
+  // 智能滚动处理
+  const horizontalContainers = document.querySelectorAll('.horizontal-scroller');
+
+  horizontalContainers.forEach(container => {
+      container.addEventListener('wheel', (e) => {
+          if (Math.abs(e.deltaY) > Math.abs(e.deltaX) && !e.shiftKey) {
+              return;
+          }
+          if (Math.abs(e.deltaX) > Math.abs(e.deltaY) || e.shiftKey) {
+              e.preventDefault();
+              container.scrollLeft += (e.deltaX || e.deltaY);
+          }
+      }, { passive: false });
+  });
+</script>
+</body>
+</html>

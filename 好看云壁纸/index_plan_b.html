@@ -131,7 +131,7 @@
             display: flex;
             gap: 10px;
             overflow-x: auto;
-            padding: 0 1.5rem 1rem;
+            padding: 0 1.5rem 1.5rem;
         }
         .cat-tab-b {
             flex-shrink: 0;
@@ -1399,7 +1399,7 @@
             <div class="flex justify-between items-end">
                 <div>
                     <p id="date-label" class="text-[10px] font-black text-indigo-500 uppercase tracking-[0.2em] mb-1">THURSDAY, MAR 5</p>
-                    <h1 id="view-title" class="text-4xl font-black tracking-tighter text-slate-900">订阅壁纸</h1>
+                    <h1 id="view-title" class="text-4xl font-black tracking-tighter text-slate-900">壁纸中心</h1>
                 </div>
                 <div id="header-actions" class="flex gap-3 mb-1">
                     <button class="w-11 h-11 rounded-2xl bg-white shadow-sm flex items-center justify-center text-slate-500 border border-slate-200" aria-label="搜索">
@@ -1415,7 +1415,7 @@
             <!-- 壁纸订阅视图 -->
             <section id="category-view" class="view-content">
                 <!-- 教程入口 -->
-                <div class="px-6 mb-4">
+                <div class="px-6 mb-6">
                     <div onclick="toggleHelp(true, 'category')" class="flex items-center gap-3 p-4 bg-slate-100 rounded-[2rem] cursor-pointer active:scale-[0.98] transition-transform border border-slate-200">
                         <div class="w-10 h-10 rounded-2xl bg-white flex items-center justify-center shadow-sm shrink-0">
                             <i class="fa-solid fa-wand-magic-sparkles text-indigo-500"></i>
@@ -1438,7 +1438,7 @@
                     <button class="cat-tab-b" data-cat="trend">潮流明星</button>
                     <button class="cat-tab-b" data-cat="creative">创意脑洞</button>
                 </div>
-                <div class="px-6 space-y-6 grid grid-cols-1 gap-6" id="catProductGrid"></div>
+                <div class="px-6 space-y-6 grid grid-cols-1" id="catProductGrid"></div>
             </section>
 
             <!-- 相册视图 -->
@@ -1873,7 +1873,7 @@
                     <img id="creatorCover" class="absolute inset-0 w-full h-full object-cover" style="filter: blur(40px) saturate(1.5); transform: scale(1.2);" src="" alt="">
                     <!-- 渐变遮罩层 -->
                     <div class="absolute inset-0" style="background: linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.5) 100%);"></div>
-                    
+
                     <!-- 创作者信息 -->
                     <div class="absolute bottom-0 left-0 right-0 p-5 pb-4">
                         <div class="flex items-center gap-3">
@@ -1905,7 +1905,7 @@
         <!-- 全屏壁纸预览模态框 -->
         <div id="wallpaper-fullscreen-preview">
             <img id="fullscreenWallpaperImg" class="absolute inset-0 w-full h-full object-cover" src="" alt="">
-            
+
             <!-- 锁屏时间控件 -->
             <div class="absolute inset-0 z-0 flex flex-col items-center justify-start pointer-events-none" style="padding-top: calc(80px + env(safe-area-inset-top, 0px));">
                 <div class="text-white text-center" style="text-shadow: 0 2px 20px rgba(0,0,0,0.5);">
@@ -1930,7 +1930,7 @@
                 <div id="fullscreenTuShuo" class="mb-4 hidden">
                     <p class="text-white/90 text-sm leading-relaxed" style="line-height: 1.6; max-height: 5em; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical;"></p>
                 </div>
-                
+
                 <div class="space-y-3">
                     <button id="fullscreenActionBtn" onclick="handleFullscreenAction()" class="w-full py-4 bg-white text-slate-900 rounded-2xl text-sm font-black shadow-xl active:scale-[0.97] transition-transform">
                         <i class="fa-solid fa-mobile-screen mr-2"></i>设为壁纸
@@ -2329,10 +2329,10 @@
             <div style="background:white;border-radius:24px 24px 0 0;width:100%;max-width:28rem;padding:24px 24px calc(24px + env(safe-area-inset-bottom, 0px));transform:translateY(100%);transition:transform 0.35s cubic-bezier(0.32,0.72,0,1);">
                 <!-- 拖拽条 -->
                 <div style="width:36px;height:4px;background:#e2e8f0;border-radius:2px;margin:0 auto 20px;"></div>
-                
+
                 <h3 style="font-size:18px;font-weight:900;color:#0f172a;margin-bottom:8px;">检测到锁屏自动更换已开启</h3>
                 <p style="font-size:14px;color:#64748b;line-height:1.6;margin-bottom:16px;">单独设置壁纸需要关闭「锁屏自动更换」功能。关闭后，当前壁纸将固定不变。</p>
-                
+
                 <div style="background:#f8fafc;border-radius:12px;padding:12px 16px;margin-bottom:24px;">
                     <div style="font-size:12px;font-weight:700;color:#475569;margin-bottom:4px;">如何重新开启自动更换：</div>
                     <div style="font-size:12px;color:#64748b;line-height:1.5;">进入「我的」→「功能设置」→ 开启「锁屏自动更换壁纸」</div>
@@ -2364,7 +2364,7 @@
             <div style="background:white;border-radius:24px 24px 0 0;width:100%;max-width:28rem;padding:24px 24px calc(24px + env(safe-area-inset-bottom, 0px));transform:translateY(100%);transition:transform 0.35s cubic-bezier(0.32,0.72,0,1);">
                 <!-- 拖拽条 -->
                 <div style="width:36px;height:4px;background:#e2e8f0;border-radius:2px;margin:0 auto 20px;"></div>
-                
+
                 <h3 style="font-size:18px;font-weight:900;color:#0f172a;margin-bottom:8px;">设为壁纸</h3>
                 <p style="font-size:14px;color:#64748b;line-height:1.6;margin-bottom:24px;">请选择壁纸设置方式：</p>
 
@@ -2493,33 +2493,35 @@
 
         // ========== 产品数据 ==========
         const CAT_PRODUCTS = [
-            { id: 401, name: '文观壁纸', artist: '文观WENGUAN', cover: 'https://92cn-image.levect.com/release/image/8280e343d1199df8b2eae257020515ba.jpg', subs: '9.8万', subtitle: '撷诗经草木，揽唐诗月色，掬宋词烟雨', desc: '撷诗经草木，揽唐诗月色，掬宋词烟雨，东方气韵，栖于方寸屏幕。以中国古典诗词为灵感，将千年诗意化为指间风景，每一张壁纸都是一首可以看见的诗。', update: '每日更新', cats: ['recommend', 'culture'], tushuo: '撷诗经草木，揽唐诗月色。东方气韵栖于方寸屏幕，千年诗意化为指间风景。', previews: ['https://92cn-image.levect.com/release/image/c695c62ee0c73d56e451167addcd60a8.jpg@!fw360.webp?k=1&p=1&eid=1', 'https://92cn-image.levect.com/release/image/daa325ac0e7ebc62d2eebf813f49949b.jpg@!fw360.webp?k=1&p=1&eid=1', 'https://92cn-image.levect.com/release/image/b5df685752ed6af077fb9c33e945b7dd.jpg@!fw360.webp?k=1&p=1&eid=1'] },
-            { id: 101, name: '千里江山图 · 新绎', artist: '墨染山河', cover: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=800', subs: '28.7万', subtitle: '传世名画与现代插画的梦幻联动', desc: '以《千里江山图》为蓝本，墨染山河工作室用全新的数字绘画手法重新诠释了这幅传世之作。每一张壁纸都是一次跨越千年的对话。', update: '每周更新', cats: ['recommend', 'culture'], tushuo: '青绿山水间，千年画卷徐徐展开。墨色晕染的峰峦叠嶂，仿佛能听见江风拂过水面的声音。' },
-            { id: 102, name: '画境集', artist: '好看云壁纸', cover: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=800', count: '9张壁纸', subtitle: '精选组图，一次设置多张壁纸', desc: '精选高质量组图壁纸，一次设置多张，让你的锁屏和桌面更加丰富多样。不定期更新，总有新惊喜。', update: '不定期更新', cats: ['recommend'], tushuo: '精选组图壁纸，一次设置多张，让你的锁屏和桌面更加丰富多样。' },
-            { id: 103, name: '银河漫游指南', artist: 'Artflow', cover: 'https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=800', subs: '16.9万', subtitle: '从近地轨道到仙女座的视觉旅程', desc: '由概念艺术家Artflow倾力打造，用电影级别的画面质感呈现宇宙的壮阔。星云、黑洞、空间站......每一帧都值得凝视。', update: '每周五更新', cats: ['recommend', 'creative'] },
-            { id: 1, name: '樱花物语', artist: '猫小姐', cover: 'https://images.unsplash.com/photo-1522383225653-ed111181a951?w=800', subs: '12.6万', subtitle: '以日本樱花季为灵感的粉色梦境', desc: '以日本樱花季为灵感，每一张壁纸都是一段粉色的梦。插画师猫小姐用细腻的笔触描绘了樱花树下的故事，温暖治愈。', update: '每周三更新', cats: ['recommend', 'nature'] },
-            { id: 2, name: '赛博之城', artist: '像素光年', cover: 'https://images.unsplash.com/photo-1514565131-fce0801e5785?w=800', subs: '8.3万', subtitle: '赛博朋克风格的未来都市', desc: '赛博朋克风格的未来都市，霓虹灯闪烁的街道，飞行器穿梭的天空。每一帧都是一场视觉盛宴。', update: '每周五更新', cats: ['recommend', 'creative', 'trend'] },
-            { id: 3, name: '山水画卷', artist: '墨染山河', cover: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800', subs: '15.2万', subtitle: '传统国风水墨与现代审美的融合', desc: '传统国风水墨与现代审美的完美融合，将千里江山浓缩在方寸之间，让你的屏幕也能感受到东方美学的意境。', update: '每周一更新', cats: ['recommend', 'culture'] },
-            { id: 4, name: '深海秘境', artist: '鲸落Studio', cover: 'https://images.unsplash.com/photo-1551244072-5d12893278ab?w=800', subs: '6.8万', subtitle: '探索万米深海的奇幻世界', desc: '探索万米深海的奇幻世界，荧光水母、巨型鲸鱼、神秘海底遗迹......跟着鲸落Studio一起潜入蔚蓝深处。', update: '双周更新', cats: ['recommend', 'nature'] },
-            { id: 5, name: '萌宠日记', artist: '泡芙酱', cover: 'https://images.unsplash.com/photo-1574158622682-e40e69881006?w=800', subs: '20.1万', subtitle: '超可爱的猫猫狗狗插画', desc: '超可爱的猫猫狗狗插画，每一张都能治愈你疲惫的心。泡芙酱的作品风格温暖柔和，是最受欢迎的萌宠壁纸合辑。', update: '每日更新', cats: ['recommend', 'pet'] },
-            { id: 6, name: '星际迷航', artist: 'Artflow', cover: 'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?w=800', subs: '9.4万', subtitle: '浩瀚星河与未知星球', desc: '浩瀚星河、未知星球、星际战舰......Artflow工作室用概念设计级别的画面，带你领略宇宙的壮阔与神秘。', update: '每周二更新', cats: ['recommend', 'creative'] },
-            { id: 201, name: '东京散步', artist: 'CityWalker', cover: 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=800', subs: '3.2万', subtitle: '穿梭在涩谷的十字路口与街头', desc: '穿梭在涩谷的十字路口，漫步在下北泽的街头。记录东京街头的日与夜，感受城市脉搏的跳动。', update: '每周更新', cats: ['travel'] },
-            { id: 202, name: '北欧秘境', artist: '极地摄影', cover: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=800', subs: '4.5万', subtitle: '冰岛黑沙滩与挪威峡湾', desc: '冰岛的黑沙滩，挪威的峡湾。带你领略世界尽头的冷酷仙境，感受极地的纯净与壮美。', update: '双周更新', cats: ['travel', 'nature'] },
-            { id: 203, name: '地中海假日', artist: 'Sunny', cover: 'https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?w=800', subs: '2.8万', subtitle: '圣托里尼的蓝白建筑与落日', desc: '圣托里尼的蓝白建筑，西西里岛的落日。把地中海的阳光装进手机，随时感受度假般的惬意。', update: '月更', cats: ['travel'] },
-            { id: 204, name: '公路电影', artist: 'OnTheRoad', cover: 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=800', subs: '1.9万', subtitle: '66号公路的自由与加州黄昏', desc: '66号公路的自由，加州旅馆的黄昏。像电影一样的胶片质感壁纸，每张都是一段公路上的故事。', update: '不定期', cats: ['travel'] },
-            { id: 205, name: '纯白空间', artist: 'Minimalist', cover: 'https://images.unsplash.com/photo-1494438639946-1ebd1d20bf85?w=800', subs: '6.7万', subtitle: '用光影和线条构建纯净空间', desc: '少即是多。用光影和线条构建的纯净空间，给你的眼睛放个假。极简主义美学的最佳诠释。', update: '每日更新', cats: ['minimal'] },
-            { id: 206, name: '莫兰迪色系', artist: 'Colorist', cover: 'https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?w=800', subs: '5.4万', subtitle: '低饱和度的灰色调，温柔高级', desc: '低饱和度的灰色调，温柔而高级。最适合作为手机背景的色系，让你的屏幕质感瞬间提升。', update: '每周更新', cats: ['minimal', 'creative'] },
-            { id: 207, name: '国家地理', artist: 'NatGeo', cover: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=800', subs: '15.6万', subtitle: '精选全球最震撼的自然景观', desc: '精选全球最震撼的自然景观，探索地球的每一个角落。每一张照片都是摄影师追逐光影的结晶。', update: '每日更新', cats: ['nature'] },
-            { id: 208, name: '超现实梦境', artist: 'Dreamer', cover: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?w=800', subs: '3.9万', subtitle: '打破物理规则的不可能空间', desc: '打破物理规则，构建不可能的空间。充满想象力的3D数字艺术，让你的锁屏成为通往梦境的入口。', update: '每周更新', cats: ['creative'] },
-            { id: 209, name: '星瞳 · 虚拟偶像', artist: '腾讯互娱', cover: 'https://images.unsplash.com/photo-1633356122102-3fe601e05bd2?w=800', subs: '28.5万', subtitle: '来自未来的虚拟偶像世界', desc: '来自未来的虚拟偶像，带你探索数字世界的无限可能。每一张壁纸都是一次与未来的对话。', update: '每周五更新', cats: ['trend', 'ip'] },
-            { id: 210, name: 'VOGUE · 时尚封面', artist: 'VOGUE', cover: 'https://images.unsplash.com/photo-1558171813-4c088753af8f?w=800', subs: '45.2万', subtitle: '全球顶尖时尚杂志封面', desc: '全球顶尖时尚杂志封面，每日一张，提升你的审美格调。时尚不止于穿搭，更在于生活的每个细节。', update: '每日更新', cats: ['trend'] },
-            { id: 211, name: 'NASA · 每日一天文图', artist: 'NASA', cover: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800', subs: '62.1万', subtitle: '探索宇宙的奥秘', desc: '来自NASA的每日一天文图，探索宇宙的奥秘。从星云到黑洞，从近地轨道到银河深处，宇宙从不缺少奇迹。', update: '每日更新', cats: ['trend', 'nature'] },
-            { id: 8, name: '猫咪咖啡馆', artist: '泡芙酱', cover: 'https://images.unsplash.com/photo-1526336024174-e58f5cdd8e13?w=800', subs: '3.5万', subtitle: '温暖午后的慵懒喵星人', desc: '一家有猫的咖啡馆，温暖的午后阳光、香浓的拿铁、慵懒的喵星人......每一张都让人心生向往。', update: '每周六更新', cats: ['pet'] },
-            { id: 10, name: '古风人物志', artist: '墨染山河', cover: 'https://images.unsplash.com/photo-1528164344705-47542687000d?w=800', subs: '4.2万', subtitle: '穿越千年的古风人物系列', desc: '穿越千年的古风人物系列，汉服之美、盛唐风华、宋韵雅致......每个朝代都有独特的故事。', update: '双周更新', cats: ['culture'] },
-            { id: 301, name: '历史上的今天', artist: '时光记录者', cover: 'https://images.unsplash.com/photo-1461360370896-922624d12aa1?w=800', subs: '8.9万', subtitle: '时光刻痕 · 每日一段历史', desc: '让每一次解锁都成为一次跨越时空的旅行，回顾那些改变人类进程的辉煌瞬间。每天一张壁纸，讲述一个历史故事。', update: '每日 07:00', cats: ['recommend', 'culture'] },
-            { id: 302, name: '城市流光', artist: '像素光年', cover: 'https://images.unsplash.com/photo-1514565131-fce0801e5785?w=800', subs: '5.2万', subtitle: '赛博朋克 · 霓虹都市', desc: '捕捉深夜都市中闪烁的霓虹与极速掠过的光影，感受现代工业与未来美学的交织。每一帧都是一场视觉盛宴。', update: '每周一更新', cats: ['recommend', 'creative', 'trend'] },
-            { id: 303, name: '繁花', artist: '植物美学社', cover: 'https://images.unsplash.com/photo-1490750967868-88aa4f44baee?w=800', subs: '18.6万', subtitle: '四季花事 · 以花为媒', desc: '从春天的樱花、夏日的荷花、秋天的桂花到冬日的梅花，精选全球各地最美的花卉摄影。每一张壁纸都是一首写给自然的情诗，让芬芳与色彩治愈每一次亮屏时刻。', update: '每周三更新', cats: ['recommend', 'nature'] },
-            { id: 304, name: '国色', artist: '东方色彩研究所', cover: 'https://images.unsplash.com/photo-1547981609-4b6bfe67ca0b?w=800', subs: '12.3万', subtitle: '中国传统色 · 千年美学', desc: '取自《天工开物》《本草纲目》等古典文献中的东方色谱——黛青、月白、胭脂、缃叶、竹青、藕荷……每种颜色背后都是一段跨越千年的文化记忆。用中国传统色装点你的屏幕，感受东方美学的含蓄与隽永。', update: '每周一更新', cats: ['recommend', 'culture'] },
+            { id: 401, name: 'James Jean · 奇幻世界', artist: 'James Jean', cover: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800', subs: '12.8万', subtitle: '超现实主义插画大师', desc: 'James Jean 超现实主义插画作品，梦幻般的色彩与细腻的笔触，构建了一个超越现实的奇幻世界。', update: '每日更新', cats: ['recommend', 'ip'], tushuo: '超现实主义插画大师，奇幻世界的视觉盛宴。', previews: ['https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400&h=800&fit=crop', 'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=400&h=800&fit=crop', 'https://images.unsplash.com/photo-1547891654-e66ed7ebb968?w=400&h=800&fit=crop'] },
+            { id: 101, name: 'KAWS ·  Companion 系列', artist: 'KAWS', cover: 'https://images.unsplash.com/photo-1561214078-f3247647fc5e?w=800', count: '9张壁纸', subtitle: '潮流艺术大师的标志性符号', desc: 'KAWS 标志性 Companion 形象数字艺术系列，XX 眼睛、骷髅头造型，潮流文化的终极符号。', update: '每周更新', cats: ['recommend', 'ip'], tushuo: '潮流艺术大师的标志性符号，XX 眼睛的终极魅力。', previews: ['https://images.unsplash.com/photo-1561214078-f3247647fc5e?w=400&h=800&fit=crop', 'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=400&h=800&fit=crop', 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400&h=800&fit=crop', 'https://images.unsplash.com/photo-1547891654-e66ed7ebb968?w=400&h=800&fit=crop', 'https://images.unsplash.com/photo-1557682250-33bd709cbe85?w=400&h=800&fit=crop', 'https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?w=400&h=800&fit=crop'] },
+            { id: 102, name: '村上隆 · 太阳花', artist: 'Takashi Murakami', cover: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=800', count: '9张壁纸', subtitle: '超扁平美学的彩色世界', desc: '村上隆标志性太阳花系列，超扁平运动美学与日本御宅文化的完美融合，彩色花朵绽放数字屏幕。', update: '不定期更新', cats: ['recommend', 'ip'], tushuo: '超扁平美学，彩色太阳花绽放屏幕。', previews: ['https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=400&h=800&fit=crop', 'https://images.unsplash.com/photo-1580136579312-94651dfd596d?w=400&h=800&fit=crop', 'https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?w=400&h=800&fit=crop', 'https://images.unsplash.com/photo-1547891654-e66ed7ebb968?w=400&h=800&fit=crop', 'https://images.unsplash.com/photo-1518998053901-5348d3961a04?w=400&h=800&fit=crop', 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=400&h=800&fit=crop'] },
+            { id: 103, name: 'Beeple · 数字艺术', artist: 'Beeple', cover: 'https://images.unsplash.com/photo-1633356122102-3fe601e05bd2?w=800', count: '9张壁纸', subtitle: 'NFT 天王的赛博朋克宇宙', desc: 'Beeple 每日创作系列精选，从赛博朋克到反乌托邦，用数字艺术探索未来世界的无限可能。', update: '每周五更新', cats: ['recommend', 'ip'], tushuo: 'NFT 天王的赛博朋克宇宙，每日创作精选。', previews: ['https://images.unsplash.com/photo-1633356122102-3fe601e05bd2?w=400&h=800&fit=crop', 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=400&h=800&fit=crop', 'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?w=400&h=800&fit=crop', 'https://images.unsplash.com/photo-1444703686981-a3abbc4d4fe3?w=400&h=800&fit=crop', 'https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?w=400&h=800&fit=crop', 'https://images.unsplash.com/photo-1543722530-d2c3201371e7?w=400&h=800&fit=crop'] },
+            { id: 1, name: '草间弥生 · 圆点宇宙', artist: 'Yayoi Kusama', cover: 'https://images.unsplash.com/photo-1557682250-33bd709cbe85?w=800', count: '9张壁纸', subtitle: '无限镜屋的迷幻世界', desc: '草间弥生标志性圆点图案，无限延伸的迷幻空间。波点女王用重复的圆点构建了一个超越现实的宇宙。', update: '每周三更新', cats: ['recommend', 'ip'], tushuo: '波点女王的无限圆点宇宙，迷幻而治愈。', previews: ['https://images.unsplash.com/photo-1557682250-33bd709cbe85?w=400&h=800&fit=crop', 'https://images.unsplash.com/photo-1557683316-97178b90381c?w=400&h=800&fit=crop', 'https://images.unsplash.com/photo-1549490349-8643362247b5?w=400&h=800&fit=crop', 'https://images.unsplash.com/photo-1557682250-33bd709cbe85?w=400&h=800&fit=crop', 'https://images.unsplash.com/photo-1557683316-97178b90381c?w=400&h=800&fit=crop', 'https://images.unsplash.com/photo-1549490349-8643362247b5?w=400&h=800&fit=crop'] },
+            { id: 2, name: 'Banksy · 街头艺术', artist: 'Banksy', cover: 'https://images.unsplash.com/photo-1514565131-fce0801e5785?w=800', count: '9张壁纸', subtitle: '匿名艺术家的反叛宣言', desc: 'Banksy 经典街头作品数字复刻，用涂鸦和讽刺艺术挑战权威，每一张都是对社会的深刻反思。', update: '每周五更新', cats: ['recommend', 'ip'], tushuo: '匿名艺术家的反叛宣言，街头涂鸦经典。', previews: ['https://images.unsplash.com/photo-1514565131-fce0801e5785?w=400&h=800&fit=crop', 'https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=400&h=800&fit=crop', 'https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=400&h=800&fit=crop', 'https://images.unsplash.com/photo-1514565131-fce0801e5785?w=400&h=800&fit=crop', 'https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=400&h=800&fit=crop', 'https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=400&h=800&fit=crop'] },
+            { id: 3, name: 'TeamLab · 沉浸式艺术', artist: 'TeamLab', cover: 'https://images.unsplash.com/photo-1518998053901-5348d3961a04?w=800', count: '9张壁纸', subtitle: '数字团队的沉浸式美学', desc: 'TeamLab 无界美术馆精选作品，光影、花朵、水流在屏幕上流动，创造沉浸式的数字艺术体验。', update: '每周一更新', cats: ['recommend', 'ip'], tushuo: '无界美术馆精选，沉浸式数字艺术体验。', previews: ['https://images.unsplash.com/photo-1518998053901-5348d3961a04?w=400&h=800&fit=crop', 'https://images.unsplash.com/photo-1547891654-e66ed7ebb968?w=400&h=800&fit=crop', 'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=400&h=800&fit=crop', 'https://images.unsplash.com/photo-1518998053901-5348d3961a04?w=400&h=800&fit=crop', 'https://images.unsplash.com/photo-1547891654-e66ed7ebb968?w=400&h=800&fit=crop', 'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=400&h=800&fit=crop'] },
+            { id: 4, name: '迪士尼 · 经典动画', artist: 'Disney', cover: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?w=800', count: '9张壁纸', subtitle: '百年魔法的梦幻世界', desc: '迪士尼经典动画场景壁纸，从米老鼠到冰雪奇缘，百年魔法工作室的梦幻瞬间，唤醒童年回忆。', update: '双周更新', cats: ['recommend', 'ip'], tushuo: '百年魔法梦幻瞬间，唤醒童年回忆。', previews: ['https://images.unsplash.com/photo-1534447677768-be436bb09401?w=400&h=800&fit=crop', 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=400&h=800&fit=crop', 'https://images.unsplash.com/photo-1534447677768-be436bb09401?w=400&h=800&fit=crop', 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=400&h=800&fit=crop', 'https://images.unsplash.com/photo-1534447677768-be436bb09401?w=400&h=800&fit=crop', 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=400&h=800&fit=crop'] },
+            { id: 5, name: '漫威 · 超级英雄', artist: 'Marvel', cover: 'https://images.unsplash.com/photo-1635805737707-575885ab0820?w=800', count: '9张壁纸', subtitle: '宇宙最强英雄集结', desc: '漫威电影宇宙经典场景壁纸，钢铁侠、美国队长、蜘蛛侠......超级英雄的高光时刻，点燃你的屏幕。', update: '每日更新', cats: ['recommend', 'ip'], tushuo: '超级英雄高光时刻，点燃你的屏幕。', previews: ['https://images.unsplash.com/photo-1635805737707-575885ab0820?w=400&h=800&fit=crop', 'https://images.unsplash.com/photo-1608889175123-8ee362201f81?w=400&h=800&fit=crop', 'https://images.unsplash.com/photo-1635805737707-575885ab0820?w=400&h=800&fit=crop', 'https://images.unsplash.com/photo-1608889175123-8ee362201f81?w=400&h=800&fit=crop', 'https://images.unsplash.com/photo-1635805737707-575885ab0820?w=400&h=800&fit=crop', 'https://images.unsplash.com/photo-1608889175123-8ee362201f81?w=400&h=800&fit=crop'] },
+            { id: 6, name: '吉卜力 · 宫崎骏', artist: 'Studio Ghibli', cover: 'https://images.unsplash.com/photo-1528360983277-13d401cdc186?w=800', count: '9张壁纸', subtitle: '动画大师的治愈世界', desc: '宫崎骏吉卜力工作室经典场景，龙猫、千与千寻、哈尔的移动城堡......每一帧都是治愈心灵的风景。', update: '每周二更新', cats: ['recommend', 'ip'], tushuo: '宫崎骏治愈世界，每一帧都是心灵风景。', previews: ['https://images.unsplash.com/photo-1528360983277-13d401cdc186?w=400&h=800&fit=crop', 'https://images.unsplash.com/photo-1522383225653-ed111181a951?w=400&h=800&fit=crop', 'https://images.unsplash.com/photo-1528360983277-13d401cdc186?w=400&h=800&fit=crop', 'https://images.unsplash.com/photo-1522383225653-ed111181a951?w=400&h=800&fit=crop', 'https://images.unsplash.com/photo-1528360983277-13d401cdc186?w=400&h=800&fit=crop', 'https://images.unsplash.com/photo-1522383225653-ed111181a951?w=400&h=800&fit=crop'] },
+            { id: 201, name: '泡泡玛特 · Molly', artist: 'POP MART', cover: 'https://images.unsplash.com/photo-1566792274931-0b4b5db7069d?w=800', subs: '8.2万', subtitle: '潮玩 IP 的可爱宇宙', desc: '泡泡玛特旗下最火 IP Molly 系列，嘟嘴小女孩的百变造型，潮玩爱好者的必备收藏。', update: '每周更新', cats: ['recommend', 'ip'] },
+            { id: 202, name: 'LINE FRIENDS', artist: 'LINE', cover: 'https://images.unsplash.com/photo-1557683316-97178b90381c?w=800', subs: '15.5万', subtitle: '布朗熊与可妮兔的日常', desc: 'LINE FRIENDS 家族成员集体登场，布朗熊、可妮兔、莎莉鸡......超萌日常瞬间，治愈每一个细胞。', update: '双周更新', cats: ['recommend', 'ip'] },
+            { id: 203, name: '宝可梦 · Pikachu', artist: 'Pokémon', cover: 'https://images.unsplash.com/photo-1605901309584-818e25960b8f?w=800', subs: '32.1万', subtitle: '皮卡丘的电气世界', desc: '宝可梦系列经典角色壁纸，皮卡丘、杰尼龟、小火龙......训练师们的童年回忆，十万伏特来袭。', update: '月更', cats: ['recommend', 'ip'] },
+            { id: 204, name: '火影忍者 · 木叶村', artist: 'NARUTO', cover: 'https://images.unsplash.com/photo-1578632767115-351597cf2477?w=800', subs: '18.9万', subtitle: '忍者的热血羁绊', desc: '火影忍者经典场景壁纸，鸣人、佐助、卡卡西......木叶村的忍者们，用热血和羁绊书写传奇。', update: '不定期', cats: ['recommend', 'ip'] },
+            { id: 205, name: '原神 · 提瓦特大陆', artist: 'miHoYo', cover: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800', subs: '45.6万', subtitle: '开放世界的奇幻风景', desc: '原神提瓦特大陆精选风景壁纸，蒙德、璃月、稻妻......七国风光，每一帧都是壁纸级画质。', update: '每日更新', cats: ['recommend', 'ip'] },
+            { id: 206, name: '星穹铁道 · 银河列车', artist: 'miHoYo', cover: 'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?w=800', subs: '22.3万', subtitle: '银河冒险的星际风景', desc: '崩坏星穹铁道精选壁纸，银河列车途经的每一个星球，都是值得收藏的绝美风景。', update: '每周更新', cats: ['recommend', 'ip'] },
+            { id: 207, name: '三丽鸥 · Hello Kitty', artist: 'Sanrio', cover: 'https://images.unsplash.com/photo-1549490349-8643362247b5?w=800', subs: '28.7万', subtitle: '可爱即正义的粉色世界', desc: '三丽鸥家族全员登场，Hello Kitty、美乐蒂、库洛米......可爱即正义，粉色系壁纸治愈每一天。', update: '每日更新', cats: ['ip'] },
+            { id: 208, name: '高达 · 机动战士', artist: 'Bandai Namco', cover: 'https://images.unsplash.com/photo-1543722530-d2c3201371e7?w=800', subs: '9.8万', subtitle: '机甲男人的浪漫', desc: '高达系列经典机体壁纸，RX-78-2、自由高达、独角兽高达......机甲男人的浪漫，点燃热血之魂。', update: '每周更新', cats: ['ip'] },
+            { id: 209, name: '星瞳 · 虚拟偶像', artist: '腾讯互娱', cover: 'https://images.unsplash.com/photo-1633356122102-3fe601e05bd2?w=800', subs: '28.5万', subtitle: '来自未来的虚拟偶像世界', desc: '来自未来的虚拟偶像，带你探索数字世界的无限可能。每一张壁纸都是一次与未来的对话。', update: '每周五更新', cats: ['ip'] },
+            { id: 210, name: '初音未来 · Vocaloid', artist: 'Crypton', cover: 'https://images.unsplash.com/photo-1614680376573-df3480f0c6ff?w=800', subs: '35.2万', subtitle: '世界第一公主殿下', desc: '初音未来经典造型壁纸，世界第一公主殿下的歌声与身姿，Vocaloid 文化的永恒象征。', update: '每日更新', cats: ['ip'] },
+            { id: 211, name: 'EVA · 新世纪福音战士', artist: 'Gainax', cover: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?w=800', subs: '16.1万', subtitle: '人类补完计划的终极命题', desc: 'EVA 经典场景壁纸，初号机暴走、使徒来袭、AT 力场......庵野秀明的终极命题，每一次重温都有新感悟。', update: '每日更新', cats: ['ip'] },
+            { id: 7, name: '海贼王 · 伟大航路', artist: 'ONE PIECE', cover: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800', count: '9张壁纸', subtitle: '航海王的热血冒险旅程', desc: '海贼王经典场景壁纸，路飞、索隆、娜美......草帽一伙的伟大航路冒险，点燃热血之魂。', update: '每周更新', cats: ['ip'] },
+            { id: 8, name: '咒术回战 · 领域展开', artist: 'Jujutsu Kaisen', cover: 'https://images.unsplash.com/photo-1578632767115-351597cf2477?w=800', count: '9张壁纸', subtitle: '咒术师们的战斗瞬间', desc: '咒术回战经典战斗场景，五条悟、虎杖悠仁、伏黑惠......领域展开的震撼瞬间，感受咒术的力量。', update: '每周三更新', cats: ['ip'] },
+            { id: 9, name: '间谍过家家 · 温馨日常', artist: 'SPY×FAMILY', cover: 'https://images.unsplash.com/photo-1528360983277-13d401cdc186?w=800', count: '9张壁纸', subtitle: '福杰一家的搞笑日常', desc: '间谍过家家温馨场景壁纸，黄昏、约尔、阿尼亚......福杰一人的搞笑日常，治愈每一个瞬间。', update: '每周五更新', cats: ['ip'] },
+            { id: 10, name: '进击的巨人 · 自由之翼', artist: 'Attack on Titan', cover: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800', count: '9张壁纸', subtitle: '调查兵团的壮烈战斗', desc: '进击的巨人经典场景壁纸，艾伦、三笠、利威尔......调查兵团为自由而战的壮烈瞬间，震撼心灵。', update: '每周更新', cats: ['ip'] },
+            { id: 301, name: '奈良美智 · 梦游娃娃', artist: 'Yoshitomo Nara', cover: 'https://images.unsplash.com/photo-1561214078-f3247647fc5e?w=800', count: '9张壁纸', subtitle: '日本当代艺术大师', desc: '奈良美智标志性大头娃娃系列，天真与叛逆的完美结合，日本当代艺术最具辨识度的符号。', update: '每周更新', cats: ['ip'] },
+            { id: 302, name: '空山基 · 机械姬', artist: 'Hajime Sorayama', cover: 'https://images.unsplash.com/photo-1633356122102-3fe601e05bd2?w=800', count: '9张壁纸', subtitle: '超写实机械美学', desc: '空山基经典机械姬系列，金属光泽与人体曲线的完美融合，赛博朋克美学的先驱之作。', update: '每周五更新', cats: ['ip'] },
+            { id: 303, name: 'Daniel Arsham · 未来遗迹', artist: 'Daniel Arsham', cover: 'https://images.unsplash.com/photo-1518998053901-5348d3961a04?w=800', count: '9张壁纸', subtitle: '虚构考古学', desc: 'Daniel Arsham 标志性侵蚀雕塑系列，将现代物品转化为千年后的考古遗迹，探索时间与物质的关系。', update: '每周一更新', cats: ['ip'] },
+            { id: 304, name: 'Mr. Doodle · 涂鸦世界', artist: 'Mr. Doodle', cover: 'https://images.unsplash.com/photo-1557682250-33bd709cbe85?w=800', count: '9张壁纸', subtitle: '线条的无限可能', desc: 'Mr. Doodle 标志性涂鸦艺术，密密麻麻的线条构建了一个充满想象力的世界，每一笔都是自由的表达。', update: '每周三更新', cats: ['ip'] },
         ];
 
         // ========== 锁屏壁纸引导配置 ==========
@@ -2697,10 +2699,36 @@
             const img1 = p.previews ? p.previews[0] : PREVIEW_POOL_B[idx];
             const img2 = p.previews ? p.previews[1] : PREVIEW_POOL_B[(idx + 1) % PREVIEW_POOL_B.length];
             const img3 = p.previews ? p.previews[2] : PREVIEW_POOL_B[(idx + 2) % PREVIEW_POOL_B.length];
-            const isGroupWallpaper = p.id === 102;
+            const isGroupWallpaper = p.count !== undefined;
             const subscribed = subscribedProductIds.has(p.id);
             const btnText = isGroupWallpaper ? (subscribed ? '正在使用' : '设为壁纸') : (subscribed ? '已订阅' : '立即订阅');
             const btnOnClick = subscribed ? 'event.stopPropagation()' : `event.stopPropagation();toggleSubB(this, ${p.id})`;
+
+            // 组图壁纸：横向滑动展示所有壁纸
+            if (isGroupWallpaper) {
+                const wallpapers = p.previews || PREVIEW_POOL_B.slice(0, 6);
+                return `
+                    <div class="mb-6">
+                        <div class="flex items-start justify-between mb-3 px-1">
+                            <div class="flex-1 min-w-0 mr-3">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <h3 class="text-base font-black text-slate-800">${p.name}</h3>
+                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-500 shrink-0">${p.count}</span>
+                                </div>
+                                <p class="text-xs text-slate-500 truncate">${p.subtitle}</p>
+                            </div>
+                            <button class="${subscribed ? 'bg-slate-200 text-slate-600' : 'bg-slate-900 text-white'} px-4 py-2 rounded-xl text-xs font-black active:scale-95 transition-transform shrink-0" onclick="${btnOnClick}">${btnText}</button>
+                        </div>
+                        <div class="flex gap-2.5 overflow-x-auto scrollbar-hide pb-2 -mx-4 px-4">
+                            ${wallpapers.map((src, i) => `
+                                <div class="flex-shrink-0 w-[120px] aspect-[9/19.5] rounded-2xl overflow-hidden bg-slate-100" onclick="openDetail(${p.id})">
+                                    <img src="${src}" class="w-full h-full object-cover" loading="lazy">
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
 
             return `
                 <div class="product-card-b" onclick="openDetail(${p.id})">
@@ -2710,7 +2738,7 @@
                         <div>
                             <div class="flex items-center gap-2 mb-3">
                                 <span class="text-[10px] font-bold px-2.5 py-1 rounded-md bg-white/20 text-white border border-white/20 backdrop-blur-sm">${p.update}</span>
-                                <span class="text-[11px] text-white/80 font-medium">${isGroupWallpaper ? p.count : p.subs + '订阅'}</span>
+                                <span class="text-[11px] text-white/80 font-medium">${p.subs + '订阅'}</span>
                             </div>
                             <div class="mini-preview">
                                 <div class="mini-preview-img"><img src="${img1}" loading="lazy"></div>
@@ -2733,10 +2761,13 @@
         function renderCatProducts(cat) {
             const container = document.getElementById('catProductGrid');
             const filtered = CAT_PRODUCTS.filter(p => p.cats.includes(cat));
-            
-            // 在第一个产品后插入创作者卡片
+
+            // 分离组图壁纸和订阅壁纸
+            const groupWallpapers = filtered.filter(p => p.count !== undefined);
+            const subscriptionWallpapers = filtered.filter(p => p.count === undefined);
+
+            // 创作者卡片
             const creator = CREATORS[0];
-            // 获取最新的3张壁纸（从所有合辑中取前3张）
             const latestWallpapers = [];
             for (const album of creator.albums) {
                 for (const src of album.wallpapers) {
@@ -2745,29 +2776,71 @@
                 }
                 if (latestWallpapers.length >= 3) break;
             }
-            
+
             const creatorCard = `
-                <div onclick="openCreatorPage()" style="cursor:pointer;background:white;border-radius:2.5rem;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.06);border:1px solid #e2e8f0;padding:20px;">
-                    <div class="flex items-center gap-3 mb-4">
-                        <img src="${creator.avatar}" class="w-12 h-12 rounded-full object-cover shadow-md" alt="">
-                        <div class="flex-1 min-w-0">
-                            <h3 class="text-base font-black text-slate-900 tracking-tight">${creator.name}</h3>
-                            <p class="text-[11px] text-slate-500 mt-0.5 truncate">${creator.desc}</p>
+                <div class="mb-6">
+                    <div onclick="openCreatorPage()" style="cursor:pointer;background:white;border-radius:2.5rem;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.06);border:1px solid #e2e8f0;padding:20px;">
+                        <div class="flex items-center gap-3 mb-4">
+                            <img src="${creator.avatar}" class="w-12 h-12 rounded-full object-cover shadow-md" alt="">
+                            <div class="flex-1 min-w-0">
+                                <h3 class="text-base font-black text-slate-900 tracking-tight">${creator.name}</h3>
+                                <p class="text-[11px] text-slate-500 mt-0.5 truncate">${creator.desc}</p>
+                            </div>
                         </div>
+                        <div class="flex gap-2 mb-4">
+                            ${latestWallpapers.map(src => `<div style="flex:1;aspect-ratio:9/19.5;border-radius:12px;overflow:hidden;"><img src="${src}" class="w-full h-full object-cover"></div>`).join('')}
+                        </div>
+                        <button class="w-full bg-slate-900 text-white py-3 rounded-2xl text-xs font-black shadow-sm active:scale-[0.98] transition-transform" onclick="event.stopPropagation();openCreatorPage()">查看详情</button>
                     </div>
-                    <div class="flex gap-2 mb-4">
-                        ${latestWallpapers.map(src => `<div style="flex:1;aspect-ratio:9/16;border-radius:12px;overflow:hidden;"><img src="${src}" class="w-full h-full object-cover"></div>`).join('')}
-                    </div>
-                    <button class="w-full bg-slate-900 text-white py-3 rounded-2xl text-xs font-black shadow-sm active:scale-[0.98] transition-transform" onclick="event.stopPropagation();openCreatorPage()">查看详情</button>
                 </div>
             `;
-            
+
             let html = '';
-            filtered.forEach((p, i) => {
+
+            // 渲染订阅壁纸（横向滚动小卡片）- 放在最前面
+            if (subscriptionWallpapers.length > 0) {
+                html += `
+                    <div class="mb-6">
+                        <h3 class="text-base font-black text-slate-800 mb-3 px-1">精选订阅</h3>
+                        <div class="flex gap-3 overflow-x-auto scrollbar-hide pb-2 -mx-4 px-4">
+                            ${subscriptionWallpapers.map(p => {
+                                const idx = (p.id * 3) % PREVIEW_POOL_B.length;
+                                const img1 = p.previews ? p.previews[0] : PREVIEW_POOL_B[idx];
+                                const img2 = p.previews ? p.previews[1] : PREVIEW_POOL_B[(idx + 1) % PREVIEW_POOL_B.length];
+                                const img3 = p.previews ? p.previews[2] : PREVIEW_POOL_B[(idx + 2) % PREVIEW_POOL_B.length];
+                                const subscribed = subscribedProductIds.has(p.id);
+                                const btnText = subscribed ? '已订阅' : '立即订阅';
+                                const btnOnClick = subscribed ? 'event.stopPropagation()' : `event.stopPropagation();toggleSubB(this, ${p.id})`;
+                                return `
+                                    <div class="flex-shrink-0 w-72 bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-200" style="aspect-ratio: 3/2;" onclick="openDetail(${p.id})">
+                                        <div class="relative h-full">
+                                            <img src="${p.cover}" class="absolute inset-0 w-full h-full object-cover" loading="lazy">
+                                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+                                            <div class="absolute bottom-0 left-0 right-0 p-4">
+                                                <h4 class="text-base font-black text-white truncate">${p.name}</h4>
+                                                <p class="text-xs text-white/80 mt-1 truncate">${p.subtitle}</p>
+                                                <div class="flex items-center justify-between mt-2">
+                                                    <span class="text-[10px] text-white/60 bg-white/20 px-2 py-0.5 rounded backdrop-blur-sm">${p.update}</span>
+                                                    <button class="${subscribed ? 'bg-white/20 text-white/90' : 'bg-white text-slate-900'} px-4 py-1.5 rounded-xl text-[10px] font-black active:scale-95 transition-transform" onclick="${btnOnClick}">${btnText}</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            // 渲染组图壁纸
+            groupWallpapers.forEach(p => {
                 html += renderCatCard(p);
-                if (i === 0) html += creatorCard;
             });
-            
+
+            // 插入创作者卡片
+            html += creatorCard;
+
             container.innerHTML = html || '<div class="text-center py-20 text-slate-500 text-sm font-bold">暂无内容</div>';
         }
 
@@ -2825,11 +2898,11 @@
                 rose: { bg: 'bg-rose-50', text: 'text-rose-600' },
                 cyan: { bg: 'bg-cyan-50', text: 'text-cyan-600' },
             };
-            
+
             el.innerHTML = (albums || []).map(a => {
                 const colors = colorMap[a.updateColor] || colorMap.indigo;
                 const thumbs = (a.wallpapers || []).slice(0, 3);
-                
+
                 return `
                     <div class="album-card-h" onclick="openAlbumDetail('${a.id}')">
                         <div class="cover-row">
@@ -2924,11 +2997,11 @@
             document.getElementById('creatorBackBtn').style.display = 'none';
 
             document.getElementById('fullscreenWallpaperImg').src = album.wallpapers[index];
-            
+
             updateTushuoDisplay();
-            
+
             updateLockscreenTime();
-            
+
             updateFullscreenActionButton();
 
             document.getElementById('wallpaper-fullscreen-preview').classList.add('show');
@@ -2957,11 +3030,11 @@
             document.getElementById('creatorBackBtn').style.display = 'none';
 
             document.getElementById('fullscreenWallpaperImg').src = images[index];
-            
+
             updateTushuoDisplay();
-            
+
             updateLockscreenTime();
-            
+
             updateFullscreenActionButton();
 
             document.getElementById('wallpaper-fullscreen-preview').classList.add('show');
@@ -2970,14 +3043,14 @@
 
         function updateFullscreenPreview() {
             if (isGenericPreview) return;
-            
+
             const creator = CREATORS[0];
             const album = (creator.albums || []).find(a => a.id === currentPreviewAlbumId);
             if (!album) return;
 
             const src = album.wallpapers[currentPreviewIndex];
             document.getElementById('fullscreenWallpaperImg').src = src;
-            
+
             updateLockscreenTime();
         }
 
@@ -2986,7 +3059,7 @@
             const hours = String(now.getHours()).padStart(2, '0');
             const minutes = String(now.getMinutes()).padStart(2, '0');
             document.getElementById('lockscreenTime').textContent = `${hours}:${minutes}`;
-            
+
             const months = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
             const days = ['星期日','星期一','星期二','星期三','星期四','星期五','星期六'];
             document.getElementById('lockscreenDate').textContent = `${months[now.getMonth()]}${now.getDate()}日 ${days[now.getDay()]}`;
@@ -3000,17 +3073,17 @@
             currentPreviewImages = [];
             isGenericPreview = false;
             currentPreviewTushuo = null;
-            
+
             // 隐藏图说
             const tushuoEl = document.getElementById('fullscreenTuShuo');
             if (tushuoEl) tushuoEl.classList.add('hidden');
-            
+
             // 恢复按钮显示
             const subBtn = document.querySelector('#wallpaper-fullscreen-preview button[onclick="subscribeAlbumFromFullscreen()"]');
             if (subBtn) subBtn.style.display = '';
-            
+
             // 如果创作者页打开着且详情页未打开，重新显示悬浮按钮
-            if (document.getElementById('creator-modal').classList.contains('show') && 
+            if (document.getElementById('creator-modal').classList.contains('show') &&
                 !document.getElementById('detail-modal').classList.contains('show')) {
                 document.getElementById('creatorBackBtn').style.display = 'block';
             }
@@ -3036,7 +3109,7 @@
 
         function showWallpaperModeModal() {
             const platform = getPhotoPermissionPlatform();
-            
+
             if (platform === 'ios') {
                 // iOS：直接通过快捷指令换壁纸，不弹弹窗
                 showLockScreenGuideStep('lockScreenGuideIosSetting');
@@ -3063,9 +3136,9 @@
 
         function setWallpaperFromFullscreen() {
             closeWallpaperModeModal();
-            
+
             const platform = getPhotoPermissionPlatform();
-            
+
             if (platform === 'ios') {
                 // iOS：直接通过快捷指令换壁纸
                 showLockScreenGuideStep('lockScreenGuideIosSetting');
@@ -3077,7 +3150,7 @@
             } else {
                 // Android：检查是否开启了锁屏自动更换
                 const isAutoRotationEnabled = localStorage.getItem(LOCK_GUIDE_KEYS.androidService) === '1';
-                
+
                 if (isAutoRotationEnabled) {
                     // 已开启，弹窗二次确认
                     showAndroidWallpaperConfirmModal();
@@ -3193,7 +3266,7 @@
             const previews = document.getElementById('detailPreviewsB');
             // 清空之前的内容
             previews.innerHTML = '';
-            
+
             const previewImages = album.wallpapers || [];
             previewImages.forEach((src, idx) => {
                 const div = document.createElement('div');
@@ -3221,7 +3294,7 @@
                     </div>
                 </div>
             `).join('');
-            
+
             // 根据合辑 ID 映射到产品 ID，使用订阅逻辑
             const albumToProductMap = {
                 'album1': 401,
@@ -3230,7 +3303,7 @@
             };
             const productId = albumToProductMap[album.id] || null;
             detailProductId = productId;
-            
+
             // 更新底部按钮为订阅逻辑
             updateDetailBar(productId);
             updateDetailReviewEntry(productId);
@@ -3285,7 +3358,7 @@
             introBar.classList.remove('hidden');
             gridSection.classList.toggle('hidden', photos.length === 0);
             emptySection.classList.toggle('hidden', photos.length > 0);
-            
+
             const introSub = document.getElementById('photo-intro-bar-sub');
             const carouselEnabled = getPhotoCarouselEnabled();
             if (introSub) {
@@ -3423,7 +3496,7 @@
             ];
             document.getElementById('photo-picker-modal').classList.remove('show');
             updatePhotoView();
-            
+
             if (newPhotos.length > 0) {
                 showToast('已添加 ' + newPhotos.length + ' 张新照片');
                 preloadNewPhotos(newPhotos);
@@ -3468,7 +3541,7 @@
             const photos = photoModuleState.photos;
             const carouselEnabled = getPhotoCarouselEnabled();
             const introSub = document.getElementById('photo-intro-bar-sub');
-            
+
             if (introSub && photos.length > 0) {
                 if (carouselEnabled) {
                     introSub.textContent = `你的 ${photos.length} 张个人照片将在锁屏自动轮播，每次亮屏都是回忆`;
@@ -3574,13 +3647,18 @@
 
         // ========== 订阅切换（仅订阅/已订阅，取消订阅在详情页） ==========
         function toggleSubB(btn, productId) {
-            const isGroupWallpaper = productId === 102;
+            const isGroupWallpaper = productId && CAT_PRODUCTS.find(p => p.id === productId)?.count !== undefined;
             const isSubscribing = !subscribedProductIds.has(productId);
             if (isSubscribing) {
                 if (productId != null) subscribedProductIds.add(productId);
                 btn.textContent = isGroupWallpaper ? '正在使用' : '已订阅';
-                btn.classList.remove('bg-white', 'text-slate-900');
-                btn.classList.add('bg-white/20', 'text-white/90');
+                if (isGroupWallpaper) {
+                    btn.classList.remove('bg-slate-900', 'text-white');
+                    btn.classList.add('bg-slate-200', 'text-slate-600');
+                } else {
+                    btn.classList.remove('bg-white', 'text-slate-900');
+                    btn.classList.add('bg-white/20', 'text-white/90');
+                }
                 btn.style.boxShadow = 'none';
                 btn.setAttribute('onclick', 'event.stopPropagation()');
                 showToast(isGroupWallpaper ? '设置成功！' : '订阅成功！');
@@ -3630,7 +3708,7 @@
             document.getElementById('detailMetaB').innerHTML = `
                 <div class="flex items-center gap-3">
                     <span class="text-[10px] font-bold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-lg">${p.update}</span>
-                    <span class="text-xs text-slate-500">${p.id === 102 ? p.count : p.subs + '人订阅'}</span>
+                    <span class="text-xs text-slate-500">${p.count || p.subs + '人订阅'}</span>
                 </div>
             `;
 
@@ -3668,7 +3746,7 @@
             // 画境集（id: 102）隐藏订阅权益模块
             const benefitsSection = document.getElementById('detailBenefitsSection');
             if (benefitsSection) {
-                benefitsSection.style.display = p.id === 102 ? 'none' : 'block';
+                benefitsSection.style.display = p.count !== undefined ? 'none' : 'block';
             }
 
             document.getElementById('detail-modal').classList.add('show');
@@ -3752,13 +3830,13 @@
             if (detailProductId != null) subscribedProductIds.add(detailProductId);
             updateDetailBar(detailProductId);
             updateDetailReviewEntry(detailProductId);
-            
-            const isGroupWallpaper = detailProductId === 102;
-            
+
+            const isGroupWallpaper = detailProductId && CAT_PRODUCTS.find(p => p.id === detailProductId)?.count !== undefined;
+
             showLoadingOverlay(isGroupWallpaper ? '正在准备壁纸…' : '正在同步壁纸数据…');
             const product = CAT_PRODUCTS.find(p => p.id === detailProductId);
             const previewUrls = product?.previews || [];
-            
+
             preloadImages(previewUrls, () => {
                 hideLoadingOverlay();
                 showToast(isGroupWallpaper ? '设置成功！壁纸已准备就绪' : '订阅成功！壁纸已准备就绪');
@@ -3776,7 +3854,7 @@
             if (detailProductId != null) subscribedProductIds.delete(detailProductId);
             updateDetailBar(detailProductId);
             updateDetailReviewEntry(detailProductId);
-            const isGroupWallpaper = detailProductId === 102;
+            const isGroupWallpaper = detailProductId && CAT_PRODUCTS.find(p => p.id === detailProductId)?.count !== undefined;
             showToast(isGroupWallpaper ? '已取消使用' : '已取消订阅');
         }
 
@@ -3868,7 +3946,7 @@
             const updateTail = isIos
                 ? '到时请通过快捷指令拉取新壁纸。'
                 : '到时将自动推送新壁纸。';
-            
+
             setTimeout(() => {
                 const notice = document.createElement('div');
                 notice.className = 'fixed top-4 left-4 right-4 z-[450] bg-white rounded-2xl p-4 shadow-xl border border-slate-100 transform -translate-y-full opacity-0 transition-all duration-300';
@@ -3888,12 +3966,12 @@
                     </div>
                 `;
                 document.body.appendChild(notice);
-                
+
                 requestAnimationFrame(() => {
                     notice.style.transform = 'translateY(0)';
                     notice.style.opacity = '1';
                 });
-                
+
                 setTimeout(closePushNotice, 6000);
             }, 500);
         }
@@ -3968,7 +4046,7 @@
                 } else {
                     pendingPushNoticeProduct = null;
                 }
-                
+
                 // Android 首次设置成功后弹出切换间隔弹窗
                 if (getPhotoPermissionPlatform() === 'android' && !localStorage.getItem('hasShownIntervalGuide')) {
                     localStorage.setItem('hasShownIntervalGuide', '1');
@@ -4074,7 +4152,7 @@
             document.body.style.overflow = '';
             const activeCat = document.querySelector('.cat-tab-b.active');
             if (activeCat) renderCatProducts(activeCat.dataset.cat);
-            
+
             // 如果创作者页仍然打开着，重新显示悬浮按钮
             if (document.getElementById('creator-modal').classList.contains('show')) {
                 document.getElementById('creatorBackBtn').style.display = 'block';
@@ -4125,7 +4203,7 @@
 
             const overlay = document.createElement('div');
             overlay.className = 'ls-fullscreen';
-            
+
             const blurLayer = document.createElement('div');
             blurLayer.className = 'ls-blur-layer';
             blurLayer.style.cssText = `
@@ -4144,12 +4222,12 @@
             const track = document.createElement('div');
             track.className = 'ls-track';
             track.style.zIndex = '1';
-            
+
             images.forEach((src, idx) => {
                 const slide = document.createElement('div');
                 slide.className = 'ls-slide';
                 slide.dataset.idx = idx;
-                
+
                 if (smartDisplay) {
                     slide.style.cssText = `
                         position: relative;
@@ -4201,7 +4279,7 @@
                 img.style.objectPosition = 'center';
                 return;
             }
-                
+
             // 横图：保持现状（充满宽度，高度自适应），不做 cover 裁切
             img.style.width = '100%';
             img.style.height = 'auto';
@@ -4221,7 +4299,7 @@
             const bottomHtml = `${images.length > 1 ? '<span class="ls-index"></span>' : ''}<span class="ls-hint">点击屏幕退出预览</span>`;
 
             overlay.appendChild(track);
-            
+
             const vignette = document.createElement('div');
             vignette.style.cssText = `
                 position: absolute;
@@ -4231,7 +4309,7 @@
                 z-index: 2;
             `;
             overlay.appendChild(vignette);
-            
+
             overlay.insertAdjacentHTML('beforeend', `
                 <div class="ls-preview-content" style="text-align:center;z-index:5;">
                     <div style="font-size:20px;font-weight:500;margin-bottom:8px;text-shadow:0 1px 8px rgba(0,0,0,0.45);">${month}月${day}日 星期${week}</div>
@@ -4525,20 +4603,20 @@
             }
             closeProfileLoginModal();
             showLoadingOverlay('正在登录，同步数据中…');
-            
+
             setTimeout(() => {
                 profileUser = {
                     nickname: '用户' + phone.slice(-4),
                     id: 'HK' + Date.now().toString(36).toUpperCase().slice(-8),
                     avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120&h=120&fit=crop'
                 };
-                
+
                 const allPreviewUrls = [];
                 subscribedProductIds.forEach(pid => {
                     const p = CAT_PRODUCTS.find(pr => pr.id === pid);
                     if (p && p.previews) allPreviewUrls.push(...p.previews);
                 });
-                
+
                 preloadImages(allPreviewUrls, () => {
                     hideLoadingOverlay();
                     renderProfileHeader();
@@ -4583,14 +4661,14 @@
             const page = document.getElementById('secondary-page');
             const titleEl = document.getElementById('secondary-page-title');
             if (!page || !titleEl) return;
-            
+
             // 隐藏所有子页面
             document.querySelectorAll('.secondary-sub-page').forEach(p => p.classList.add('hidden'));
-            
+
             // 显示目标子页面
             const targetPage = document.getElementById(pageId);
             if (targetPage) targetPage.classList.remove('hidden');
-            
+
             const isAndroid = getPhotoPermissionPlatform() === 'android';
             page.classList.toggle('secondary-android', isAndroid);
             page.classList.toggle('secondary-ios', !isAndroid);
@@ -4630,12 +4708,12 @@
             accountSubPage = type;
             const titleEl = document.getElementById('secondary-page-title');
             if (!titleEl) return;
-            
+
             // 隐藏所有账号子页面
             document.getElementById('account-main').classList.add('hidden');
             document.getElementById('account-phone-sub').classList.add('hidden');
             document.getElementById('account-password-sub').classList.add('hidden');
-            
+
             if (type === 'account') {
                 titleEl.textContent = '账号管理';
                 document.getElementById('account-main').classList.remove('hidden');
@@ -4901,13 +4979,13 @@
             document.getElementById('creatorBackBtn').style.display = 'none';
 
             document.getElementById('fullscreenWallpaperImg').src = wallpapers[index].src;
-            
+
             // 隐藏图说
             const tushuoEl = document.getElementById('fullscreenTuShuo');
             if (tushuoEl) tushuoEl.classList.add('hidden');
-            
+
             updateLockscreenTime();
-            
+
             // 更新按钮为"移除"
             updateFullscreenActionButton();
 
@@ -4992,7 +5070,7 @@
             document.querySelectorAll('.view-content').forEach(v => v.classList.add('hidden'));
             document.getElementById(id + '-view').classList.remove('hidden');
 
-            const labels = { category: '订阅壁纸', photo: '照片壁纸', profile: '我的' };
+            const labels = { category: '壁纸中心', photo: '照片壁纸', profile: '我的' };
             document.getElementById('view-title').textContent = labels[id];
 
             // 首页壁纸、照片：显示日期 + 搜索；我的：仅标题（无搜索、无日期）
@@ -5028,7 +5106,7 @@
                 if (intervalRow) intervalRow.classList.toggle('profile-android-only', !isAndroid);
                 updateProfileIntervalRowEnabled();
                 initSettingSwitches();
-                
+
                 // iOS 隐藏轮播壁纸按钮
                 const rotationBtn = document.getElementById('rotationWallpaperBtn');
                 if (rotationBtn) rotationBtn.style.display = isAndroid ? 'flex' : 'none';
