@@ -2943,14 +2943,13 @@
       const name = artistName || '摄影师小王';
       
       // 查找创作者数据
-      let creator = CREATORS.find(c => c.name === name);
+      const creator = CREATORS.find(c => c.name === name);
       
-      // 如果没找到,使用默认创作者
+      // 如果没找到对应的创作者,不打开页面
       if (!creator) {
-          creator = CREATORS[0];
+          console.log(`创作者 "${name}" 暂未入驻平台`);
+          return;
       }
-      
-      if (!creator) return;
 
       document.getElementById('creatorCover').src = creator.avatar;
       document.getElementById('creatorAvatar').src = creator.avatar;
