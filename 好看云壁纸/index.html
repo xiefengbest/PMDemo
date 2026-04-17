@@ -2756,7 +2756,7 @@
       if (link) {
           return `<a href="${link}" target="_blank" rel="noopener" class="${baseClass}" onclick="event.stopPropagation()">${label}</a>`;
       }
-      return `<p class="${baseClass}" onclick="event.stopPropagation();openCreatorPage()">${label}</p>`;
+      return `<p class="${baseClass}" onclick="event.stopPropagation();openCreatorPage('${p.artist}')">${label}</p>`;
   }
 
   // ========== Unsplash 预览图池 ==========
@@ -2938,8 +2938,18 @@
   }
 
   // ========== 创作者页 ==========
-  function openCreatorPage() {
-      const creator = CREATORS[0];
+  function openCreatorPage(artistName) {
+      // 如果没有传入 artistName,使用默认创作者
+      const name = artistName || '摄影师小王';
+      
+      // 查找创作者数据
+      let creator = CREATORS.find(c => c.name === name);
+      
+      // 如果没找到,使用默认创作者
+      if (!creator) {
+          creator = CREATORS[0];
+      }
+      
       if (!creator) return;
 
       document.getElementById('creatorCover').src = creator.avatar;
@@ -3804,7 +3814,7 @@
               <span class="text-[10px] font-bold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-lg">${p.update}</span>
               <span class="text-xs text-slate-500">${p.count || p.subs + '人订阅'}</span>
           </div>
-          ${p.artist ? (p.artistLink ? `<a href="${p.artistLink}" target="_blank" rel="noopener" class="text-sm text-indigo-600 font-medium underline cursor-pointer hover:text-indigo-500" onclick="event.stopPropagation()">${p.artistLabel || p.artist}</a>` : `<p class="text-sm text-indigo-600 font-medium underline cursor-pointer" onclick="event.stopPropagation();openCreatorPage()">${p.artistLabel || p.artist}</p>`) : ''}
+          ${p.artist ? (p.artistLink ? `<a href="${p.artistLink}" target="_blank" rel="noopener" class="text-sm text-indigo-600 font-medium underline cursor-pointer hover:text-indigo-500" onclick="event.stopPropagation()">${p.artistLabel || p.artist}</a>` : `<p class="text-sm text-indigo-600 font-medium underline cursor-pointer" onclick="event.stopPropagation();openCreatorPage('${p.artist}')">${p.artistLabel || p.artist}</p>`) : ''}
       `;
 
       const previews = document.getElementById('detailPreviewsB');
