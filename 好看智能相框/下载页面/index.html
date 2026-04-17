@@ -404,6 +404,76 @@
             font-size: 12px;
             border-top: 0.5px solid #d2d2d7;
         }
+
+        /* iOS 下载引导弹窗 */
+        .ios-guide-mask {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .ios-guide-content {
+            background: white;
+            border-radius: 16px;
+            padding: 32px 24px 24px;
+            max-width: 320px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .ios-guide-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1d1d1f;
+            margin-bottom: 8px;
+        }
+
+        .ios-guide-desc {
+            font-size: 14px;
+            color: #86868b;
+            margin-bottom: 24px;
+            line-height: 1.4;
+        }
+
+        .ios-guide-btn {
+            display: block;
+            width: 100%;
+            padding: 14px 0;
+            background: #007AFF;
+            color: white;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 500;
+            text-decoration: none;
+            text-align: center;
+            transition: background-color 0.2s;
+        }
+
+        .ios-guide-btn:active {
+            opacity: 0.8;
+        }
+
+        .ios-guide-cancel {
+            margin-top: 12px;
+            padding: 12px 0;
+            color: #86868b;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        .ios-guide-cancel:active {
+            color: #1d1d1f;
+        }
     </style>
 </head>
 <body>
@@ -498,6 +568,10 @@
         const APP_PACKAGE = 'com.hk.phone_album.mobile';
         const YYB_URL = `https://a.app.qq.com/o/simple.jsp?pkgname=${APP_PACKAGE}`;
         const ANDROID_STORE_FALLBACK_DELAY_MS = 3500;
+
+        // iOS URL Scheme
+        const IOS_URL_SCHEME = 'haokanphoframe';
+        const IOS_SCHEME_TIMEOUT = 1500;
 
         function getQueryParam(name) {
             try {
@@ -596,6 +670,42 @@
             window.location.href = 'https://apps.apple.com/cn/app/%E5%A5%BD%E7%9C%8B%E6%99%BA%E8%83%BD%E7%9B%B8%E6%A1%86/id6756484343';
         }
 
+        // iOS: 使用 URL Scheme 拉起 App
+        function openIOSAppWithScheme() {
+            const token = getQueryParam('token');
+            const schemeUrl = token 
+                ? `${IOS_URL_SCHEME}://invite?token=${token}`
+                : `${IOS_URL_SCHEME}://open`;
+
+            // 尝试拉起 App
+            window.location.href = schemeUrl;
+        }
+
+        // 显示 iOS 下载引导
+        function showIOSDownloadGuide() {
+            const existingGuide = document.getElementById('iosDownloadGuide');
+            if (existingGuide) return;
+
+            const guide = document.createElement('div');
+            guide.id = 'iosDownloadGuide';
+            guide.innerHTML = `
+                <div class="ios-guide-mask">
+                    <div class="ios-guide-content">
+                        <div class="ios-guide-title">未检测到好看智能相框</div>
+                        <div class="ios-guide-desc">请先安装 App 后再加入相框</div>
+                        <a class="ios-guide-btn" href="https://apps.apple.com/cn/app/%E5%A5%BD%E7%9C%8B%E6%99%BA%E8%83%BD%E7%9B%B8%E6%A1%86/id6756484343" target="_blank">前往 App Store 下载</a>
+                        <div class="ios-guide-cancel" onclick="closeIOSGuide()">取消</div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(guide);
+        }
+
+        function closeIOSGuide() {
+            const guide = document.getElementById('iosDownloadGuide');
+            if (guide) guide.remove();
+        }
+
         function openIOSAppOrStore() {
             const inviteUrl = getCurrentInviteUrl();
             // iOS: 让系统尝试 Universal Links（需要用户点击触发；若未安装/不支持则停留）
@@ -667,12 +777,10 @@
                     setAsJsAction(secondaryBtn, openAndroidApp);
                 }
             } else if (isIOS()) {
-                const inviteUrl = getCurrentInviteUrl();
                 if (hasToken) {
                     // 邀请/任务链路：优先打开App完成流程
                     primaryBtn.textContent = '打开App继续';
-                    // iOS: 用真实链接触发 Universal Links（比 window.location 更稳）
-                    setAsLink(primaryBtn, inviteUrl);
+                    setAsJsAction(primaryBtn, openIOSAppWithScheme);
 
                     secondaryBtn.textContent = '前往App Store下载';
                     setAsJsAction(secondaryBtn, openAppStore);
@@ -682,8 +790,7 @@
                     setAsJsAction(primaryBtn, openAppStore);
 
                     secondaryBtn.textContent = '打开App继续';
-                    // iOS: 用真实链接触发 Universal Links（比 window.location 更稳）
-                    setAsLink(secondaryBtn, inviteUrl);
+                    setAsJsAction(secondaryBtn, openIOSAppWithScheme);
                 }
             } else {
                 // 其他设备（桌面浏览器等），引导到应用宝，不自动跳转
