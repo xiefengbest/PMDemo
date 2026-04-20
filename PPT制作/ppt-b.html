@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>五更天 · 50km徒步挑战</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+    min-height: 100vh;
+    padding: 20px 20px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .slide {
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto 30px;
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 36px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.06);
+  }
+
+  .slide-header {
+    margin-bottom: 24px;
+  }
+
+  .slide-number {
+    font-size: 11px;
+    font-weight: 600;
+    color: #86868b;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .slide-title {
+    font-size: 40px;
+    font-weight: 700;
+    letter-spacing: -1px;
+    line-height: 1.1;
+    color: #1d1d1f;
+  }
+
+  .slide-title span {
+    color: #0071e3;
+  }
+
+  .content-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+
+  .content-full {
+    grid-column: span 2;
+  }
+
+  .card {
+    background: #f5f5f7;
+    border-radius: 14px;
+    padding: 20px;
+  }
+
+  .card-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #86868b;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .team-info {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .team-row {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+
+  .team-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #86868b;
+    min-width: 60px;
+  }
+
+  .team-value {
+    font-size: 18px;
+    font-weight: 500;
+    color: #1d1d1f;
+  }
+
+  .slogan-box {
+    background: linear-gradient(135deg, #1d1d1f 0%, #2d2d2f 100%);
+    border-radius: 14px;
+    padding: 24px;
+    text-align: center;
+    margin: 20px 0;
+  }
+
+  .slogan-text {
+    font-size: 24px;
+    font-weight: 600;
+    color: #ffffff;
+    letter-spacing: -0.5px;
+  }
+
+  .slogan-emoji {
+    font-size: 32px;
+    margin-bottom: 8px;
+  }
+
+  .goal-section {
+    margin-top: 16px;
+  }
+
+  .goal-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid #e5e5e7;
+  }
+
+  .goal-item:last-child {
+    border-bottom: none;
+  }
+
+  .goal-icon {
+    font-size: 18px;
+  }
+
+  .goal-text {
+    font-size: 15px;
+    font-weight: 500;
+    color: #1d1d1f;
+  }
+
+  .goal-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #0071e3;
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 600;
+    padding: 12px 24px;
+    border-radius: 10px;
+    margin-top: 16px;
+  }
+
+  .timeline {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 0;
+    position: relative;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: #e5e5e7;
+    transform: translateY(-50%);
+  }
+
+  .timeline-item {
+    position: relative;
+    text-align: center;
+    flex: 1;
+    z-index: 1;
+  }
+
+  .timeline-dot {
+    width: 10px;
+    height: 10px;
+    background: #0071e3;
+    border-radius: 50%;
+    margin: 0 auto 8px;
+    box-shadow: 0 0 0 4px #ffffff, 0 0 0 6px #0071e3;
+  }
+
+  .timeline-time {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1d1d1f;
+    margin-bottom: 4px;
+  }
+
+  .timeline-desc {
+    font-size: 12px;
+    color: #86868b;
+  }
+
+  .pace-info {
+    background: #f5f5f7;
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin-top: 16px;
+    text-align: center;
+  }
+
+  .pace-label {
+    font-size: 12px;
+    color: #86868b;
+    margin-bottom: 6px;
+  }
+
+  .pace-value {
+    font-size: 18px;
+    font-weight: 700;
+    color: #0071e3;
+  }
+
+  .route-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .route-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 15px;
+    color: #1d1d1f;
+  }
+
+  .route-icon {
+    font-size: 16px;
+  }
+
+  .supply-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+
+  .supply-card {
+    background: #f5f5f7;
+    border-radius: 10px;
+    padding: 16px;
+    text-align: center;
+  }
+
+  .supply-km {
+    font-size: 22px;
+    font-weight: 700;
+    color: #0071e3;
+    margin-bottom: 6px;
+  }
+
+  .supply-content {
+    font-size: 14px;
+    font-weight: 500;
+    color: #1d1d1f;
+    margin-bottom: 4px;
+  }
+
+  .supply-rest {
+    font-size: 12px;
+    color: #86868b;
+  }
+
+  .equipment-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .equipment-item {
+    background: #f5f5f7;
+    border-radius: 100px;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #1d1d1f;
+  }
+</style>
+</head>
+<body>
+
+<!-- 第1页 -->
+<div class="slide">
+  <div class="slide-header">
+    <div class="slide-number">01 / 02</div>
+    <div class="slide-title">五更天 <span>·</span> 50km</div>
+  </div>
+
+  <div class="content-grid">
+    <div class="card">
+      <div class="card-label">队伍信息</div>
+      <div class="team-info">
+        <div class="team-row">
+          <span class="team-label">队长</span>
+          <span class="team-value">谢峰</span>
+        </div>
+        <div class="team-row">
+          <span class="team-label">队员</span>
+          <span class="team-value">李东卫 / 任梦茹 / 毛俊冶 / 徐朋</span>
+        </div>
+        <div class="team-row">
+          <span class="team-label">配置</span>
+          <span class="team-value">3人经验丰富 + 2人身轻如燕</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">活动目标</div>
+      <div class="goal-section">
+        <div class="goal-item">
+          <span class="goal-icon">📍</span>
+          <span class="goal-text">50km徒步 + 红螺寺登山</span>
+        </div>
+        <div class="goal-item">
+          <span class="goal-icon">⏰</span>
+          <span class="goal-text">Day 1 06:00 出发 → 16:00开始登山</span>
+        </div>
+        <div class="goal-item">
+          <span class="goal-icon">⚡</span>
+          <span class="goal-text">减少休息 + 提升配速</span>
+        </div>
+      </div>
+      <div class="goal-badge">🏆 安全完赛，永争第一</div>
+    </div>
+  </div>
+
+  <div class="slogan-box">
+    <div class="slogan-emoji">🍔🥤</div>
+    <div class="slogan-text">吃麦当劳，喝冰可乐</div>
+  </div>
+</div>
+
+<!-- 第2页 -->
+<div class="slide">
+  <div class="slide-header">
+    <div class="slide-number">02 / 02</div>
+    <div class="slide-title">五更天 <span>&</span> 执行计划</div>
+  </div>
+
+  <div class="content-full">
+    <div class="card">
+      <div class="card-label">时间节奏</div>
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-time">06:00</div>
+          <div class="timeline-desc">出发</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-time">~10:10</div>
+          <div class="timeline-desc">25km 补给</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-time">~13:30</div>
+          <div class="timeline-desc">40km 补给</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-time">16:00</div>
+          <div class="timeline-desc">开始登山</div>
+        </div>
+      </div>
+      <div class="pace-info">
+        <div class="pace-label">目标配速</div>
+        <div class="pace-value">前期 6 km/h · 中期 5.5 km/h · 上坡约 3.5 km/h</div>
+      </div>
+      <div class="pace-info" style="margin-top: 12px;">
+        <div class="pace-label">休息策略</div>
+        <div class="pace-value">25km & 40km 各休息 10 分钟</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="content-grid" style="margin-top: 20px;">
+    <div class="card">
+      <div class="card-label">路线信息</div>
+      <div class="route-info">
+        <div class="route-item">
+          <span class="route-icon">📍</span>
+          <span>起点：公司楼下麦当劳</span>
+        </div>
+        <div class="route-item">
+          <span class="route-icon">🛣️</span>
+          <span>路线：城市道路为主</span>
+        </div>
+        <div class="route-item">
+          <span class="route-icon">📏</span>
+          <span>总里程：50km</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">装备清单</div>
+      <div class="equipment-grid">
+        <div class="equipment-item">创可贴</div>
+        <div class="equipment-item">两双厚袜</div>
+        <div class="equipment-item">矿泉水</div>
+        <div class="equipment-item">充电宝</div>
+        <div class="equipment-item">能量棒</div>
+        <div class="equipment-item">巧克力</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
