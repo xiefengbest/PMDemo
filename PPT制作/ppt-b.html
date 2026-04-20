@@ -292,9 +292,47 @@
     font-weight: 500;
     color: #1d1d1f;
   }
+
+  .cover-slide {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    min-height: 500px;
+  }
+
+  .cover-title {
+    font-size: 64px;
+    font-weight: 700;
+    letter-spacing: -2px;
+    line-height: 1.1;
+    color: #1d1d1f;
+    margin-bottom: 16px;
+  }
+
+  .cover-subtitle {
+    font-size: 28px;
+    font-weight: 500;
+    color: #0071e3;
+    margin-bottom: 32px;
+  }
+
+  .cover-desc {
+    font-size: 18px;
+    color: #86868b;
+    max-width: 600px;
+  }
 </style>
 </head>
 <body>
+
+<!-- 封面页 -->
+<div class="slide cover-slide">
+  <div class="cover-title">五更天</div>
+  <div class="cover-subtitle">50km 徒步挑战</div>
+  <div class="cover-desc">吃麦当劳，喝冰可乐<br>安全完赛，永争第一</div>
+</div>
 
 <!-- 第1页 -->
 <div class="slide">
@@ -420,6 +458,7 @@
         <div class="equipment-item">能量棒</div>
         <div class="equipment-item">巧克力</div>
       </div>
+      <div style="text-align: right; margin-top: 12px; font-size: 11px; color: #86868b;">我们还有B方案</div>
     </div>
   </div>
 </div>
