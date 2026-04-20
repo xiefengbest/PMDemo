@@ -377,6 +377,7 @@
     .profile-android-only { display: none !important; }
     .profile-interval-opt.selected { border-color: #6366f1; background: #eef2ff; color: #4338ca; }
     #profile-interval-row.profile-interval-row-disabled { opacity: 0.5; pointer-events: none; cursor: default; }
+    #profile-photo-carousel-switch-row.profile-switch-disabled { opacity: 0.5; pointer-events: none; cursor: default; }
     .photo-manage-bar .count { color: #94a3b8; font-size: 13px; font-weight: 700; }
     .photo-manage-bar .btn-delete {
         padding: 10px 24px;
@@ -2406,7 +2407,7 @@
   </div>
 
   <!-- Android 设置壁纸确认弹窗 -->
-  <div id="android-wallpaper-confirm-overlay" style="position:fixed;inset:0;z-index:600;background:rgba(0,0,0,0.5);display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.3s ease;">
+  <div id="android-wallpaper-confirm-overlay" style="position:fixed;inset:0;z-index:650;background:rgba(0,0,0,0.5);display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.3s ease;">
     <div style="background:white;border-radius:24px 24px 0 0;width:100%;max-width:28rem;padding:24px 24px calc(24px + env(safe-area-inset-bottom, 0px));transform:translateY(100%);transition:transform 0.35s cubic-bezier(0.32,0.72,0,1);">
       <!-- 拖拽条 -->
       <div style="width:36px;height:4px;background:#e2e8f0;border-radius:2px;margin:0 auto 20px;"></div>
@@ -2432,11 +2433,11 @@
 
   <style>
     #android-wallpaper-confirm-overlay.show {
-        opacity: 1;
-        pointer-events: auto;
+        opacity: 1 !important;
+        pointer-events: auto !important;
     }
     #android-wallpaper-confirm-overlay.show > div {
-        transform: translateY(0);
+        transform: translateY(0) !important;
     }
   </style>
 
@@ -2668,6 +2669,16 @@
       if (!intervalRow) return;
       if (getProfileLockAuto()) intervalRow.classList.remove('profile-interval-row-disabled');
       else intervalRow.classList.add('profile-interval-row-disabled');
+      
+      // 更新个人照片轮播开关状态
+      const photoCarouselRow = document.getElementById('profile-photo-carousel-switch-row');
+      if (photoCarouselRow) {
+          if (getProfileLockAuto()) {
+              photoCarouselRow.classList.remove('profile-switch-disabled');
+          } else {
+              photoCarouselRow.classList.add('profile-switch-disabled');
+          }
+      }
   }
 
   // 订阅壁纸更新：应用内提醒开关（默认开）
@@ -2752,7 +2763,7 @@
       const label = p.artistLabel || p.artist;
       const link = p.artistLink || null;
       const baseClass = `text-[10px] text-indigo-300 font-medium mt-1 underline cursor-pointer hover:text-indigo-200 ${extraClass}`;
-      
+
       if (link) {
           return `<a href="${link}" target="_blank" rel="noopener" class="${baseClass}" onclick="event.stopPropagation()">${label}</a>`;
       }
@@ -2941,15 +2952,15 @@
   function openCreatorPage(artistName) {
       // 如果没有传入 artistName,使用默认创作者
       const name = artistName || '摄影师小王';
-      
+
       // 查找创作者数据
       let creator = CREATORS.find(c => c.name === name);
-      
+
       // 如果没找到,使用默认创作者(摄影师小王)
       if (!creator) {
           creator = CREATORS[0];
       }
-      
+
       if (!creator) return;
 
       document.getElementById('creatorCover').src = creator.avatar;
@@ -3238,9 +3249,11 @@
   }
 
   function setWallpaperFromFullscreen() {
+      console.log('[DEBUG] setWallpaperFromFullscreen called');
       closeWallpaperModeModal();
 
       const platform = getPhotoPermissionPlatform();
+      console.log('[DEBUG] platform:', platform);
 
       if (platform === 'ios') {
           // iOS：直接通过快捷指令换壁纸
@@ -3253,12 +3266,16 @@
       } else {
           // Android：检查是否开启了锁屏自动更换
           const isAutoRotationEnabled = localStorage.getItem(LOCK_GUIDE_KEYS.androidService) === '1';
+          console.log('[DEBUG] isAutoRotationEnabled:', isAutoRotationEnabled);
+          console.log('[DEBUG] androidService value:', localStorage.getItem(LOCK_GUIDE_KEYS.androidService));
 
           if (isAutoRotationEnabled) {
               // 已开启，弹窗二次确认
+              console.log('[DEBUG] showing Android confirm modal');
               showAndroidWallpaperConfirmModal();
           } else {
               // 未开启，直接设置
+              console.log('[DEBUG] showing guide directly');
               showLockScreenGuideStep('lockScreenGuideAndroidSetting');
               document.getElementById('lock-screen-guide-modal').classList.add('show');
               setTimeout(() => {
@@ -3271,9 +3288,15 @@
 
   // Android 设置壁纸确认弹窗
   function showAndroidWallpaperConfirmModal() {
+      console.log('[DEBUG] showAndroidWallpaperConfirmModal called');
       const overlay = document.getElementById('android-wallpaper-confirm-overlay');
+      console.log('[DEBUG] overlay element:', overlay);
       if (overlay) {
           overlay.classList.add('show');
+          console.log('[DEBUG] added .show class, classes now:', overlay.className);
+          console.log('[DEBUG] overlay style:', overlay.style.cssText);
+      } else {
+          console.error('[DEBUG] overlay element not found!');
       }
   }
 
@@ -3287,7 +3310,9 @@
   function confirmDisableAutoRotation() {
       // 关闭自动更换
       localStorage.removeItem(LOCK_GUIDE_KEYS.androidService);
+      setProfileLockAuto(false);
       closeAndroidWallpaperConfirmModal();
+      updateProfileIntervalRowEnabled();
       showLockScreenGuideStep('lockScreenGuideAndroidSetting');
       document.getElementById('lock-screen-guide-modal').classList.add('show');
       setTimeout(() => {
@@ -3667,6 +3692,9 @@
               if (dot) dot.style.transform = 'translateX(0)';
           }
       }
+      
+      // 检查锁屏自动切换开关状态，如果关闭则置灰个人照片轮播开关
+      updateProfileIntervalRowEnabled();
   }
 
   function showPhotoCarouselGuide() {
@@ -4092,8 +4120,6 @@
   }
 
   // ========== 锁屏壁纸引导弹窗（订阅成功/添加照片成功后，按平台条件引导） ==========
-  localStorage.removeItem(LOCK_GUIDE_KEYS.iosShortcuts);
-  localStorage.removeItem(LOCK_GUIDE_KEYS.androidService);
 
   function showLockScreenGuideModal(type) {
       const platform = getPhotoPermissionPlatform();
@@ -4158,6 +4184,9 @@
               localStorage.setItem('hasShownIntervalGuide', '1');
               setTimeout(() => openProfileIntervalModal(), 500);
           }
+          
+          // 更新设置页开关状态
+          updateProfileIntervalRowEnabled();
       } else {
           pendingPushNoticeProduct = null;
       }
@@ -4184,6 +4213,7 @@
           showToast('正在设置壁纸…');
           setTimeout(() => {
               localStorage.setItem(LOCK_GUIDE_KEYS.androidService, '1');
+              setProfileLockAuto(true);
               showToast('设置成功');
               closeLockScreenGuideModal(true);
           }, 2500);
@@ -4192,6 +4222,7 @@
 
   function onAndroidServiceEnabled() {
       localStorage.setItem(LOCK_GUIDE_KEYS.androidService, '1');
+      setProfileLockAuto(true);
       showToast('壁纸已更换');
       closeLockScreenGuideModal(true);
   }
@@ -5032,11 +5063,11 @@
           bodyEl.innerHTML = '<div class="space-y-6">' + list.map(p => {
               const subscribed = true;
               const isGroupWallpaper = p.count !== undefined;
-              
+
               if (isGroupWallpaper) {
                   return renderCatCard(p);
               }
-              
+
               const btnText = '已订阅';
               const btnOnClick = `event.stopPropagation();toggleSubB(this, ${p.id})`;
               return `
@@ -5089,6 +5120,11 @@
           });
           saveRotationWallpapers(wallpapers);
           showToast('已加入轮播');
+          
+          // Android 下首次加入轮播后显示引导
+          if (getPhotoPermissionPlatform() === 'android' && localStorage.getItem(LOCK_GUIDE_KEYS.androidService) !== '1') {
+              setTimeout(() => showLockScreenGuideModal('rotation'), 500);
+          }
       } else {
           showToast('已在轮播列表中');
       }
