@@ -2705,11 +2705,48 @@
       const splash = document.getElementById('splash-screen');
       const privacy = document.getElementById('privacy-consent');
       const app = document.getElementById('app');
+      
+      // 解析 URL 参数
+      const urlParams = new URLSearchParams(location.search);
+      const skipPrivacy = urlParams.get('skip_privacy') === '1';
+      const targetPage = urlParams.get('page');
 
       function enterApp() {
           if (app) app.style.visibility = 'visible';
           if (splash) { splash.classList.add('hide'); splash.style.display = 'none'; }
           if (privacy) { privacy.classList.remove('show'); privacy.style.display = 'none'; }
+          
+          // 处理页面跳转
+          if (targetPage) {
+              setTimeout(() => handlePageNavigation(targetPage), 300);
+          }
+      }
+      
+      // 页面导航处理
+      function handlePageNavigation(page) {
+          switch(page) {
+              case 'category':
+              case 'wallpaper':
+                  switchTab('category');
+                  break;
+              case 'photo':
+              case 'album':
+                  switchTab('photo');
+                  break;
+              case 'profile':
+              case 'my':
+                  switchTab('profile');
+                  break;
+              case 'rotation':
+                  openMyRotationModal();
+                  break;
+              default:
+                  // 尝试作为产品 ID 打开详情
+                  const productId = parseInt(page);
+                  if (!isNaN(productId)) {
+                      openDetail(productId);
+                  }
+          }
       }
 
       if (!splash || !app) {
@@ -2717,7 +2754,16 @@
       } else {
           app.style.visibility = 'hidden';
           const hasConsent = localStorage.getItem(PRIVACY_CONSENT_KEY) === '1';
-          if (privacy) {
+          
+          // 如果 URL 参数指定跳过隐私弹窗，直接进入应用
+          if (skipPrivacy) {
+              // 跳过启动页，直接进入应用
+              splash.classList.add('hide');
+              setTimeout(function() {
+                  splash.style.display = 'none';
+                  enterApp();
+              }, 100);
+          } else if (privacy) {
               const acceptBtn = document.getElementById('privacy-btn-accept');
               const rejectBtn = document.getElementById('privacy-btn-reject');
               if (acceptBtn) acceptBtn.onclick = function() {
@@ -2725,20 +2771,34 @@
                   enterApp();
               };
               if (rejectBtn) rejectBtn.onclick = function() { enterApp(); };
-          }
-          setTimeout(function() {
-              if (hasConsent) {
-                  splash.classList.add('hide');
-                  setTimeout(function() {
-                      splash.style.display = 'none';
+              
+              setTimeout(function() {
+                  if (hasConsent) {
+                      splash.classList.add('hide');
+                      setTimeout(function() {
+                          splash.style.display = 'none';
+                          enterApp();
+                      }, 400);
+                  } else if (privacy) {
+                      privacy.classList.add('show');
+                  } else {
                       enterApp();
-                  }, 400);
-              } else if (privacy) {
-                  privacy.classList.add('show');
-              } else {
-                  enterApp();
-              }
-          }, 1500);
+                  }
+              }, 1500);
+          } else {
+              setTimeout(function() {
+                  if (hasConsent) {
+                      splash.classList.add('hide');
+                      setTimeout(function() {
+                          splash.style.display = 'none';
+                          enterApp();
+                      }, 400);
+                  } else {
+                      enterApp();
+                  }
+              }, 1500);
+          }
+          
           setTimeout(function() {
               if (app && app.style.visibility === 'hidden') enterApp();
           }, 8000);
