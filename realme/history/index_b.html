@@ -241,63 +241,41 @@
             transform: scale(0.96);
         }
 
-        .bottom-nav {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-top: 1px solid rgba(0, 0, 0, 0.08);
-            padding: 8px 0 calc(env(safe-area-inset-bottom, 8px) + 16px) 0;
+        /* 导航栏样式 */
+        .nav-container {
             display: flex;
             justify-content: space-around;
             align-items: center;
-            z-index: 100;
+            height: 64px;
+            background-color: #ffffff;
+            border-top: 1px solid #f0f0f0;
+            padding-bottom: env(safe-area-inset-bottom);
         }
 
         .nav-item {
+            flex: 1;
             display: flex;
-            flex-direction: column;
-            align-items: center;
             justify-content: center;
+            align-items: center;
+            height: 100%;
             cursor: pointer;
-            transition: all 0.2s ease;
-            padding: 8px 16px;
-            min-width: 48px;
-            min-height: 56px;
-            position: relative;
-        }
-
-        .nav-item::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%) scaleX(0);
-            width: 24px;
-            height: 2px;
-            background: #000000;
-            border-radius: 1px;
-            transition: transform 0.2s ease;
-        }
-
-        .nav-item.active::before {
-            transform: translateX(-50%) scaleX(1);
-        }
-
-        .nav-item i {
-            font-size: 24px;
-            color: rgba(0, 0, 0, 0.4);
-            transition: all 0.2s ease;
-        }
-
-        .nav-item.active i {
-            color: #000000;
+            transition: opacity 0.2s;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .nav-item:active {
-            transform: scale(0.9);
+            opacity: 0.6;
+        }
+
+        .icon {
+            width: 28px;
+            height: 28px;
+            display: block;
+        }
+
+        .icon-plus {
+            width: 44px;
+            height: 44px;
         }
 
         .modal-overlay {
@@ -502,23 +480,48 @@
             </div>
         </div>
 
-        <div class="bottom-nav">
+        <nav class="nav-container">
+            <!-- 首页图标 (实心) -->
             <div class="nav-item" onclick="switchPage('home', this)">
-                <i class="fas fa-house"></i>
+                <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M4 10v10a1 1 0 0 0 1 1h5v-6h4v6h5a1 1 0 0 0 1-1V10l-9-7L4 10z"/>
+                </svg>
             </div>
+
+            <!-- 发现/探索图标 (线条) -->
             <div class="nav-item active" onclick="switchPage('discover', this)">
-                <i class="fas fa-compass"></i>
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M12 12c-4 0-4 4-8 4M4 8a1 1 0 1 0 0 2 1 1 0 0 0 0-2z" style="display:none;"/>
+                    <path d="M4 14c2-1 4-2 8-2s6 1 8 2" />
+                    <circle cx="8" cy="8" r="1" fill="currentColor" stroke="none"/>
+                </svg>
             </div>
+
+            <!-- 发布/添加按钮 (圆圈加号) -->
             <div class="nav-item" onclick="switchPage('publish', this)">
-                <i class="fas fa-square-plus"></i>
+                <svg class="icon-plus" viewBox="0 0 48 48" fill="none">
+                    <circle cx="24" cy="24" r="20" stroke="currentColor" stroke-width="1.5"/>
+                    <path d="M24 16v16M16 24h16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
             </div>
+
+            <!-- 通知/铃铛图标 (线条) -->
             <div class="nav-item" onclick="switchPage('message', this)">
-                <i class="fas fa-comment"></i>
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/>
+                    <path d="M10.5 21h3" stroke-width="2"/>
+                </svg>
             </div>
+
+            <!-- 个人中心图标 (线条) -->
             <div class="nav-item" onclick="switchPage('profile', this)">
-                <i class="fas fa-user"></i>
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                </svg>
             </div>
-        </div>
+        </nav>
     </div>
 
     <script>
@@ -602,27 +605,12 @@
             });
         }
 
-        const iconMap = {
-            home: 'fa-house',
-            discover: 'fa-compass',
-            publish: 'fa-square-plus',
-            message: 'fa-comment',
-            profile: 'fa-user'
-        };
-
         function switchPage(pageName, element) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(n => {
-                n.classList.remove('active');
-                const page = n.getAttribute('onclick').match(/'([^']+)'/)[1];
-                const icon = n.querySelector('i');
-                icon.className = `fas ${iconMap[page]}`;
-            });
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             
             document.getElementById(`page-${pageName}`).classList.add('active');
             element.classList.add('active');
-            const icon = element.querySelector('i');
-            icon.className = `fas ${iconMap[pageName]}`;
         }
 
         function useSingle() {
