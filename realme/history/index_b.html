@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>壁纸功能区原型 - 视觉平衡版</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .phone-container {
+            width: 100%;
+            max-width: 412px;
+            height: 100vh;
+            margin: 0 auto;
+            position: relative;
+            overflow: hidden;
+            background-color: #F5F5F5;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        .discover-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?q=80&w=2144&auto=format&fit=crop'); 
+            background-size: cover;
+            background-position: center;
+        }
+
+        .top-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 20;
+            padding: 16px;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 100%);
+        }
+
+        .weather-capsule {
+            position: absolute;
+            top: 48px;
+            right: 16px;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .bottom-panel {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            background: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.2) 40%, rgba(0,0,0,0.5) 100%);
+        }
+
+        .news-section {
+            padding: 0 16px 16px 16px;
+        }
+
+        .news-bar {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(15px);
+            border-radius: 12px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-left: 3px solid #FF9500;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
+
+        .news-icon-container {
+            color: #FF9500;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+        }
+
+        .news-text {
+            flex: 1;
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.95);
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-weight: 400;
+        }
+
+        .wallpaper-info {
+            padding: 0 16px 16px 16px;
+        }
+
+        .wallpaper-title {
+            color: white;
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin-bottom: 6px;
+        }
+
+        .wallpaper-meta {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .wallpaper-meta .dot {
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .thumbnail-row {
+            padding: 0 16px 24px 16px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .thumbnail {
+            flex: 1;
+            aspect-ratio: 9 / 16;
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .thumbnail.active {
+            border-color: #FFFFFF;
+            box-shadow: 0 4px 12px rgba(255, 255, 255, 0.4);
+            transform: scale(1.05);
+        }
+
+        .thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .action-footer {
+            padding: 0 16px 16px 16px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .nav-spacer {
+            height: 88px;
+        }
+
+        @supports (padding-bottom: env(safe-area-inset-bottom)) {
+            .nav-spacer {
+                height: calc(8px + 56px + env(safe-area-inset-bottom, 8px) + 16px);
+            }
+        }
+
+        .action-btn {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            color: white;
+            border-radius: 12px;
+            height: 48px;
+            font-size: 15px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            border: 1.5px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .action-btn:active {
+            transform: scale(0.97);
+        }
+
+        .action-btn.primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #FFFFFF;
+            border: none;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .action-btn.ad-btn {
+            position: relative;
+        }
+
+        .ad-badge {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            background: #FF3B30;
+            color: white;
+            font-size: 8px;
+            font-weight: 700;
+            padding: 2px 4px;
+            border-radius: 4px;
+            letter-spacing: 0.5px;
+        }
+
+        .subscribe-btn {
+            background: #FFFFFF;
+            color: #000000;
+            border-radius: 14px;
+            height: 44px;
+            padding: 0 22px;
+            font-size: 15px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            transition: transform 0.1s;
+            cursor: pointer;
+        }
+        
+        .subscribe-btn:active {
+            transform: scale(0.96);
+        }
+
+        .bottom-nav {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(0, 0, 0, 0.08);
+            padding: 8px 0 calc(env(safe-area-inset-bottom, 8px) + 16px) 0;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            padding: 8px 16px;
+            min-width: 48px;
+            min-height: 56px;
+            position: relative;
+        }
+
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%) scaleX(0);
+            width: 24px;
+            height: 2px;
+            background: #000000;
+            border-radius: 1px;
+            transition: transform 0.2s ease;
+        }
+
+        .nav-item.active::before {
+            transform: translateX(-50%) scaleX(1);
+        }
+
+        .nav-item i {
+            font-size: 24px;
+            color: rgba(0, 0, 0, 0.4);
+            transition: all 0.2s ease;
+        }
+
+        .nav-item.active i {
+            color: #000000;
+        }
+
+        .nav-item:active {
+            transform: scale(0.9);
+        }
+
+        .modal-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            z-index: 100;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: rgba(30, 30, 30, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 24px;
+            width: 85%;
+            max-width: 320px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-title {
+            color: white;
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+
+        .modal-text {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .modal-btn {
+            width: 100%;
+            height: 44px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            margin-bottom: 10px;
+        }
+
+        .modal-btn:active {
+            transform: scale(0.98);
+        }
+
+        .modal-btn.primary {
+            background: #FFFFFF;
+            color: #000000;
+        }
+
+        .modal-btn.secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .page-content {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #333333;
+            background: #F5F5F5;
+        }
+
+        .page-content i {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.3;
+            color: #666666;
+        }
+
+        .page-content h2 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #333333;
+        }
+
+        .page-content p {
+            font-size: 14px;
+            color: #999999;
+        }
+    </style>
+</head>
+<body class="bg-gray-300 flex items-center justify-center min-h-screen">
+
+    <div class="phone-container shadow-2xl" id="phoneContainer">
+        
+        <div class="top-overlay">
+            <div class="flex justify-between text-white text-xs font-semibold">
+                <span>09:41</span>
+                <div class="flex gap-2 items-center">
+                    <i class="fas fa-signal"></i>
+                    <i class="fas fa-wifi"></i>
+                    <i class="fas fa-battery-full text-sm"></i>
+                </div>
+            </div>
+
+            <div class="weather-capsule cursor-pointer">
+                <i class="fas fa-sun text-yellow-400"></i>
+                <div class="flex flex-col">
+                    <span class="text-xs font-bold leading-none">26°</span>
+                    <span class="text-[9px] opacity-70 mt-0.5">上海</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="page active" id="page-discover">
+            <div class="discover-bg" id="discoverBg"></div>
+            <div class="bottom-panel">
+                <div class="wallpaper-info">
+                    <h2 class="wallpaper-title" id="wallpaperTitle">赛博都市</h2>
+                    <p class="wallpaper-meta" id="wallpaperMeta">5 张高清壁纸</p>
+                </div>
+
+                <div class="thumbnail-row" id="thumbnailRow">
+                </div>
+
+                <div class="action-footer">
+                    <button class="action-btn" onclick="useSingle()">
+                        <i class="fas fa-image"></i>
+                        单张使用
+                    </button>
+                    <button class="action-btn primary ad-btn" onclick="useGroup()">
+                        <i class="fas fa-layer-group"></i>
+                        整组使用
+                        <span class="ad-badge">AD</span>
+                    </button>
+                </div>
+
+                <div class="news-section">
+                    <div class="news-bar cursor-pointer">
+                        <div class="news-icon-container">
+                            <i class="fas fa-newspaper"></i>
+                        </div>
+                        <p class="news-text">
+                            今日聚焦：WWDC 2024 发布多项视觉设计革新，带来全新的人机交互体验，重塑数字生活方式。
+                        </p>
+                        <i class="fas fa-angle-right text-white opacity-40 text-xs"></i>
+                    </div>
+                </div>
+                <div class="nav-spacer"></div>
+            </div>
+        </div>
+
+        <div class="page" id="page-home">
+            <div class="page-content">
+                <i class="fas fa-home"></i>
+                <h2>首页</h2>
+                <p>推荐壁纸内容</p>
+            </div>
+        </div>
+
+        <div class="page" id="page-publish">
+            <div class="page-content">
+                <i class="fas fa-plus-circle"></i>
+                <h2>发布</h2>
+                <p>上传你的壁纸作品</p>
+            </div>
+        </div>
+
+        <div class="page" id="page-message">
+            <div class="page-content">
+                <i class="fas fa-comment"></i>
+                <h2>消息</h2>
+                <p>暂无新消息</p>
+            </div>
+        </div>
+
+        <div class="page" id="page-profile">
+            <div class="page-content">
+                <i class="fas fa-user"></i>
+                <h2>个人中心</h2>
+                <p>查看收藏和下载记录</p>
+            </div>
+        </div>
+
+        <div class="bottom-nav">
+            <div class="nav-item" onclick="switchPage('home', this)">
+                <i class="fas fa-house"></i>
+            </div>
+            <div class="nav-item active" onclick="switchPage('discover', this)">
+                <i class="fas fa-compass"></i>
+            </div>
+            <div class="nav-item" onclick="switchPage('publish', this)">
+                <i class="fas fa-square-plus"></i>
+            </div>
+            <div class="nav-item" onclick="switchPage('message', this)">
+                <i class="fas fa-comment"></i>
+            </div>
+            <div class="nav-item" onclick="switchPage('profile', this)">
+                <i class="fas fa-user"></i>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const wallpaperGroups = [
+            {
+                date: '2026-04-21',
+                name: '赛博都市',
+                wallpapers: [
+                    { url: 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?q=80&w=800&auto=format&fit=crop', name: '赛博都市 1' },
+                    { url: 'https://images.unsplash.com/photo-1515630771457-09367d0ae038?q=80&w=800&auto=format&fit=crop', name: '赛博都市 2' },
+                    { url: 'https://images.unsplash.com/photo-1519608487953-e999c86e7455?q=80&w=800&auto=format&fit=crop', name: '赛博都市 3' },
+                    { url: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=800&auto=format&fit=crop', name: '赛博都市 4' },
+                    { url: 'https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0?q=80&w=800&auto=format&fit=crop', name: '赛博都市 5' }
+                ]
+            },
+            {
+                date: '2026-04-22',
+                name: '自然风光',
+                wallpapers: [
+                    { url: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=800&auto=format&fit=crop', name: '自然风光 1' },
+                    { url: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?q=80&w=800&auto=format&fit=crop', name: '自然风光 2' },
+                    { url: 'https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?q=80&w=800&auto=format&fit=crop', name: '自然风光 3' },
+                    { url: 'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?q=80&w=800&auto=format&fit=crop', name: '自然风光 4' }
+                ]
+            },
+            {
+                date: '2026-04-23',
+                name: '抽象艺术',
+                wallpapers: [
+                    { url: 'https://images.unsplash.com/photo-1541701494587-cb58502866ab?q=80&w=800&auto=format&fit=crop', name: '抽象艺术 1' },
+                    { url: 'https://images.unsplash.com/photo-1550859492-d5da9d8e45f3?q=80&w=800&auto=format&fit=crop', name: '抽象艺术 2' },
+                    { url: 'https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?q=80&w=800&auto=format&fit=crop', name: '抽象艺术 3' },
+                    { url: 'https://images.unsplash.com/photo-1567095761054-7a02e69e5571?q=80&w=800&auto=format&fit=crop', name: '抽象艺术 4' },
+                    { url: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=800&auto=format&fit=crop', name: '抽象艺术 5' },
+                    { url: 'https://images.unsplash.com/photo-1579546929518-9e396f3cc80e?q=80&w=800&auto=format&fit=crop', name: '抽象艺术 6' }
+                ]
+            }
+        ];
+
+        let currentGroupIndex = 0;
+        let currentWallpaperIndex = 0;
+
+        function getTodayGroup() {
+            const today = new Date().toISOString().split('T')[0];
+            const groupIndex = wallpaperGroups.findIndex(g => g.date === today);
+            return groupIndex >= 0 ? groupIndex : 0;
+        }
+
+        function renderThumbnails() {
+            const group = wallpaperGroups[currentGroupIndex];
+            const thumbnailRow = document.getElementById('thumbnailRow');
+            thumbnailRow.innerHTML = '';
+            
+            group.wallpapers.forEach((wallpaper, index) => {
+                const thumb = document.createElement('div');
+                thumb.className = `thumbnail ${index === currentWallpaperIndex ? 'active' : ''}`;
+                thumb.onclick = () => switchWallpaper(index);
+                thumb.innerHTML = `<img src="${wallpaper.url}" alt="${wallpaper.name}">`;
+                thumbnailRow.appendChild(thumb);
+            });
+        }
+
+        function switchWallpaper(index) {
+            if (index === currentWallpaperIndex) return;
+            
+            currentWallpaperIndex = index;
+            const group = wallpaperGroups[currentGroupIndex];
+            const wallpaper = group.wallpapers[index];
+            
+            document.getElementById('discoverBg').style.backgroundImage = `url('${wallpaper.url}')`;
+            document.getElementById('wallpaperTitle').textContent = group.name;
+            document.getElementById('wallpaperMeta').innerHTML = `<span class="dot"></span>${group.wallpapers.length} 张高清壁纸`;
+            
+            const thumbnails = document.querySelectorAll('.thumbnail');
+            thumbnails.forEach((thumb, i) => {
+                if (i === index) {
+                    thumb.classList.add('active');
+                } else {
+                    thumb.classList.remove('active');
+                }
+            });
+        }
+
+        const iconMap = {
+            home: 'fa-house',
+            discover: 'fa-compass',
+            publish: 'fa-square-plus',
+            message: 'fa-comment',
+            profile: 'fa-user'
+        };
+
+        function switchPage(pageName, element) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => {
+                n.classList.remove('active');
+                const page = n.getAttribute('onclick').match(/'([^']+)'/)[1];
+                const icon = n.querySelector('i');
+                icon.className = `fas ${iconMap[page]}`;
+            });
+            
+            document.getElementById(`page-${pageName}`).classList.add('active');
+            element.classList.add('active');
+            const icon = element.querySelector('i');
+            icon.className = `fas ${iconMap[pageName]}`;
+        }
+
+        function useSingle() {
+            alert('已应用当前壁纸！');
+        }
+
+        function useGroup() {
+            alert('观看广告后解锁整组壁纸！（模拟）');
+        }
+
+        currentGroupIndex = getTodayGroup();
+        renderThumbnails();
+    </script>
+
+</body>
+</html>

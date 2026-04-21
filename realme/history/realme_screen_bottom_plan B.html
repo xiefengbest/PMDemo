@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>手机壁纸功能区原型 - 知名IP增强版</title>
+    <!-- 引入 Tailwind CSS 用于原子化布局 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 FontAwesome 图标库 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* 1. 设备尺寸约束 */
+        .phone-container {
+            width: 100%;
+            max-width: 375px; 
+            height: 100vh;
+            max-height: 812px;
+            margin: 0 auto;
+            position: relative;
+            overflow: hidden;
+            background-color: #1a1a1a;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        /* 背景图片容器 */
+        .bg-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-image: linear-gradient(135deg, #1a1a1a, #333);
+            transition: background-image 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1;
+        }
+
+        /* 2. 左右切换按钮 */
+        .nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 44px;
+            height: 80px;
+            background: rgba(0, 0, 0, 0.35); 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            z-index: 20;
+            transition: all 0.2s;
+            cursor: pointer;
+            border: none;
+            outline: none;
+        }
+
+        .nav-btn:active {
+            background: rgba(0, 0, 0, 0.6);
+        }
+
+        .nav-left { left: 0; border-radius: 0 12px 12px 0; }
+        .nav-right { right: 0; border-radius: 12px 0 0 12px; }
+
+        /* 3. 底部面板渐变 */
+        .bottom-panel {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            background: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.5) 40%, rgba(0,0,0,0.9) 100%);
+            z-index: 10;
+        }
+
+        /* 4. 天气组件：回归 Logo + Weather 样式 */
+        .weather-section {
+            padding: 0 20px 20px 20px;
+        }
+
+        .weather-card {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            width: fit-content;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: background 0.2s;
+        }
+
+        .weather-card:active {
+            background: rgba(255, 255, 255, 0.35);
+        }
+
+        .weather-logo {
+            color: #60A5FA; 
+            font-size: 18px;
+            margin-right: 10px;
+        }
+
+        .weather-name {
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        /* 5. 合辑标题区块 */
+        .album-section {
+            padding: 0 20px 24px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .album-title {
+            color: white;
+            font-size: 19px; 
+            font-weight: 700;
+            text-shadow: 0 1px 4px rgba(0,0,0,0.4);
+        }
+
+        .album-count {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 13px;
+            margin-top: 2px;
+        }
+
+        /* 6. 订阅按钮 */
+        .subscribe-btn {
+            background: #FFFFFF;
+            color: #000000;
+            border-radius: 10px;
+            height: 44px; 
+            padding: 0 18px;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        /* 7. 资讯流 */
+        .news-footer {
+            background: rgba(0, 0, 0, 0.5); 
+            width: 100%;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 16px 20px calc(env(safe-area-inset-bottom, 24px) + 16px) 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .news-content {
+            flex: 1;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.85);
+            line-height: 1.4;
+        }
+
+        /* 进场动画 */
+        .fade-in {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-zinc-200 flex items-center justify-center min-h-screen">
+
+    <div class="phone-container shadow-2xl">
+        <div id="bgLayer" class="bg-layer"></div>
+        
+        <button class="nav-btn nav-left" onclick="changeContent(-1)">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+        <button class="nav-btn nav-right" onclick="changeContent(1)">
+            <i class="fas fa-chevron-right"></i>
+        </button>
+
+        <header class="absolute top-0 w-full p-5 text-white flex justify-between text-xs z-10 font-bold tracking-wider">
+            <span>09:41</span>
+            <div class="flex gap-2 items-center">
+                <i class="fas fa-signal"></i>
+                <i class="fas fa-wifi"></i>
+                <div class="w-6 h-3 border border-white/50 rounded-sm relative p-[1px]">
+                    <div class="bg-white h-full w-4/5"></div>
+                </div>
+            </div>
+        </header>
+
+        <div class="bottom-panel">
+            <!-- 天气快速入口：Logo + Weather -->
+            <div class="weather-section">
+                <div class="weather-card cursor-pointer">
+                    <i class="fas fa-cloud-sun weather-logo"></i>
+                    <span class="weather-name">Weather</span>
+                </div>
+            </div>
+
+            <!-- IP 合辑详情 -->
+            <section class="album-section">
+                <div id="albumContent" class="flex flex-col">
+                    <h2 id="albumTitle" class="album-title">载入中...</h2>
+                    <p id="albumCount" class="album-count">-- 张精选壁纸</p>
+                </div>
+                <button class="subscribe-btn active:scale-95 transition-transform">
+                    免费订阅
+                </button>
+            </section>
+
+            <!-- 实时资讯 -->
+            <footer class="news-footer">
+                <div id="newsContent" class="news-content">获取最新动态中...</div>
+                <i class="fas fa-angle-right text-white/30 text-xs"></i>
+            </footer>
+        </div>
+    </div>
+
+    <script>
+        const wallpapers = [
+            {
+                image: 'https://images.unsplash.com/photo-1611604548118-0870935b0c95?auto=format&fit=crop&w=800&q=80',
+                title: '蝙蝠侠：黑暗骑士',
+                count: '42 张精选壁纸',
+                news: 'DC 动态：新版《超人》发布定妆照，DC 电影宇宙正式进入詹姆斯·古恩时代。'
+            },
+            {
+                image: 'https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?auto=format&fit=crop&w=800&q=80',
+                title: '星球大战：绝地归来',
+                count: '56 张精选壁纸',
+                news: '星战资讯：卢卡斯影业确认三部新电影正在开发，将探索原力起源与新共和国时代。'
+            },
+            {
+                image: 'https://images.unsplash.com/photo-1594732832278-abd644401426?auto=format&fit=crop&w=800&q=80',
+                title: '火影忍者：疾风传',
+                count: '38 张精选壁纸',
+                news: '动漫快讯：岸本齐史亲自操刀《博人传》新篇章，青年版博人造型引发粉丝热议。'
+            },
+            {
+                image: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=800&q=80',
+                title: '皮克斯：玩具总动员',
+                count: '25 张精选壁纸',
+                news: '影讯：皮克斯宣布《玩具总动员 5》正式立项，胡迪与巴斯光年的冒险将续写新篇。'
+            },
+            {
+                image: 'https://images.unsplash.com/photo-1560114928-40f1f1eb26a0?auto=format&fit=crop&w=800&q=80',
+                title: '吉卜力：龙猫之林',
+                count: '30 张精选壁纸',
+                news: '展览资讯：吉卜力公园“魔女之谷”园区今日正式开放，《哈尔的移动城堡》1:1还原。'
+            },
+            {
+                image: 'https://images.unsplash.com/photo-1618519764620-7403abdbddd9?auto=format&fit=crop&w=800&q=80',
+                title: '复仇者联盟：终局之战',
+                count: '64 张精选壁纸',
+                news: '漫威周报：《复仇者联盟 5》副标题更名为“末日”，小罗伯特唐尼确认回归饰演毁灭博士。'
+            }
+        ];
+
+        let currentIndex = 0;
+
+        function updateUI() {
+            const data = wallpapers[currentIndex];
+            const bgLayer = document.getElementById('bgLayer');
+            const albumTitle = document.getElementById('albumTitle');
+            const albumCount = document.getElementById('albumCount');
+            const newsContent = document.getElementById('newsContent');
+
+            const tempImg = new Image();
+            tempImg.src = data.image;
+            tempImg.onload = () => {
+                bgLayer.style.backgroundImage = `url('${data.image}')`;
+            };
+            
+            [albumTitle, albumCount, newsContent].forEach(el => {
+                el.classList.remove('fade-in');
+                void el.offsetWidth;
+                el.classList.add('fade-in');
+            });
+
+            albumTitle.innerText = data.title;
+            albumCount.innerText = data.count;
+            newsContent.innerText = data.news;
+        }
+
+        function changeContent(direction) {
+            currentIndex += direction;
+            if (currentIndex < 0) currentIndex = wallpapers.length - 1;
+            if (currentIndex >= wallpapers.length) currentIndex = 0;
+            updateUI();
+        }
+
+        window.onload = updateUI;
+    </script>
+</body>
+</html>
